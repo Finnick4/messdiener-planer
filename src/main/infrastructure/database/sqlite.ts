@@ -1,4 +1,5 @@
 import {Database, verbose} from "sqlite3";
+import {Messdiener} from "../../../shared/general";
 
 const sqlite3 = verbose();
 
@@ -46,4 +47,48 @@ export const testConnection = async () => {
         SELECT sqlite_version();
     `);
     console.log(`Connection valid: ${version}`);
+}
+
+export const getAllMessdiener = async (): Promise<Messdiener[]> => {
+    const db = await openDatabase()
+
+    const rows = await runQuery(db, `
+        SELECT id, name FROM Messdiener;
+    `);
+
+    const messdiener: Messdiener[] = []
+
+    for (const row of rows) {
+        messdiener.push({
+            identifier: row.id,
+            name: row.name
+        })
+    }
+    return messdiener
+}
+
+export const createMessdiener = async (name: string): Promise<number> => {
+    const db = await openDatabase()
+
+    const rows = await runQuery(db, `
+        INSERT INTO messdiener (name) VALUES (?) RETURNING id;
+    `, [name]);
+
+    return rows[0]
+}
+
+export const removeMessdiener = async (id: number): Promise<void> => {
+    const db = await openDatabase()
+
+    await runQuery(db, `
+        DELETE FROM messdiener WHERE id = ?;
+    `, [id]);
+}
+
+export const changeMessdienerName = async (id: number, newName: string): Promise<void> => {
+    const db = await openDatabase()
+
+    await runQuery(db, `
+        UPDATE messdiener SET name = ? WHERE id = ?;
+    `, [newName, id]);
 }
