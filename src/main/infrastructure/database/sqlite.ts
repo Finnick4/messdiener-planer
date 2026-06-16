@@ -1,94 +1,72 @@
 import {Database, verbose} from "sqlite3";
 import {Messdiener} from "../../../shared/general";
+import {DatabaseConnection} from "./database";
 
 const sqlite3 = verbose();
 
-const openDatabase = (): Promise<Database> => {
-  return new Promise((resolve, reject) => {
-      const db = new sqlite3.Database(`data.db`, (err: Error) => {
-          if (err) {
-              console.error(`Connection error: ${err.message}`)
-              reject(err)
-          }
-          console.log("Connection established!")
-          resolve(db)
-      })
-  })
-}
+export class SQLiteConnection implements DatabaseConnection {
+    private db: Database;
 
-const runQuery = (db: Database, sqlStatement: string, params: any[] = []): Promise<any> => {
-    return new Promise((resolve, reject) => {
-        db.all(sqlStatement, params, (err: Error, rows: any[]) => {
+    constructor() {
+        this.db = new sqlite3.Database(`data.db`, (err: Error) => {
             if (err) {
-                console.error(`Error while running query: ${err.message}`)
-                reject(err)
+                console.error(`Connection error: ${err.message}`)
+                throw new Error(`Error while establishing connection: ${err.message}`)
             }
-            resolve(rows)
-        })
-    })
-}
-
-export const initialiseDatabase = async () => {
-    console.debug("Initialising the database with all required tables!")
-    const db = await openDatabase()
-
-    await runQuery(db, `
-        CREATE TABLE IF NOT EXISTS messdiener (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
-        )
-    `);
-}
-
-export const testConnection = async () => {
-    const db = await openDatabase()
-
-    const version = await runQuery(db, `
-        SELECT sqlite_version();
-    `);
-    console.log(`Connection valid: ${version}`);
-}
-
-export const getAllMessdiener = async (): Promise<Messdiener[]> => {
-    const db = await openDatabase()
-
-    const rows = await runQuery(db, `
-        SELECT id, name FROM Messdiener;
-    `);
-
-    const messdiener: Messdiener[] = []
-
-    for (const row of rows) {
-        messdiener.push({
-            identifier: row.id,
-            name: row.name
+            console.log("Connection to database established!")
         })
     }
-    return messdiener
-}
+    private runQuery (sqlStatement: string, params: any[] = []): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.db.all(sqlStatement, params, (err: Error, rows: any[]) => {
+                if (err) {
+                    console.error(`Error while running query: ${err.message}`)
+                    reject(err)
+                }
+                resolve(rows)
+            })
+        })
+    }
 
-export const createMessdiener = async (name: string): Promise<number> => {
-    const db = await openDatabase()
+    async initialiseDatabase(): Promise<void> {
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS messdiener (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )
+        `);
+    }
 
-    const rows = await runQuery(db, `
-        INSERT INTO messdiener (name) VALUES (?) RETURNING id;
-    `, [name]);
+    async getAllMessdiener(): Promise<Messdiener[]> {
+        const rows = await this.runQuery(`
+            SELECT id, name FROM Messdiener;
+        `)
+        const messdiener: Messdiener[] = []
 
-    return rows[0]
-}
+        for (const row of rows) {
+            messdiener.push({
+                identifier: row.id,
+                name: row.name
+            })
+        }
+        return messdiener
+    }
 
-export const removeMessdiener = async (id: number): Promise<void> => {
-    const db = await openDatabase()
+    async createMessdiener(name: string): Promise<number> {
+        return (await this.runQuery(`
+            INSERT INTO messdiener (name) VALUES (?) RETURNING id;
+        `, [name]))[0]
+    }
 
-    await runQuery(db, `
-        DELETE FROM messdiener WHERE id = ?;
-    `, [id]);
-}
+    async removeMessdiener(id: number): Promise<void> {
+        return await this.runQuery(`
+            DELETE FROM messdiener WHERE id = ?;
+        `, [id]);
+    }
 
-export const changeMessdienerName = async (id: number, newName: string): Promise<void> => {
-    const db = await openDatabase()
-
-    await runQuery(db, `
-        UPDATE messdiener SET name = ? WHERE id = ?;
-    `, [newName, id]);
+    async changeMessdienerName(id: number, newName: string): Promise<void> {
+        return await this.runQuery(`
+            UPDATE messdiener SET name = ? WHERE id = ?;
+        `, [newName, id]);
+    }
 }
