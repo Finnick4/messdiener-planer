@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
-import {getAllMessdienerHandler} from "./main/handlers/messdiener";
+import {createMessdienerHandler, getAllMessdienerHandler, removeMessdienerHandler} from "./main/handlers/messdiener";
 
 if (started) {
   app.quit();
@@ -29,7 +29,9 @@ const createWindow = () => {
 
 app.on('ready', () => {
     createWindow()
-    ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler)
+    ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler);
+    ipcMain.on('create-messdiener', createMessdienerHandler);
+    ipcMain.on('remove-messdiener', removeMessdienerHandler);
 });
 
 app.on('window-all-closed', () => {
