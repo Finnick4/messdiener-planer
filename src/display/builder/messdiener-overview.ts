@@ -1,8 +1,8 @@
+import {setMainAndSidebar} from "./utilities";
 
 export const buildMessdienerOverviewPage = () => {
-    document.body.innerHTML = `
-        <main>
-            <h1>Alle Messdiener</h1>
-            <p>WIP!</p>
-        </main>`
+    setMainAndSidebar(`
+        <h1>Alle Messdiener</h1>
+        <p>WIP!</p>
+    `)
 }

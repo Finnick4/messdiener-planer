@@ -3,10 +3,14 @@ import {buildMessdienerOverviewPage} from "./builder/messdiener-overview";
 
 export enum Pages {
     Main,
-    MessdienerOverview
+    MessdienerOverview,
+    MassesOverview,
+    Planner,
+    AbsencesOverview,
 }
 
 export const routeToPage = (destination: Pages) => {
+    console.log(destination)
     switch (destination) {
         case Pages.Main:
             buildMainPage();
@@ -15,6 +19,7 @@ export const routeToPage = (destination: Pages) => {
             buildMessdienerOverviewPage();
             break;
         default:
+            buildMainPage();
             console.warn("Did not find page to route to!");
     }
 }
