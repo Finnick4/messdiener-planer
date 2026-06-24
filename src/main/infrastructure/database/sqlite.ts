@@ -87,7 +87,7 @@ export class SQLiteConnection implements DatabaseConnection {
     async createMessdiener(name: string): Promise<number> {
         return (await this.getRowQuery(`
             INSERT INTO messdiener (name) VALUES (?) RETURNING id;
-        `, [name]))
+        `, [name])).id
     }
 
     async removeMessdiener(id: number): Promise<void> {

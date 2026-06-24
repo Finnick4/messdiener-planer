@@ -56,7 +56,6 @@ const states = {
         return window.electronAPI.getAllMessdiener();
     })
 }
-// TODO manage incoming updates
 
 export enum ListenerEndpoints {
     AllMessdiener = "AllMessdiener"
@@ -65,3 +64,8 @@ export enum ListenerEndpoints {
 export const addSubscription = (listener: ListenerEndpoints, callback: CallbackFunction<any>) => {
     states[listener].add(callback);
 }
+
+window.electronAPI.onMessdienerUpdate((data: Messdiener[]) => {
+    const target = ListenerEndpoints.AllMessdiener;
+    states[target].pushUpdate(data);
+})
