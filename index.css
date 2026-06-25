@@ -9,6 +9,8 @@
 
     --primary: hsl(9, 100%, 64%);
     --secondary: hsl(9, 100%, 87%);
+    --secondary-hover: hsl(9, 100%, 80%);
+    --secondary-pressed: hsl(9, 100%, 84%);
     --accent: hsl(205, 77%, 56%);
 
     --dropdown-button-highlight: hsl(0, 6%, 90%);
@@ -19,6 +21,7 @@
 
     --padding-element: .75rem;
     --padding-button: .5rem;
+    --padding-row: .25rem;
 
     --border-width: .1rem;
     --border: solid hsl(0, 6%, 80%) var(--border-width);
@@ -35,11 +38,12 @@ body {
 
 .sidebar {
     width: var(--sidebar-width);
-    position: absolute;
+    position: fixed;
+    overflow: auto;
     display: flex;
     flex-direction: column;
     padding: var(--padding-element);
-    height: calc(100% - 2*var(--padding-element) - 2*var(--border-width));
+    height: calc(100% - 2*var(--padding-element) - 1*var(--border-width));
     top: 0;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     border: var(--border);
@@ -61,19 +65,44 @@ body {
         background-color: var(--dropdown-button-pressed);
     }
 }
-button {
+button,
+.button {
     padding: var(--padding-button);
     border: var(--border);
     transition: background-color .1s ease, translate .1s ease, border .1s ease;
+    background-color: var(--secondary);
 }
-button:hover {
+button:hover,
+.button:hover {
     translate: 0 -2px;
+    background-color: var(--secondary-hover);
 }
-button:active {
+button:active,
+.button:active{
     translate: 0 1px;
+    background-color: var(--secondary-pressed);
 }
 
 main {
     margin-left: calc(var(--sidebar-width) + 3 * var(--padding-element) + 2*var(--border-width));
-    width: var(--main-width);
+    margin-right: calc(var(--padding-element) + var(--border-width));
+}
+
+messdiener-list {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    background-color: var(--bg-color-element);
+    border: var(--border);
+    padding: var(--padding-element);
+    border-radius: var(--border-radius);
+
+    .messdiener {
+        display: grid;
+        grid-column: 1/final;
+        grid-template-columns: subgrid;
+        padding: var(--padding-row);
+        .button {
+            border-radius: calc(var(--border-radius) - var(--padding-element));
+        }
+    }
 }

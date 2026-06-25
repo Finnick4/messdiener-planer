@@ -61,8 +61,8 @@ export enum ListenerEndpoints {
     AllMessdiener = "AllMessdiener"
 }
 
-export const addSubscription = (listener: ListenerEndpoints, callback: CallbackFunction<any>) => {
-    states[listener].add(callback);
+export const addSubscription = (listener: ListenerEndpoints, callback: CallbackFunction<any>): () => void => {
+    return states[listener].add(callback);
 }
 
 window.electronAPI.onMessdienerUpdate((data: Messdiener[]) => {
