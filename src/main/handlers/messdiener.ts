@@ -1,5 +1,5 @@
 import {Messdiener} from "../../shared/general";
-import {createMessdiener, getAllMessdiener, removeMessdiener} from "../application/state";
+import {changeMessdienerName, createMessdiener, getAllMessdiener, removeMessdiener} from "../application/state";
 import IpcMainEvent = Electron.IpcMainEvent;
 import {pingManager} from "./ping-manager";
 
@@ -26,6 +26,23 @@ export const removeMessdienerHandler = (_event: IpcMainEvent, id: number): Promi
         });
     })
 }
+
+export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdiener): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+        if (messdiener.identifier <= 0) {
+            reject();
+        }
+        const waitGroup: Promise<any>[] = [];
+        if (messdiener.name != "") {
+            waitGroup.push(changeMessdienerName(messdiener.identifier, messdiener.name));
+        }
+        Promise.all(waitGroup).then(() => {
+            pingMessdienerUpdate();
+            resolve();
+        })
+    })
+}
+
 
 const pingMessdienerUpdate = () => {
     getAllMessdiener().then(messdiener => pingManager.onMessdienerUpdate(messdiener));

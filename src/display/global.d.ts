@@ -7,6 +7,7 @@ declare global {
             getAllMessdiener: () => Promise<Messdiener[]>,
             createMessdiener: (name: string) => void,
             deleteMessdiener: (id: number) => void,
+            editMessdiener: (messdiener: Messdiener) => void,
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer
         }

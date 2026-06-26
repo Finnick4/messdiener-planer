@@ -1,7 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
-import {createMessdienerHandler, getAllMessdienerHandler, removeMessdienerHandler} from "./main/handlers/messdiener";
+import {
+    createMessdienerHandler,
+    editMessdienerHandler,
+    getAllMessdienerHandler,
+    removeMessdienerHandler
+} from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
 
 if (started) {
@@ -35,6 +40,7 @@ app.on('ready', () => {
     ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler);
     ipcMain.on('create-messdiener', createMessdienerHandler);
     ipcMain.on('remove-messdiener', removeMessdienerHandler);
+    ipcMain.on('edit-messdiener', editMessdienerHandler);
 });
 
 app.on('window-all-closed', () => {

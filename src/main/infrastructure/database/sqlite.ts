@@ -8,10 +8,10 @@ export class SQLiteConnection implements DatabaseConnection {
     private db: Database;
 
     constructor() {
-        this.db = new sqlite3.Database(`data.db`, (err: Error) => {
+        this.db = new sqlite3.Database(`data.db`, (err: Error | null) => {
             if (err) {
-                console.error(`Connection error: ${err.message}`)
-                throw new Error(`Error while establishing connection: ${err.message}`)
+                console.error(`Connection error: ${err?.message}`)
+                throw new Error(`Error while establishing connection: ${err?.message}`)
             }
             console.log("Connection to database established!")
         })

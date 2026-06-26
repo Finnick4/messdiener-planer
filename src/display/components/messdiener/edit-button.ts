@@ -53,7 +53,10 @@ export class MessdienerEditButton extends HTMLElement {
             inputName.value = messdiener.name;
             saveBtn.addEventListener("click", () => {
                 if (inputName.value != messdiener.name) {
-                    console.log("Edit name!");
+                    window.electronAPI.editMessdiener({
+                        identifier: messdiener.identifier,
+                        name: inputName.value
+                    })
                 }
                 modal.close();
             })
@@ -70,7 +73,6 @@ export class MessdienerEditButton extends HTMLElement {
         this.disconnectedHandler = () => {
             cancel();
             modal.remove()
-            document.body.removeChild(modal);
         }
     }
     disconnectedCallback() {
