@@ -49,3 +49,9 @@ const updateSidebar = (currentEntry: SidebarEntries) => {
         sidebarElem.appendChild(elem);
     }
 }
+
+let idCounter = 0;
+
+export const getUniqueCount = (): number => {
+    return idCounter++;
+}
