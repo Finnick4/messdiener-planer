@@ -33,7 +33,7 @@ export const removeMessdiener = (id: number): Promise<void> => {
 export const changeMessdienerName = (id: number, newName: string): Promise<void> => {
     return getDBConnection().then(db => db.changeMessdienerName(id, newName)). then(() => {
         const index = allMessdiener.findIndex(m => m.identifier == id);
-        if (index > 0) {
+        if (index >= 0) {
             allMessdiener[index].name = newName;
         }
     })

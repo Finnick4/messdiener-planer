@@ -9,6 +9,8 @@ interface SubscriptionListElement<T> {
 class State<T> {
     private subscriptions: SubscriptionListElement<T>[];
     private idCounter: number;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     private savedData: T;
     private queryDataFunction: () => Promise<T>;
 
