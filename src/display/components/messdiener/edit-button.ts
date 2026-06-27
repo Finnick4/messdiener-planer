@@ -38,7 +38,7 @@ export class MessdienerEditButton extends HTMLElement {
 
         document.body.appendChild(modal);
 
-        const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => new Promise<void>((resolve) => {
+        const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
             const messdiener = data.filter(m => m.identifier == id)[0];
 
             const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
@@ -46,7 +46,6 @@ export class MessdienerEditButton extends HTMLElement {
 
             if (inputName == null || saveBtn == null) {
                 modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-                resolve();
                 return;
             }
 
@@ -60,9 +59,7 @@ export class MessdienerEditButton extends HTMLElement {
                 }
                 modal.close();
             })
-
-            resolve();
-        }))
+        })
         this.onclick = () => {
             modal.showModal();
         }

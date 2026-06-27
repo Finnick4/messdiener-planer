@@ -6,7 +6,7 @@ import {MessdienerEditButton} from "./edit-button";
 export class MessdienerList extends HTMLElement {
     connectedCallback() {
         this.classList.add("list");
-        const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => new Promise<void>((resolve) => {
+        const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
             const elements = data.map(messdiener => {
                 const entry = document.createElement("div");
                 entry.dataset.id = String(messdiener.identifier);
@@ -27,8 +27,7 @@ export class MessdienerList extends HTMLElement {
             })
 
             this.replaceChildren(...elements);
-            resolve();
-        }))
+        })
         this.disconnectedCallback = () => {
             cancel()
         }

@@ -15,7 +15,7 @@ class State<T> {
     constructor(fn: () => Promise<T>) {
         this.subscriptions = [];
         this.idCounter = 0;
-        this.queryDataFunction = fn
+        this.queryDataFunction = fn;
     }
     
     add(fn: CallbackFunction<T>): () => void {
@@ -33,7 +33,6 @@ class State<T> {
         p.then(data => {
             this.savedData = data;
             fn(this.savedData)
-                .catch(() => this.remove(elem.id))
         })
         return () => {
             this.remove(elem.id)
@@ -43,7 +42,6 @@ class State<T> {
         this.savedData = data
         for (const elem of this.subscriptions) {
             elem.fn(this.savedData)
-                .catch(() => this.remove(elem.id))
         }
     }
     private remove(id: number) {

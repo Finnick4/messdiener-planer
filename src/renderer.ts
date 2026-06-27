@@ -22,7 +22,6 @@ routeToPage(Pages.Main);
 
 
 
-addSubscription(ListenerEndpoints.AllMessdiener, data => new Promise<void>((resolve) => {
+addSubscription(ListenerEndpoints.AllMessdiener, data => {
     console.log(data)
-    resolve()
-}))
+})
