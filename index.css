@@ -8,9 +8,13 @@
     --text-muted: hsl(0, 0%, 10%);
 
     --primary: hsl(9, 100%, 64%);
+    --primary-hover: hsl(9, 100%, 55%);
+    --primary-pressed: hsl(9, 100%, 60%);
+
     --secondary: hsl(9, 100%, 87%);
     --secondary-hover: hsl(9, 100%, 80%);
     --secondary-pressed: hsl(9, 100%, 84%);
+
     --accent: hsl(205, 77%, 56%);
 
     --dropdown-button-highlight: hsl(0, 6%, 90%);
@@ -156,4 +160,22 @@ messdiener-list {
 .modal:open.form {
     display: grid;
     gap: 1.5rem;
+}
+
+.button.centered {
+    margin: 1rem auto;
+}
+messdiener-create-button.button {
+    background-color: var(--primary);
+    border-radius: calc(var(--border-radius) - var(--padding-button));
+    display: block;
+    text-align: center;
+    width: fit-content;
+}
+
+messdiener-create-button.button:hover {
+    background-color: var(--primary-hover);
+}
+messdiener-create-button.button:active {
+    background-color: var(--primary-pressed);
 }
