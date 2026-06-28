@@ -1,33 +1,29 @@
-/**
- * This file will automatically be loaded by vite and run in the "renderer" context.
- * To learn more about the differences between the "main" and the "renderer" context in
- * Electron, visit:
- *
- * https://electronjs.org/docs/tutorial/process-model
- *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.ts` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
- */
-
 import '../index.css';
+import {Pages, routeToPage} from "./display/routing";
+import {addSubscription, ListenerEndpoints} from "./display/state/state-manager";
+import {MessdienerList} from "./display/components/messdiener/list";
+import {MessdienerEditButton} from "./display/components/messdiener/edit-button";
+import {MessdienerCreateButton} from "./display/components/messdiener/create-button";
 
-console.log(
-  '👋 This message is being logged by "renderer.ts", included via Vite',
-);
+interface CustomElementDefinition {
+    name: string,
+    constructor: CustomElementConstructor
+}
+
+const customElementsList: CustomElementDefinition[] = [
+    {name: "messdiener-list", constructor: MessdienerList},
+    {name: "messdiener-edit-button", constructor: MessdienerEditButton},
+    {name: "messdiener-create-button", constructor: MessdienerCreateButton},
+]
+
+for (const elem of customElementsList) {
+    customElements.define(elem.name, elem.constructor);
+}
+
+routeToPage(Pages.Main);
+
+
+
+addSubscription(ListenerEndpoints.AllMessdiener, data => {
+    console.log(data)
+})

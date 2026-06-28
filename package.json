@@ -1,7 +1,7 @@
 {
   "name": "messdiener-planer",
   "productName": "messdiener-planer",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Ein Werkzeug zur Erstellung von Messdienerplänen.",
   "main": ".vite/build/main.js",
   "private": true,
@@ -33,10 +33,11 @@
     "electron": "42.4.0",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
-    "typescript": "~4.5.4",
-    "vite": "^5.4.21"
+    "typescript": "6.0.3",
+    "vite": "8.0.5"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "sqlite3": "^6.0.1"
   }
 }
