@@ -7,6 +7,14 @@ export class MessdienerList extends HTMLElement {
     connectedCallback() {
         this.classList.add("list");
         const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
+            if (data.length == 0) {
+                const placeholder = document.createElement("p");
+                placeholder.classList.add("placeholder");
+                placeholder.innerHTML = "Es wurden noch keine Messdiener erstellt!"
+                this.replaceChildren(placeholder);
+                return
+            }
+
             const elements = data.map(messdiener => {
                 const entry = document.createElement("div");
                 entry.dataset.id = String(messdiener.identifier);
