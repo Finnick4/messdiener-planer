@@ -5,7 +5,7 @@ import {ModalManager} from "../../types";
 let editMessdienerModalCount = 0;
 
 export const generateEditMessdienerModal = (id: number): ModalManager => {
-    editMessdienerModalCount++;
+    const thisModalCount = editMessdienerModalCount++;
     const modal = document.createElement("dialog");
 
     modal.classList.add("messdiener-edit");
@@ -15,7 +15,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
     const numberOfInputElement = 1;
     const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
     for (let i = 0; i < numberOfInputElement; i++) {
-        inputElementIDs[i] = `modal-edit-messdiener-${editMessdienerModalCount}-input-${i}`;
+        inputElementIDs[i] = `modal-edit-messdiener-${thisModalCount}-input-${i}`;
     }
 
     modal.innerHTML = `
@@ -27,6 +27,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Speichern</button>
+            <button class="delete">Löschen</button>
         </div>
         `
 
@@ -46,6 +47,15 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
         if(!btn) {
             modal.innerHTML = "<h1>A fatal error occurred!</h1>";
             console.error("Encountered issue with getting save button!");
+            return new HTMLButtonElement();
+        }
+        return btn
+    })()
+    const delBtn = ((): HTMLButtonElement => {
+        const btn = modal.querySelector<HTMLButtonElement>("button.delete");
+        if(!btn) {
+            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+            console.error("Encountered issue with getting delete button!");
             return new HTMLButtonElement();
         }
         return btn
@@ -84,6 +94,16 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
             }
         })
     })
+
+    // @TODO implement confirmation
+    const attainConfirmation = () => new Promise<void>((resolve) => resolve())
+
+    delBtn.onclick = () => {
+        attainConfirmation().then(() => {
+            modal.close();
+            window.electronAPI.deleteMessdiener(id);
+        })
+    }
 
     return {
         element: modal,

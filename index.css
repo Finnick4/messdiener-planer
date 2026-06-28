@@ -76,6 +76,7 @@ button,
     border: var(--border);
     transition: background-color .1s ease, translate .1s ease, border .1s ease;
     background-color: var(--secondary);
+    border-radius: calc(var(--border-radius) - var(--padding-button));
 }
 button:hover,
 .button:hover {
@@ -145,6 +146,11 @@ messdiener-list {
         border-radius: calc(var(--border-radius) - var(--padding-button));
         border: var(--border);
     }
+    .controls {
+        display: flex;
+        justify-content: flex-start;
+        gap: .5rem;
+    }
     button {
         border-radius: calc(var(--border-radius) - var(--padding-button));
         font-size: 1rem;
@@ -154,6 +160,9 @@ messdiener-list {
     }
     button.cancel {
         background-color: var(--secondary);
+    }
+    button.delete {
+        margin-left: auto;
     }
 }
 
