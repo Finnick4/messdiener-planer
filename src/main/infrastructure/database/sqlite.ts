@@ -62,9 +62,21 @@ export class SQLiteConnection implements DatabaseConnection {
 
     async initialiseDatabase(): Promise<void> {
         await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS messdiener (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
+            CREATE TABLE IF NOT EXISTS family
+            (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                internal_name TEXT NOT NULL,
+                display_name  TEXT
+            )
+        `);
+
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS messdiener
+            (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                name               TEXT    NOT NULL,
+                family_association INTEGER NOT NULL,
+                FOREIGN KEY (family_association) REFERENCES family (id)
             )
         `);
     }
@@ -84,10 +96,17 @@ export class SQLiteConnection implements DatabaseConnection {
         return messdiener
     }
 
-    async createMessdiener(name: string): Promise<number> {
+    async createMessdienerInFamily(name: string, familyID: number): Promise<number> {
         return (await this.getRowQuery(`
-            INSERT INTO messdiener (name) VALUES (?) RETURNING id;
-        `, [name])).id
+            INSERT INTO messdiener (name, family_association) VALUES (?, ?) RETURNING id;
+        `, [name, String(familyID)])).id
+    }
+    async createMessdienerAndFamily(name: string, lastName: string): Promise<number> {
+        return (await this.getRowQuery(`            
+            INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
+        `, [lastName, lastName]).then(row => {
+            return this.createMessdienerInFamily(name, row.id);
+        }))
     }
 
     async removeMessdiener(id: number): Promise<void> {

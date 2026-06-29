@@ -14,7 +14,7 @@ export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     )
 }
 export const createMessdiener = (name: string): Promise<number> => {
-    return getDBConnection().then(db => db.createMessdiener(name))
+    return getDBConnection().then(db => db.createMessdienerAndFamily(name, "New Family!"))
         .then(id => {
             allMessdiener.push({identifier: id, name: name});
             return id;

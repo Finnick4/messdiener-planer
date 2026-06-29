@@ -112,6 +112,9 @@ messdiener-list {
             border-radius: calc(var(--border-radius) - var(--padding-element));
             background-color: var(--bg-color-muted);
         }
+        .name {
+            align-self: center  ;
+        }
     }
 }
 

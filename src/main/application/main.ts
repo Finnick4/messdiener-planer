@@ -6,6 +6,8 @@ db.initialiseDatabase().then(() => {
     console.log("Database ready!")
 })
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 export const getDBConnection = async (): Promise<DatabaseConnection> => {
     if (db == null) {
         db = new SQLiteConnection()
