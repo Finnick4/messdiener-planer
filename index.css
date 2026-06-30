@@ -144,11 +144,7 @@ messdiener-list {
         display: block;
     }
     input {
-        padding: var(--padding-button);
-        font-size: 1rem;
         width: calc(100% - 2*var(--border-width) - 2*var(--padding-button));
-        border-radius: calc(var(--border-radius) - var(--padding-button));
-        border: var(--border);
     }
     .controls {
         display: flex;
@@ -168,6 +164,9 @@ messdiener-list {
     button.delete {
         margin-left: auto;
     }
+    select {
+        width: calc(100% - 2 * var(--border-width));
+    }
 }
 
 .modal:open.form {
@@ -178,6 +177,54 @@ messdiener-list {
 .button.centered {
     margin: 1rem auto;
 }
+
+input {
+    padding: var(--padding-button);
+    background-color: var(--bg-color-element);
+    font-size: 1rem;
+    border-radius: calc(var(--border-radius) - var(--padding-button));
+    border: var(--border);
+}
+
+select {
+    padding: var(--padding-button);
+    border: var(--border);
+    background-color: var(--bg-color-element);
+    border-radius: var(--border-radius);
+    width: calc(100% - 2 * var(--border-width));
+    font-size: 1rem;
+    appearance: base-select;
+}
+select::picker-icon {
+    color: var(--text-muted);
+    transition: .1s rotate, .1s translate;
+    width: .25rem;
+    translate: -.5rem 0;
+}
+select:open::picker-icon {
+    rotate: 180deg;
+    translate: -.25rem 0;
+}
+::picker(select) {
+    appearance: base-select;
+    padding: var(--padding-button);
+    background-color: var(--bg-color-element);
+    border: var(--border);
+    border-radius: calc(var(--border-radius) - var(--padding-button));
+    margin-block: .5rem;
+    top: anchor(bottom);
+    overflow: auto;
+}
+
+option {
+    color: var(--text-muted);
+}
+
+option:checked {
+    font-weight: 550;
+    color: var(--text);
+}
+
 messdiener-create-button.button {
     background-color: var(--primary);
     border-radius: calc(var(--border-radius) - var(--padding-button));

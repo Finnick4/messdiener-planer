@@ -1,4 +1,5 @@
 import {getUniqueCount} from "../../builder/utilities";
+import {FamilySelector} from "../family-selector";
 
 export class MessdienerCreateButton extends HTMLElement {
     private disconnectedHandler() {
@@ -15,7 +16,7 @@ export class MessdienerCreateButton extends HTMLElement {
         modal.classList.add("modal");
         modal.classList.add("form");
 
-        const numberOfInputElement = 1;
+        const numberOfInputElement = 2;
         const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
         for (let i = 0; i < numberOfInputElement; i++) {
             inputElementIDs[i] = `modal-create-messdiener-input-${getUniqueCount()}`;
@@ -27,6 +28,10 @@ export class MessdienerCreateButton extends HTMLElement {
             <label class="label" for="${inputElementIDs[0]}}">Vorname</label>
             <input type="text" id="${inputElementIDs[0]}">
         </div>
+        <div class="field">
+            <label class="label" for="${inputElementIDs[1]}">Familienanhehörigkeit</label>
+            <select is="family-selector" id="${inputElementIDs[1]}"></select>
+        </div>
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Erstellen</button>
@@ -37,8 +42,9 @@ export class MessdienerCreateButton extends HTMLElement {
 
         const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
         const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
+        const familySelector = modal.querySelector<FamilySelector>("#" + inputElementIDs[1]);
 
-        if (inputName == null || saveBtn == null) {
+        if (inputName == null || saveBtn == null || familySelector == null) {
             modal.innerHTML = "<h1>A fatal error occurred!</h1>";
             return;
         }
@@ -48,7 +54,9 @@ export class MessdienerCreateButton extends HTMLElement {
                 console.log("Cannot create Messsdiener with empty name!")
                 return
             }
-            window.electronAPI.createMessdiener(inputName.value, 1);
+            const familyID = familySelector.getSelectedFamily();
+            const newFamily = "Not yet implemented!";
+            window.electronAPI.createMessdiener(inputName.value, familyID == 0 ? newFamily : familyID);
             modal.close();
             inputName.value = "";
         })
