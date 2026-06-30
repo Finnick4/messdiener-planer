@@ -48,7 +48,7 @@ export class MessdienerCreateButton extends HTMLElement {
                 console.log("Cannot create Messsdiener with empty name!")
                 return
             }
-            window.electronAPI.createMessdiener(inputName.value);
+            window.electronAPI.createMessdiener(inputName.value, 1);
             modal.close();
             inputName.value = "";
         })

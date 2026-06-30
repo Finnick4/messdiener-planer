@@ -2,18 +2,27 @@ import {Messdiener} from "../../shared/general";
 import {changeMessdienerName, createMessdiener, getAllMessdiener, removeMessdiener} from "../application/state";
 import IpcMainEvent = Electron.IpcMainEvent;
 import {pingManager} from "./ping-manager";
+import {pingFamiliesUpdate} from "./familiies";
 
 export const getAllMessdienerHandler = (): Promise<Messdiener[]> => {
     return getAllMessdiener()
 }
-export const createMessdienerHandler = (_event: IpcMainEvent, name: string): Promise<number> => {
+export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: string | number): Promise<number> => {
     return new Promise<number>((resolve, reject) => {
         if (name == "" || name == undefined) {
             console.log("[HANDLER] (createMessdiener) Parameter issue: name is empty!");
             reject(-1);
+            return;
         }
-        createMessdiener(name).then((id: number) => {
+        if (family == undefined || (typeof family == "number" && family <= 0)) {
+            console.log("[HANDLER] (createMessdiener) Parameter issue: family is invalid!");
+            console.log(family)
+            reject(-1);
+            return
+        }
+        createMessdiener(name, family).then((id: number) => {
             pingMessdienerUpdate();
+            pingFamiliesUpdate();
             resolve(id);
         });
     })

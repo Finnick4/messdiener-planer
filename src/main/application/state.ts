@@ -26,18 +26,27 @@ export const getAllFamilies = async (): Promise<Family[]> => {
     )
 }
 
-export const createMessdiener = (name: string): Promise<number> => {
-    const familyName = "New Family!";
-    return getDBConnection().then(db => db.createMessdienerAndFamily(name, familyName))
-        .then(id => {
+export const createMessdiener = (name: string, family: string | number): Promise<number> => {
+    let creationPromise: Promise<number>;
+
+    if (typeof family == "number") {
+        creationPromise = getDBConnection().then(db => db.createMessdienerInFamily(name, family));
+    }
+    if (typeof family == "string") {
+        creationPromise = getDBConnection().then(db => db.createMessdienerAndFamily(name, family));
+    }
+    return new Promise<number>((resolve, reject) => {
+        creationPromise.then(id => {
             allMessdiener = [];
-            return id;
+            allFamilies = [];
+            resolve(id);
         })
-        .catch(reason => {
+        creationPromise.catch(reason => {
             console.error("[STATE] (createMessdiener) Failed to create Messdiener!");
             console.error(reason);
-            return -1;
+            reject(reason);
         })
+    })
 }
 export const removeMessdiener = (id: number): Promise<void> => {
     return getDBConnection().then(db => db.removeMessdiener(id)).then(() => {

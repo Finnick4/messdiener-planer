@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getAllMessdiener: (): Promise<Messdiener[]> => ipcRenderer.invoke("dialog:getAllMessdiener"),
     getAllFamilies: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllFamilies"),
 
-    createMessdiener: (name: string): void => ipcRenderer.send("create-messdiener", name),
+    createMessdiener: (name: string, family: string | number): void => ipcRenderer.send("create-messdiener", name, family),
     deleteMessdiener: (id: number): void=> ipcRenderer.send("remove-messdiener", id),
     editMessdiener: (messdiener: Messdiener): void=> ipcRenderer.send("edit-messdiener", messdiener),
 
