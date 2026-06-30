@@ -1,5 +1,8 @@
 
 export type Messdiener = {
-    name: string
+    firstName: string
+    lastNameInternal: string
+    lastNameDisplay: string
+    familyID: number
     identifier: number
 }

@@ -66,13 +66,16 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
         const inputName = inputElements[0];
 
-        inputName.value = messdiener.name;
+        inputName.value = messdiener.firstName;
         saveBtn.addEventListener("click", () => {
-            if (inputName.value != messdiener.name) {
+            if (inputName.value != messdiener.firstName) {
                 modal.close();
                 window.electronAPI.editMessdiener({
                     identifier: messdiener.identifier,
-                    name: inputName.value
+                    firstName: inputName.value,
+                    lastNameDisplay: messdiener.lastNameDisplay,
+                    lastNameInternal: messdiener.lastNameInternal,
+                    familyID: messdiener.familyID
                 });
             }
         })

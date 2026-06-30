@@ -14,9 +14,10 @@ export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     )
 }
 export const createMessdiener = (name: string): Promise<number> => {
-    return getDBConnection().then(db => db.createMessdienerAndFamily(name, "New Family!"))
+    const faimilyName = "New Family!";
+    return getDBConnection().then(db => db.createMessdienerAndFamily(name, faimilyName))
         .then(id => {
-            allMessdiener.push({identifier: id, name: name});
+            allMessdiener = [];
             return id;
         })
         .catch(reason => {
@@ -34,7 +35,7 @@ export const changeMessdienerName = (id: number, newName: string): Promise<void>
     return getDBConnection().then(db => db.changeMessdienerName(id, newName)). then(() => {
         const index = allMessdiener.findIndex(m => m.identifier == id);
         if (index >= 0) {
-            allMessdiener[index].name = newName;
+            allMessdiener[index].firstName = newName;
         }
     })
 }

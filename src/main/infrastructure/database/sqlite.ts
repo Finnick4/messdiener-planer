@@ -83,14 +83,24 @@ export class SQLiteConnection implements DatabaseConnection {
 
     async getAllMessdiener(): Promise<Messdiener[]> {
         const rows = await this.getRowsQuery(`
-            SELECT id, name FROM Messdiener;
+            SELECT 
+                messdiener.id AS messdiener_id, 
+                name AS first_name, 
+                family.internal_name AS internal_name, 
+                family.display_name as display_name, 
+                family.id AS fam_id 
+            FROM Messdiener
+                 JOIN family ON family.id = family_association;
         `)
         const messdiener: Messdiener[] = []
 
         for (const row of rows) {
             messdiener.push({
-                identifier: row.id,
-                name: row.name
+                identifier: row.messdiener_id,
+                firstName: row.first_name,
+                lastNameInternal: row.internal_name,
+                lastNameDisplay: row.display_name,
+                familyID: row.fam_id
             })
         }
         return messdiener

@@ -33,8 +33,8 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
             reject();
         }
         const waitGroup: Promise<any>[] = [];
-        if (messdiener.name != "") {
-            waitGroup.push(changeMessdienerName(messdiener.identifier, messdiener.name));
+        if (messdiener.firstName != "") {
+            waitGroup.push(changeMessdienerName(messdiener.identifier, messdiener.firstName));
         }
         Promise.all(waitGroup).then(() => {
             pingMessdienerUpdate();
