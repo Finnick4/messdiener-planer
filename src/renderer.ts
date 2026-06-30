@@ -27,3 +27,6 @@ routeToPage(Pages.Main);
 addSubscription(ListenerEndpoints.AllMessdiener, data => {
     console.log(data)
 })
+addSubscription(ListenerEndpoints.AllFamilies, data => {
+    console.log(data)
+})

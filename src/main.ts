@@ -8,6 +8,8 @@ import {
     removeMessdienerHandler
 } from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
+import {getAllFamilies} from "./main/application/state";
+import {getAllFamiliesHandler} from "./main/handlers/familiies";
 
 if (started) {
   app.quit();
@@ -38,6 +40,8 @@ const createWindow = () => {
 app.on('ready', () => {
     createWindow()
     ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler);
+    ipcMain.handle('dialog:getAllFamilies', getAllFamiliesHandler);
+
     ipcMain.on('create-messdiener', createMessdienerHandler);
     ipcMain.on('remove-messdiener', removeMessdienerHandler);
     ipcMain.on('edit-messdiener', editMessdienerHandler);

@@ -1,7 +1,8 @@
-import {Messdiener} from "../../shared/general";
+import {Family, Messdiener} from "../../shared/general";
 import {getDBConnection} from "./main";
 
 let allMessdiener: Messdiener[] = [];
+let allFamilies: Family[] = [];
 
 export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     if (allMessdiener.length !== 0) {
@@ -13,9 +14,21 @@ export const getAllMessdiener = async (): Promise<Messdiener[]> => {
         })
     )
 }
+
+export const getAllFamilies = async (): Promise<Family[]> => {
+    if (allFamilies.length !== 0) {
+        return allFamilies;
+    }
+    return getDBConnection().then(db => db.getAllFamilies().then(families => {
+            allFamilies = families;
+            return families;
+        })
+    )
+}
+
 export const createMessdiener = (name: string): Promise<number> => {
-    const faimilyName = "New Family!";
-    return getDBConnection().then(db => db.createMessdienerAndFamily(name, faimilyName))
+    const familyName = "New Family!";
+    return getDBConnection().then(db => db.createMessdienerAndFamily(name, familyName))
         .then(id => {
             allMessdiener = [];
             return id;

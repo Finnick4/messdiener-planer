@@ -6,3 +6,11 @@ export type Messdiener = {
     familyID: number
     identifier: number
 }
+
+export type Family = {
+    id: number
+    lastNameInternal: string
+    lastNameDisplay: string
+    memberSize:  number
+}
+

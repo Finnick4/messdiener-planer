@@ -1,5 +1,5 @@
 import {Database, verbose} from "sqlite3";
-import {Messdiener} from "../../../shared/general";
+import {Family, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
 
 const sqlite3 = verbose();
@@ -112,11 +112,7 @@ export class SQLiteConnection implements DatabaseConnection {
         `, [name, String(familyID)])).id
     }
     async createMessdienerAndFamily(name: string, lastName: string): Promise<number> {
-        return (await this.getRowQuery(`            
-            INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
-        `, [lastName, lastName]).then(row => {
-            return this.createMessdienerInFamily(name, row.id);
-        }))
+        return this.createFamily(lastName).then(famId => this.createMessdienerInFamily(name, famId))
     }
 
     async removeMessdiener(id: number): Promise<void> {
@@ -129,5 +125,35 @@ export class SQLiteConnection implements DatabaseConnection {
         return await this.runQuery(`
             UPDATE messdiener SET name = ? WHERE id = ?;
         `, [newName, id.toString()]);
+    }
+
+    async createFamily(lastName: string): Promise<number> {
+        return (await this.getRowQuery(`            
+            INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
+        `, [lastName, lastName])).id
+    }
+
+    async getAllFamilies(): Promise<Family[]> {
+        const rows = await this.getRowsQuery(`
+            SELECT
+                family.internal_name AS internal_name,
+                family.display_name as display_name,
+                family.id AS fam_id,
+                COUNT(main.messdiener.id) AS size
+            FROM family
+                     LEFT JOIN messdiener ON messdiener.family_association = family.id
+            GROUP BY family.internal_name, family.display_name, family.id;
+        `)
+        const families: Family[] = []
+
+        for (const row of rows) {
+            families.push({
+                lastNameInternal: row.internal_name,
+                lastNameDisplay: row.display_name,
+                id: row.fam_id,
+                memberSize: row.size
+            })
+        }
+        return families
     }
 }
