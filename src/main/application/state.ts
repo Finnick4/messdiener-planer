@@ -26,14 +26,13 @@ export const getAllFamilies = async (): Promise<Family[]> => {
     )
 }
 
-export const createMessdiener = (name: string, family: string | number): Promise<number> => {
+export const createMessdiener = (name: string, family: Family | number): Promise<number> => {
     let creationPromise: Promise<number>;
 
     if (typeof family == "number") {
         creationPromise = getDBConnection().then(db => db.createMessdienerInFamily(name, family));
-    }
-    if (typeof family == "string") {
-        creationPromise = getDBConnection().then(db => db.createMessdienerAndFamily(name, family));
+    } else {
+        creationPromise = getDBConnection().then(db => db.createMessdienerAndFamily(name, family.lastNameDisplay, family.lastNameInternal));
     }
     return new Promise<number>((resolve, reject) => {
         creationPromise.then(id => {

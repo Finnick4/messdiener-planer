@@ -1,4 +1,4 @@
-import {Messdiener} from "../../shared/general";
+import {Family, Messdiener} from "../../shared/general";
 import {changeMessdienerName, createMessdiener, getAllMessdiener, removeMessdiener} from "../application/state";
 import IpcMainEvent = Electron.IpcMainEvent;
 import {pingManager} from "./ping-manager";
@@ -7,7 +7,7 @@ import {pingFamiliesUpdate} from "./familiies";
 export const getAllMessdienerHandler = (): Promise<Messdiener[]> => {
     return getAllMessdiener()
 }
-export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: string | number): Promise<number> => {
+export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: Family | number): Promise<number> => {
     return new Promise<number>((resolve, reject) => {
         if (name == "" || name == undefined) {
             console.log("[HANDLER] (createMessdiener) Parameter issue: name is empty!");

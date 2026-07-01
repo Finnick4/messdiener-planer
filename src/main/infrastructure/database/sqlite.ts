@@ -111,8 +111,8 @@ export class SQLiteConnection implements DatabaseConnection {
             INSERT INTO messdiener (name, family_association) VALUES (?, ?) RETURNING id;
         `, [name, String(familyID)])).id
     }
-    async createMessdienerAndFamily(name: string, lastName: string): Promise<number> {
-        return this.createFamily(lastName).then(famId => this.createMessdienerInFamily(name, famId))
+    async createMessdienerAndFamily(name: string, lastName: string, internal = ""): Promise<number> {
+        return this.createFamily(lastName, internal).then(famId => this.createMessdienerInFamily(name, famId))
     }
 
     async removeMessdiener(id: number): Promise<void> {
@@ -127,10 +127,13 @@ export class SQLiteConnection implements DatabaseConnection {
         `, [newName, id.toString()]);
     }
 
-    async createFamily(lastName: string): Promise<number> {
+    async createFamily(lastName: string, internal = ""): Promise<number> {
+        if (internal == "") {
+            internal = lastName;
+        }
         return (await this.getRowQuery(`            
             INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
-        `, [lastName, lastName])).id
+        `, [internal, lastName])).id
     }
 
     async getAllFamilies(): Promise<Family[]> {

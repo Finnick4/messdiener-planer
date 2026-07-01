@@ -21,8 +21,9 @@ export class FamilySelector extends HTMLSelectElement {
                 option.innerText = text;
                 option.dataset.familyId = String(id);
                 option.value = String(id);
-                option.addEventListener("click", () => {
+                option.addEventListener("mouseup", () => {
                     this.selectedFamilyID = id;
+                    this.onedit(id);
                 })
                 option.selected = this.selectedFamilyID == id;
 
@@ -37,11 +38,14 @@ export class FamilySelector extends HTMLSelectElement {
     }
 
     disconnectedCallback() {
-        this.removeModal()
-        this.closeSubscription()
+        this.removeModal();
+        this.closeSubscription();
+    }
+    onedit(newFamily: number) {
+        return;
     }
 
     getSelectedFamily() {
-        return this.selectedFamilyID
+        return this.selectedFamilyID;
     }
 }

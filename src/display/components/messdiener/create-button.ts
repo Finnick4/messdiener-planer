@@ -1,5 +1,6 @@
 import {getUniqueCount} from "../../builder/utilities";
 import {FamilySelector} from "../family-selector";
+import {Family} from "../../../shared/general";
 
 export class MessdienerCreateButton extends HTMLElement {
     private disconnectedHandler() {
@@ -16,7 +17,7 @@ export class MessdienerCreateButton extends HTMLElement {
         modal.classList.add("modal");
         modal.classList.add("form");
 
-        const numberOfInputElement = 2;
+        const numberOfInputElement = 4;
         const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
         for (let i = 0; i < numberOfInputElement; i++) {
             inputElementIDs[i] = `modal-create-messdiener-input-${getUniqueCount()}`;
@@ -32,6 +33,14 @@ export class MessdienerCreateButton extends HTMLElement {
             <label class="label" for="${inputElementIDs[1]}">Familienanhehörigkeit</label>
             <select is="family-selector" id="${inputElementIDs[1]}"></select>
         </div>
+        <div class="field family">
+            <label class="label" for="${inputElementIDs[2]}}">Familienname</label>
+            <input type="text" id="${inputElementIDs[2]}">
+        </div>
+        <div class="field family">
+            <label class="label" for="${inputElementIDs[3]}}">Abweichender interner Name (optional)</label>
+            <input type="text" id="${inputElementIDs[3]}">
+        </div>
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Erstellen</button>
@@ -41,12 +50,23 @@ export class MessdienerCreateButton extends HTMLElement {
         document.body.appendChild(modal);
 
         const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
-        const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
         const familySelector = modal.querySelector<FamilySelector>("#" + inputElementIDs[1]);
+        const inputFamDispl = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
+        const inputFamIntern = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[3]);
 
-        if (inputName == null || saveBtn == null || familySelector == null) {
+
+        const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
+
+        if (inputName == null || saveBtn == null || familySelector == null || inputFamDispl == null || inputFamIntern == null) {
             modal.innerHTML = "<h1>A fatal error occurred!</h1>";
             return;
+        }
+        familySelector.onedit = (changedID: number) => {
+            if (changedID == 0) {
+                modal.querySelectorAll(".field.family.hidden").forEach(e => e.classList.remove("hidden"));
+            } else {
+                modal.querySelectorAll(".field.family:not(.hidden)").forEach(e => e.classList.add("hidden"));
+            }
         }
 
         saveBtn.addEventListener("click", () => {
@@ -55,7 +75,12 @@ export class MessdienerCreateButton extends HTMLElement {
                 return
             }
             const familyID = familySelector.getSelectedFamily();
-            const newFamily = "Not yet implemented!";
+            const newFamily: Family = {
+                lastNameInternal: inputFamIntern.value,
+                lastNameDisplay: inputFamDispl.value,
+                id: -1,
+                memberSize: 1
+            };
             window.electronAPI.createMessdiener(inputName.value, familyID == 0 ? newFamily : familyID);
             modal.close();
             inputName.value = "";
