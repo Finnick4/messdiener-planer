@@ -66,7 +66,8 @@ export class SQLiteConnection implements DatabaseConnection {
             (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 internal_name TEXT NOT NULL,
-                display_name  TEXT
+                display_name  TEXT NOT NULL,
+                shorthand     TEXT
             )
         `);
 
@@ -88,7 +89,8 @@ export class SQLiteConnection implements DatabaseConnection {
                 name AS first_name, 
                 family.internal_name AS internal_name, 
                 family.display_name as display_name, 
-                family.id AS fam_id 
+                family.id AS fam_id,
+                COALESCE(family.shorthand, '') AS short
             FROM Messdiener
                  JOIN family ON family.id = family_association;
         `)
@@ -100,6 +102,7 @@ export class SQLiteConnection implements DatabaseConnection {
                 firstName: row.first_name,
                 lastNameInternal: row.internal_name,
                 lastNameDisplay: row.display_name,
+                lastNameShorthand: row.short == "" ? undefined : row.short,
                 familyID: row.fam_id
             })
         }
@@ -111,8 +114,8 @@ export class SQLiteConnection implements DatabaseConnection {
             INSERT INTO messdiener (name, family_association) VALUES (?, ?) RETURNING id;
         `, [name, String(familyID)])).id
     }
-    async createMessdienerAndFamily(name: string, lastName: string, internal = ""): Promise<number> {
-        return this.createFamily(lastName, internal).then(famId => this.createMessdienerInFamily(name, famId))
+    async createMessdienerAndFamily(name: string, lastName: string, internal = "", shorthand = ""): Promise<number> {
+        return this.createFamily(lastName, internal, shorthand).then(famId => this.createMessdienerInFamily(name, famId))
     }
 
     async removeMessdiener(id: number): Promise<void> {
@@ -127,13 +130,18 @@ export class SQLiteConnection implements DatabaseConnection {
         `, [newName, id.toString()]);
     }
 
-    async createFamily(lastName: string, internal = ""): Promise<number> {
+    async createFamily(lastName: string, internal = "", shorthand = ""): Promise<number> {
         if (internal == "") {
             internal = lastName;
         }
+        if (shorthand == "") {
+            return (await this.getRowQuery(`            
+                INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
+            `, [internal, lastName])).id;
+        }
         return (await this.getRowQuery(`            
-            INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
-        `, [internal, lastName])).id
+            INSERT INTO family (internal_name, display_name, shorthand) VALUES (?, ?, ?) RETURNING id;
+        `, [internal, lastName, shorthand])).id
     }
 
     async getAllFamilies(): Promise<Family[]> {
@@ -142,10 +150,11 @@ export class SQLiteConnection implements DatabaseConnection {
                 family.internal_name AS internal_name,
                 family.display_name as display_name,
                 family.id AS fam_id,
-                COUNT(main.messdiener.id) AS size
+                COUNT(main.messdiener.id) AS size,
+                COALESCE(family.shorthand, '') AS short
             FROM family
                      LEFT JOIN messdiener ON messdiener.family_association = family.id
-            GROUP BY family.internal_name, family.display_name, family.id;
+            GROUP BY family.internal_name, family.display_name, family.id, short;
         `)
         const families: Family[] = []
 
@@ -154,7 +163,8 @@ export class SQLiteConnection implements DatabaseConnection {
                 lastNameInternal: row.internal_name,
                 lastNameDisplay: row.display_name,
                 id: row.fam_id,
-                memberSize: row.size
+                memberSize: row.size,
+                shorthand: row.short == "" ? undefined : row.short
             })
         }
         return families

@@ -32,7 +32,7 @@ export const createMessdiener = (name: string, family: Family | number): Promise
     if (typeof family == "number") {
         creationPromise = getDBConnection().then(db => db.createMessdienerInFamily(name, family));
     } else {
-        creationPromise = getDBConnection().then(db => db.createMessdienerAndFamily(name, family.lastNameDisplay, family.lastNameInternal));
+        creationPromise = getDBConnection().then(db => db.createMessdienerAndFamily(name, family.lastNameDisplay, family.lastNameInternal, family.shorthand));
     }
     return new Promise<number>((resolve, reject) => {
         creationPromise.then(id => {

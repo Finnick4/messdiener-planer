@@ -41,6 +41,10 @@ export class MessdienerCreateButton extends HTMLElement {
             <label class="label" for="${inputElementIDs[3]}}">Abweichender interner Name (optional)</label>
             <input type="text" id="${inputElementIDs[3]}">
         </div>
+        <div class="field family">
+            <label class="label" for="${inputElementIDs[4]}}">Familienkürzel (optional)</label>
+            <input type="text" id="${inputElementIDs[4]}">
+        </div>
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Erstellen</button>
@@ -53,11 +57,11 @@ export class MessdienerCreateButton extends HTMLElement {
         const familySelector = modal.querySelector<FamilySelector>("#" + inputElementIDs[1]);
         const inputFamDispl = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
         const inputFamIntern = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[3]);
-
+        const inputFamShort = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[4]);
 
         const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
 
-        if (inputName == null || saveBtn == null || familySelector == null || inputFamDispl == null || inputFamIntern == null) {
+        if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort) {
             modal.innerHTML = "<h1>A fatal error occurred!</h1>";
             return;
         }
@@ -78,12 +82,16 @@ export class MessdienerCreateButton extends HTMLElement {
             const newFamily: Family = {
                 lastNameInternal: inputFamIntern.value,
                 lastNameDisplay: inputFamDispl.value,
+                shorthand: inputFamShort.value,
                 id: -1,
                 memberSize: 1
             };
             window.electronAPI.createMessdiener(inputName.value, familyID == 0 ? newFamily : familyID);
             modal.close();
             inputName.value = "";
+            inputFamDispl.value = "";
+            inputFamIntern.value = "";
+            inputFamShort.value = "";
         })
 
         this.onclick = () => {
