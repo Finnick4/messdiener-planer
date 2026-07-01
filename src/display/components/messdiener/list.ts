@@ -23,7 +23,7 @@ export class MessdienerList extends HTMLElement {
                 entry.classList.add("entry");
 
                 const name = document.createElement("div");
-                name.textContent = messdiener.name;
+                name.textContent = messdiener.firstName;
                 name.classList.add("name");
                 entry.appendChild(name);
 

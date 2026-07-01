@@ -1,5 +1,5 @@
 import {CallbackFunction} from "../../shared/state-manager";
-import {Messdiener} from "../../shared/general";
+import {Family, Messdiener} from "../../shared/general";
 
 interface SubscriptionListElement<T> {
     fn: CallbackFunction<T>
@@ -54,11 +54,15 @@ class State<T> {
 const states = {
     AllMessdiener: new State<Array<Messdiener>>(() => {
         return window.electronAPI.getAllMessdiener();
+    }),
+    AllFamilies: new State<Family[]>(() => {
+        return window.electronAPI.getAllFamilies();
     })
 }
 
 export enum ListenerEndpoints {
-    AllMessdiener = "AllMessdiener"
+    AllMessdiener = "AllMessdiener",
+    AllFamilies = "AllFamilies",
 }
 
 export const addSubscription = (listener: ListenerEndpoints, callback: CallbackFunction<any>): () => void => {
@@ -69,3 +73,9 @@ window.electronAPI.onMessdienerUpdate((data: Messdiener[]) => {
     const target = ListenerEndpoints.AllMessdiener;
     states[target].pushUpdate(data);
 })
+
+window.electronAPI.onFamiliesUpdate((data: Family[]) => {
+    const target = ListenerEndpoints.AllFamilies;
+    states[target].pushUpdate(data);
+})
+

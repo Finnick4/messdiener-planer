@@ -1,6 +1,7 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
-import {Messdiener} from "../../../shared/general";
+import {Family, Messdiener} from "../../../shared/general";
 import {ModalManager} from "../../types";
+import {FamilySelector} from "../family-selector";
 
 let editMessdienerModalCount = 0;
 
@@ -12,7 +13,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
     modal.classList.add("modal");
     modal.classList.add("form");
 
-    const numberOfInputElement = 1;
+    const numberOfInputElement = 4;
     const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
     for (let i = 0; i < numberOfInputElement; i++) {
         inputElementIDs[i] = `modal-edit-messdiener-${thisModalCount}-input-${i}`;
@@ -24,6 +25,22 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
             <label class="label" for="${inputElementIDs[0]}}">Vorname</label>
             <input type="text" id="${inputElementIDs[0]}">
         </div>
+        <div class="field">
+            <label class="label" for="${inputElementIDs[1]}">Familienanhehörigkeit</label>
+            <select is="family-selector" id="${inputElementIDs[1]}"></select>
+        </div>
+        <div class="field family">
+            <label class="label" for="${inputElementIDs[2]}}">Familienname</label>
+            <input type="text" id="${inputElementIDs[2]}">
+        </div>
+        <div class="field family">
+            <label class="label" for="${inputElementIDs[3]}}">Abweichender interner Name (optional)</label>
+            <input type="text" id="${inputElementIDs[3]}">
+        </div>
+        <div class="field family">
+            <label class="label" for="${inputElementIDs[4]}}">Familienkürzel (optional)</label>
+            <input type="text" id="${inputElementIDs[4]}">
+        </div>
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Speichern</button>
@@ -33,67 +50,66 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
     document.body.appendChild(modal);
 
-    const inputElements: HTMLInputElement[] = inputElementIDs.map(id => {
-        const e = modal.querySelector<HTMLInputElement>("#" + id);
-        if (!e) {
-            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-            console.error("Encountered issue with getting input element with id of " + id);
-            return new HTMLInputElement();
+    const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
+    const familySelector = modal.querySelector<FamilySelector>("#" + inputElementIDs[1]);
+    const inputFamDispl = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
+    const inputFamIntern = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[3]);
+    const inputFamShort = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[4]);
+
+    const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
+    const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
+
+    if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !delBtn) {
+        modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+        console.error("Encountered issue with getting save button!");
+        return {
+            element: modal,
+            destroy: () => (() => {
+                let modalExists = true;
+                return () => {
+                    if (modalExists) {
+                        modal.remove();
+                        modalExists = false;
+                    }
+                }
+            })(),
+            show: () => modal.showModal(),
+            hide: () => modal.close(),
+        };
+    }
+
+    familySelector.onedit = (changedID: number) => {
+        if (changedID == 0) {
+            modal.querySelectorAll(".field.family.hidden").forEach(e => e.classList.remove("hidden"));
+        } else {
+            modal.querySelectorAll(".field.family:not(.hidden)").forEach(e => e.classList.add("hidden"));
         }
-        return e;
-    })
-    const saveBtn = ((): HTMLButtonElement => {
-        const btn = modal.querySelector<HTMLButtonElement>("button.save");
-        if(!btn) {
-            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-            console.error("Encountered issue with getting save button!");
-            return new HTMLButtonElement();
-        }
-        return btn
-    })()
-    const delBtn = ((): HTMLButtonElement => {
-        const btn = modal.querySelector<HTMLButtonElement>("button.delete");
-        if(!btn) {
-            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-            console.error("Encountered issue with getting delete button!");
-            return new HTMLButtonElement();
-        }
-        return btn
-    })()
+    }
 
     const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
         const messdiener = data.filter(m => m.identifier == id)[0];
+        familySelector.initialiseWithStartID(messdiener.familyID);
 
-        const inputName = inputElements[0];
+        inputName.value = messdiener.firstName;
 
-        inputName.value = messdiener.name;
         saveBtn.addEventListener("click", () => {
-            if (inputName.value != messdiener.name) {
+            const familyID = familySelector.getSelectedFamily();
+
+            if (inputName.value != messdiener.firstName || familyID != messdiener.familyID) {
                 modal.close();
                 window.electronAPI.editMessdiener({
                     identifier: messdiener.identifier,
-                    name: inputName.value
+                    firstName: inputName.value,
+                    lastNameDisplay: familyID == 0 ? inputFamDispl.value : "",
+                    lastNameInternal: familyID == 0 ? inputFamIntern.value : "",
+                    lastNameShorthand: familyID == 0 ? inputFamShort.value : "",
+                    familyID: messdiener.familyID
                 });
             }
         })
     })
 
     modal.querySelector<HTMLButtonElement>("button.cancel")?.addEventListener("click", () => modal.close());
-
-    modal.querySelectorAll<HTMLInputElement>("input").forEach(inputElem => {
-        const index = inputElementIDs.findIndex(id => id == inputElem.id);
-        const nextElementIndex = index + 1;
-        inputElem.addEventListener("keypress", (e: KeyboardEvent)=> {
-            if (e.key == "Enter") {
-                inputElem.blur();
-                if (inputElements.length < nextElementIndex) {
-                    inputElements[nextElementIndex].focus();
-                } else {
-                    saveBtn.click();
-                }
-            }
-        })
-    })
 
     // @TODO implement confirmation
     const attainConfirmation = () => new Promise<void>((resolve) => resolve())
