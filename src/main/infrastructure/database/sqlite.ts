@@ -44,7 +44,7 @@ export class SQLiteConnection implements DatabaseConnection {
             })
         })
     }
-    private runQuery (sqlStatement: string, params: string[] = []): Promise<void> {
+    private runQuery (sqlStatement: string, params: any[] = []): Promise<void> {
         return new Promise((resolve, reject) => {
             this.db.run(sqlStatement, params, (err: Error) => {
                 if (err) {
@@ -121,14 +121,29 @@ export class SQLiteConnection implements DatabaseConnection {
     async removeMessdiener(id: number): Promise<void> {
         return await this.runQuery(`
             DELETE FROM messdiener WHERE id = ?;
-        `, [id.toString()]);
+        `, [id]);
     }
 
     async changeMessdienerName(id: number, newName: string): Promise<void> {
         return await this.runQuery(`
             UPDATE messdiener SET name = ? WHERE id = ?;
-        `, [newName, id.toString()]);
+        `, [newName, id]);
     }
+
+    async changeMessdienerFamilyAssociation(messdienerID: number, newFamilyID: number): Promise<void> {
+        return await this.runQuery(`
+            UPDATE messdiener SET family_association = ? WHERE id = ?;
+        `, [newFamilyID, messdienerID]);
+    }
+    async changeMessdienerFamilyAssociationNewFamily(messdienerID: number, lastName: string, internal?: string, shorthand?: string): Promise<void> {
+        return this.createFamily(lastName, internal, shorthand).then(famId => this.changeMessdienerFamilyAssociation(messdienerID, famId))
+    }
+
+
+    /*
+    Family related queries
+     */
+
 
     async createFamily(lastName: string, internal = "", shorthand = ""): Promise<number> {
         if (shorthand == "") {

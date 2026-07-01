@@ -1,5 +1,6 @@
 import {Family, Messdiener} from "../../shared/general";
 import WebContents = Electron.WebContents;
+import {getAllFamilies, getAllMessdiener} from "../application/state";
 
 export interface PingDestination {
     onMessdienerUpdate: (data: Messdiener[]) => void,
@@ -37,3 +38,11 @@ class PingManager implements PingDestination {
 }
 
 export const pingManager = new PingManager();
+
+export const pingFamiliesUpdate = () => {
+    getAllFamilies().then(families => pingManager.onFamiliesUpdate(families));
+}
+
+export const pingMessdienerUpdate = () => {
+    getAllMessdiener().then(messdiener => pingManager.onMessdienerUpdate(messdiener));
+}

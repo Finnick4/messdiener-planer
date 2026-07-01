@@ -53,10 +53,31 @@ export const removeMessdiener = (id: number): Promise<void> => {
     })
 }
 export const changeMessdienerName = (id: number, newName: string): Promise<void> => {
-    return getDBConnection().then(db => db.changeMessdienerName(id, newName)). then(() => {
+    return getDBConnection().then(db => db.changeMessdienerName(id, newName)).then(() => {
         const index = allMessdiener.findIndex(m => m.identifier == id);
         if (index >= 0) {
             allMessdiener[index].firstName = newName;
         }
+    })
+}
+export const changeMessdienerFamilyAssociation = (id: number, family: Family | number): Promise<void> => {
+    let editPromise: Promise<void>;
+
+    if (typeof family == "number") {
+        editPromise = getDBConnection().then(db => db.changeMessdienerFamilyAssociation(id, family));
+    } else {
+        editPromise = getDBConnection().then(db => db.changeMessdienerFamilyAssociationNewFamily(id, family.lastNameDisplay, family.lastNameInternal, family.shorthand));
+    }
+    return new Promise<void>((resolve, reject) => {
+        editPromise.then(() => {
+            allMessdiener = [];
+            allFamilies = [];
+            resolve();
+        })
+        editPromise.catch(reason => {
+            console.error("[STATE] (changeMessdienerFamilyAssociation) Failed to edit Messdiener!");
+            console.error(reason);
+            reject(reason);
+        })
     })
 }

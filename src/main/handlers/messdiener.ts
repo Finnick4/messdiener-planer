@@ -1,8 +1,13 @@
 import {Family, Messdiener} from "../../shared/general";
-import {changeMessdienerName, createMessdiener, getAllMessdiener, removeMessdiener} from "../application/state";
+import {
+    changeMessdienerFamilyAssociation,
+    changeMessdienerName,
+    createMessdiener,
+    getAllMessdiener,
+    removeMessdiener
+} from "../application/state";
 import IpcMainEvent = Electron.IpcMainEvent;
-import {pingManager} from "./ping-manager";
-import {pingFamiliesUpdate} from "./familiies";
+import {pingMessdienerUpdate, pingFamiliesUpdate} from "./ping-manager";
 
 export const getAllMessdienerHandler = (): Promise<Messdiener[]> => {
     return getAllMessdiener()
@@ -45,14 +50,22 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
         if (messdiener.firstName != "") {
             waitGroup.push(changeMessdienerName(messdiener.identifier, messdiener.firstName));
         }
+        if (messdiener.familyID != 0 || messdiener.lastNameDisplay != "") {
+            waitGroup.push(changeMessdienerFamilyAssociation(messdiener.identifier, {
+                lastNameDisplay: messdiener.lastNameDisplay,
+                lastNameInternal: messdiener.lastNameInternal,
+                shorthand: messdiener.lastNameShorthand,
+                id: 0,
+                memberSize: 1
+            }));
+        }
         Promise.all(waitGroup).then(() => {
             pingMessdienerUpdate();
+            if (messdiener.familyID != 0 || messdiener.lastNameDisplay != "") {
+                pingFamiliesUpdate()
+            }
             resolve();
         })
     })
 }
 
-
-const pingMessdienerUpdate = () => {
-    getAllMessdiener().then(messdiener => pingManager.onMessdienerUpdate(messdiener));
-}

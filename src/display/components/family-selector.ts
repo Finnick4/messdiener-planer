@@ -15,6 +15,12 @@ export class FamilySelector extends HTMLSelectElement {
     private selectedFamilyID = 0;
 
     connectedCallback() {
+        this.initialiseWithStartID(0);
+    }
+    initialiseWithStartID(id: number) {
+        this.closeSubscription();
+        this.selectedFamilyID = id;
+        this.onedit(id);
         this.closeSubscription = addSubscription(ListenerEndpoints.AllFamilies, (data: Family[]) => {
             const makeOptionElement = (text: string, id: number): HTMLOptionElement => {
                 const option = document.createElement("option");
@@ -33,7 +39,6 @@ export class FamilySelector extends HTMLSelectElement {
             const options: HTMLOptionElement[] = [makeOptionElement("Neue Familie erstellen", 0)].concat(data.map(family => makeOptionElement(createInternalFamilyName(family.lastNameInternal, family.lastNameDisplay), family.id)));
 
             this.replaceChildren(...options);
-
         })
     }
 

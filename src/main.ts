@@ -9,7 +9,7 @@ import {
 } from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
 import {getAllFamilies} from "./main/application/state";
-import {getAllFamiliesHandler} from "./main/handlers/familiies";
+import {getAllFamiliesHandler} from "./main/handlers/families";
 
 if (started) {
   app.quit();
