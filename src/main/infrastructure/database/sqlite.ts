@@ -65,7 +65,7 @@ export class SQLiteConnection implements DatabaseConnection {
             CREATE TABLE IF NOT EXISTS family
             (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                internal_name TEXT NOT NULL,
+                internal_name TEXT,
                 display_name  TEXT NOT NULL,
                 shorthand     TEXT
             )
@@ -87,7 +87,7 @@ export class SQLiteConnection implements DatabaseConnection {
             SELECT 
                 messdiener.id AS messdiener_id, 
                 name AS first_name, 
-                family.internal_name AS internal_name, 
+                COALESCE(family.internal_name, family.display_name) AS internal_name, 
                 family.display_name as display_name, 
                 family.id AS fam_id,
                 COALESCE(family.shorthand, '') AS short
@@ -131,24 +131,31 @@ export class SQLiteConnection implements DatabaseConnection {
     }
 
     async createFamily(lastName: string, internal = "", shorthand = ""): Promise<number> {
-        if (internal == "") {
-            internal = lastName;
-        }
         if (shorthand == "") {
+            if (internal == "") {
+                return (await this.getRowQuery(`            
+                    INSERT INTO family (display_name) VALUES (?) RETURNING id;
+                `, [lastName])).id;
+            }
             return (await this.getRowQuery(`            
                 INSERT INTO family (internal_name, display_name) VALUES (?, ?) RETURNING id;
             `, [internal, lastName])).id;
         }
+        if (internal == "") {
+            return (await this.getRowQuery(`            
+                INSERT INTO family (display_name, shorthand) VALUES (?, ?) RETURNING id;
+            `, [lastName, shorthand])).id;
+        }
         return (await this.getRowQuery(`            
             INSERT INTO family (internal_name, display_name, shorthand) VALUES (?, ?, ?) RETURNING id;
-        `, [internal, lastName, shorthand])).id
+        `, [internal, lastName, shorthand])).id;
     }
 
     async getAllFamilies(): Promise<Family[]> {
         const rows = await this.getRowsQuery(`
             SELECT
-                family.internal_name AS internal_name,
-                family.display_name as display_name,
+                COALESCE(family.internal_name, family.display_name) AS internal_name,
+                family.display_name AS display_name,
                 family.id AS fam_id,
                 COUNT(main.messdiener.id) AS size,
                 COALESCE(family.shorthand, '') AS short
