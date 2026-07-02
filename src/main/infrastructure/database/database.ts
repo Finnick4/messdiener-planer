@@ -19,4 +19,5 @@ export interface DatabaseConnection {
     removeMessdienerFromChurch: (messdienerID: number, churchID: number) => Promise<void>;
     removeChurch: (id: number) => Promise<void>;
     changeChurchName: (id: number, newName: string) => Promise<void>;
+    changeChurchLocation: (id: number, newLocation: string) => Promise<void>;
 }

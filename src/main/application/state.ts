@@ -106,10 +106,19 @@ export const removeChurch = (id: number): Promise<void> => {
     })
 }
 export const changeChurchName = (id: number, newName: string): Promise<void> => {
-    return getDBConnection().then(db => db.changeMessdienerName(id, newName)).then(() => {
+    return getDBConnection().then(db => db.changeChurchName(id, newName)).then(() => {
         const index = allChurches.findIndex(c => c.id == id);
         if (index >= 0) {
             allChurches[index].name = newName;
+        }
+    })
+}
+
+export const changeChurchLocation = (id: number, newLocation: string): Promise<void> => {
+    return getDBConnection().then(db => db.changeChurchName(id, newLocation)).then(() => {
+        const index = allChurches.findIndex(c => c.id == id);
+        if (index >= 0) {
+            allChurches[index].location = newLocation;
         }
     })
 }

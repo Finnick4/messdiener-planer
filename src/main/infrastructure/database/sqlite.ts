@@ -259,6 +259,12 @@ export class SQLiteConnection implements DatabaseConnection {
         `, [newName, id]);
     }
 
+    changeChurchLocation(id: number, newLocation: string): Promise<void> {
+        return this.runQuery(`
+            UPDATE church SET location = ? WHERE id = ?;
+        `, [newLocation, id]);
+    }
+
     addMessdienerToChurch(messdienerID: number, churchID: number): Promise<void> {
         return this.runQuery(`
             INSERT INTO church_activity (messdiener_id, church_id) VALUES (?, ?);
