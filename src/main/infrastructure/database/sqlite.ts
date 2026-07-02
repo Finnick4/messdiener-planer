@@ -1,5 +1,5 @@
 import {Database, verbose} from "sqlite3";
-import {Family, Messdiener} from "../../../shared/general";
+import {Church, Family, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
 
 const sqlite3 = verbose();
@@ -62,6 +62,25 @@ export class SQLiteConnection implements DatabaseConnection {
 
     async initialiseDatabase(): Promise<void> {
         await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS church
+            (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                name          TEXT NOT NULL,
+                location      TEXT
+            )
+        `);
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS church_activity
+            (
+                messdiener_id   INTEGER NOT NULL,
+                church_id       INTEGER NOT NULL,
+                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                FOREIGN KEY (church_id) REFERENCES church (id),
+                PRIMARY KEY (messdiener_id, church_id)
+            )
+        `);
+
+        await this.runQuery(`
             CREATE TABLE IF NOT EXISTS family
             (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,7 +96,7 @@ export class SQLiteConnection implements DatabaseConnection {
                 id                 INTEGER PRIMARY KEY AUTOINCREMENT,
                 name               TEXT    NOT NULL,
                 family_association INTEGER NOT NULL,
-                FOREIGN KEY (family_association) REFERENCES family (id)
+                FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
             )
         `);
     }
@@ -118,20 +137,20 @@ export class SQLiteConnection implements DatabaseConnection {
         return this.createFamily(lastName, internal, shorthand).then(famId => this.createMessdienerInFamily(name, famId))
     }
 
-    async removeMessdiener(id: number): Promise<void> {
-        return await this.runQuery(`
+    removeMessdiener(id: number): Promise<void> {
+        return this.runQuery(`
             DELETE FROM messdiener WHERE id = ?;
         `, [id]);
     }
 
-    async changeMessdienerName(id: number, newName: string): Promise<void> {
-        return await this.runQuery(`
+    changeMessdienerName(id: number, newName: string): Promise<void> {
+        return this.runQuery(`
             UPDATE messdiener SET name = ? WHERE id = ?;
         `, [newName, id]);
     }
 
     async changeMessdienerFamilyAssociation(messdienerID: number, newFamilyID: number): Promise<void> {
-        return await this.runQuery(`
+        return this.runQuery(`
             UPDATE messdiener SET family_association = ? WHERE id = ?;
         `, [newFamilyID, messdienerID]);
     }
@@ -191,4 +210,64 @@ export class SQLiteConnection implements DatabaseConnection {
         }
         return families
     }
+
+    /*
+    Church related queries
+     */
+
+    async createChurch(name: string, location?: string): Promise<number> {
+        if (location == undefined) {
+            return (await this.getRowQuery(`            
+                INSERT INTO church (name) VALUES (?) RETURNING id;
+            `, [name])).id;
+        }
+        return (await this.getRowQuery(`
+            INSERT INTO church (name, location) VALUES (?, ?) RETURNING id;
+        `, [name, location])).id;
+    }
+
+    removeChurch(id: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM church WHERE id = ?;
+        `, [id]);
+    }
+
+    async getAllChurches(): Promise<Church[]> {
+        const rows = await this.getRowsQuery(`
+            SELECT 
+                church.id AS church_id, 
+                church.name AS name, 
+                COALESCE(church.location, '') AS location
+            FROM church;
+        `)
+        const churches: Church[] = []
+
+        for (const row of rows) {
+            churches.push({
+                id: row.church_id,
+                name: row.name,
+                location: row.location == undefined ? undefined : row.location,
+            })
+        }
+        return churches;
+    }
+
+
+    changeChurchName(id: number, newName: string): Promise<void> {
+        return this.runQuery(`
+            UPDATE church SET name = ? WHERE id = ?;
+        `, [newName, id]);
+    }
+
+    addMessdienerToChurch(messdienerID: number, churchID: number): Promise<void> {
+        return this.runQuery(`
+            INSERT INTO church_activity (messdiener_id, church_id) VALUES (?, ?);
+        `, [messdienerID, churchID]);
+    }
+    removeMessdienerFromChurch(messdienerID: number, churchID: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM church_activity WHERE messdiener_id=? AND church_id=?;
+        `, [messdienerID, churchID]);
+    }
+
 }

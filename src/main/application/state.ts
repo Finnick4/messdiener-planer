@@ -1,8 +1,9 @@
-import {Family, Messdiener} from "../../shared/general";
+import {Church, Family, Messdiener} from "../../shared/general";
 import {getDBConnection} from "./main";
 
 let allMessdiener: Messdiener[] = [];
 let allFamilies: Family[] = [];
+let allChurches: Church[] = [];
 
 export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     if (allMessdiener.length !== 0) {
@@ -22,6 +23,17 @@ export const getAllFamilies = async (): Promise<Family[]> => {
     return getDBConnection().then(db => db.getAllFamilies().then(families => {
             allFamilies = families;
             return families;
+        })
+    )
+}
+
+export const getAllChurches = async (): Promise<Church[]> => {
+    if (allChurches.length !== 0) {
+        return allChurches;
+    }
+    return getDBConnection().then(db => db.getAllChurches().then(churches => {
+            allChurches = churches;
+            return churches;
         })
     )
 }
@@ -79,5 +91,25 @@ export const changeMessdienerFamilyAssociation = (id: number, family: Family | n
             console.error(reason);
             reject(reason);
         })
+    })
+}
+
+export const createChurch = (name: string, location?: string): Promise<number> => {
+    return getDBConnection().then(db => db.createChurch(name, location)).then(id => {
+        allChurches = [];
+        return id;
+    })
+}
+export const removeChurch = (id: number): Promise<void> => {
+    return getDBConnection().then(db => db.removeChurch(id)).then(() => {
+        allChurches = allChurches.filter(c => c.id != id);
+    })
+}
+export const changeChurchName = (id: number, newName: string): Promise<void> => {
+    return getDBConnection().then(db => db.changeMessdienerName(id, newName)).then(() => {
+        const index = allChurches.findIndex(c => c.id == id);
+        if (index >= 0) {
+            allChurches[index].name = newName;
+        }
     })
 }

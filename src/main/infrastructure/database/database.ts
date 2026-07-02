@@ -1,4 +1,4 @@
-import {Family, Messdiener} from "../../../shared/general";
+import {Church, Family, Messdiener} from "../../../shared/general";
 
 export interface DatabaseConnection {
     initialiseDatabase: () => Promise<void>;
@@ -12,4 +12,11 @@ export interface DatabaseConnection {
 
     getAllFamilies: () => Promise<Family[]>;
     createFamily: (lastName: string, internal?: string, shorthand?: string) => Promise<number>;
+
+    createChurch: (name: string, location?: string) => Promise<number>;
+    getAllChurches: () => Promise<Church[]>;
+    addMessdienerToChurch: (messdienerID: number, churchID: number) => Promise<void>;
+    removeMessdienerFromChurch: (messdienerID: number, churchID: number) => Promise<void>;
+    removeChurch: (id: number) => Promise<void>;
+    changeChurchName: (id: number, newName: string) => Promise<void>;
 }

@@ -16,3 +16,8 @@ export type Family = {
     shorthand?: string
 }
 
+export type Church = {
+    id: number
+    name: string
+    location?: string
+}
