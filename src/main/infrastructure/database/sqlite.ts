@@ -102,7 +102,7 @@ export class SQLiteConnection implements DatabaseConnection {
     }
 
     async getAllMessdiener(): Promise<Messdiener[]> {
-        const rows = await this.getRowsQuery(`
+        let rows = await this.getRowsQuery(`
             SELECT 
                 messdiener.id AS messdiener_id, 
                 name AS first_name, 
@@ -111,8 +111,9 @@ export class SQLiteConnection implements DatabaseConnection {
                 family.id AS fam_id,
                 COALESCE(family.shorthand, '') AS short
             FROM Messdiener
-                 JOIN family ON family.id = family_association;
-        `)
+                 JOIN family ON family.id = family_association
+            ORDER BY messdiener_id ASC;
+        `);
         const messdiener: Messdiener[] = []
 
         for (const row of rows) {
@@ -122,8 +123,23 @@ export class SQLiteConnection implements DatabaseConnection {
                 lastNameInternal: row.internal_name,
                 lastNameDisplay: row.display_name,
                 lastNameShorthand: row.short == "" ? undefined : row.short,
-                familyID: row.fam_id
+                familyID: row.fam_id,
+                churchActivity: []
             })
+        }
+        rows = await this.getRowsQuery(`
+            SELECT
+                messdiener.id AS messdiener_id,
+                church_activity.church_id AS church_id
+            FROM messdiener
+                     JOIN church_activity ON messdiener.id = church_activity.messdiener_id
+            ORDER BY messdiener.id ASC;
+        `)
+        for (const row of rows) {
+            const index = messdiener.findIndex(m => m.identifier == row.messdiener_id);
+            if (index >= 0) {
+                messdiener[index].churchActivity.push(row.church_id);
+            }
         }
         return messdiener
     }

@@ -1,5 +1,5 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
-import {Family, Messdiener} from "../../../shared/general";
+import {Messdiener} from "../../../shared/general";
 import {ModalManager} from "../../types";
 import {FamilySelector} from "../family-selector";
 
@@ -103,7 +103,8 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
                     lastNameDisplay: familyID == 0 ? inputFamDispl.value : "",
                     lastNameInternal: familyID == 0 ? inputFamIntern.value : "",
                     lastNameShorthand: familyID == 0 ? inputFamShort.value : "",
-                    familyID: messdiener.familyID
+                    familyID: messdiener.familyID,
+                    churchActivity: []
                 });
             }
         })

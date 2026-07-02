@@ -6,6 +6,7 @@ export type Messdiener = {
     lastNameShorthand?: string
     familyID: number
     identifier: number
+    churchActivity: number[]
 }
 
 export type Family = {
