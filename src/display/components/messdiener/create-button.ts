@@ -9,7 +9,7 @@ export class MessdienerCreateButton extends HTMLElement {
 
     connectedCallback() {
         this.innerHTML = "Messdiener erstellen";
-        this.classList.add("button");
+        this.classList.add("button", "create");
 
         const modal = document.createElement("dialog");
 

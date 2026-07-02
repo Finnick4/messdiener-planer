@@ -17,5 +17,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     onMessdienerUpdate: (callback: (data: Messdiener[]) => void): IpcRenderer => ipcRenderer.on('update-messdiener', (_event, value) => callback(value)),
     onFamiliesUpdate: (callback: (data: Family[]) => void): IpcRenderer => ipcRenderer.on('update-families', (_event, value) => callback(value)),
-    onChurchesUpdate: (callback: (data: Church[]) => void): IpcRenderer => ipcRenderer.on('update-churches', (_event, value) => callback(value)),
+    onChurchesUpdate: (callback: (data: Church[]) => void): IpcRenderer => ipcRenderer.on('update-church', (_event, value) => callback(value)),
 })

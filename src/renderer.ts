@@ -5,6 +5,9 @@ import {MessdienerList} from "./display/components/messdiener/list";
 import {MessdienerEditButton} from "./display/components/messdiener/edit-button";
 import {MessdienerCreateButton} from "./display/components/messdiener/create-button";
 import {FamilySelector} from "./display/components/family-selector";
+import {ChurchList} from "./display/components/church/list";
+import {ChurchEditButton} from "./display/components/church/edit-button";
+import {ChurchCreateButton} from "./display/components/church/create-button";
 
 interface CustomElementDefinition {
     name: string,
@@ -16,6 +19,11 @@ const customElementsList: CustomElementDefinition[] = [
     {name: "messdiener-list", constructor: MessdienerList, extends: null},
     {name: "messdiener-edit-button", constructor: MessdienerEditButton, extends: null},
     {name: "messdiener-create-button", constructor: MessdienerCreateButton, extends: null},
+
+    {name: "church-list", constructor: ChurchList, extends: null},
+    {name: "church-edit-button", constructor: ChurchEditButton, extends: null},
+    {name: "church-create-button", constructor: ChurchCreateButton, extends: null},
+
     {name: "family-selector", constructor: FamilySelector, extends: "select"},
 ]
 

@@ -95,15 +95,14 @@ main {
     margin-right: calc(var(--padding-element) + var(--border-width));
 }
 
-messdiener-list {
+.list {
     display: grid;
-    grid-template-columns: 1fr auto;
     background-color: var(--bg-color-element);
     border: var(--border);
     padding: var(--padding-element);
     border-radius: var(--border-radius);
 
-    .messdiener {
+    .row {
         display: grid;
         grid-column: 1/final;
         grid-template-columns: subgrid;
@@ -116,6 +115,10 @@ messdiener-list {
             align-self: center  ;
         }
     }
+}
+messdiener-list,
+church-list {
+    grid-template-columns: 1fr auto;
 }
 
 .modal:open {
@@ -225,7 +228,7 @@ option:checked {
     color: var(--text);
 }
 
-messdiener-create-button.button {
+.create.button {
     background-color: var(--primary);
     border-radius: calc(var(--border-radius) - var(--padding-button));
     display: block;
@@ -233,10 +236,10 @@ messdiener-create-button.button {
     width: fit-content;
 }
 
-messdiener-create-button.button:hover {
+.create.button:hover {
     background-color: var(--primary-hover);
 }
-messdiener-create-button.button:active {
+.create.button:active {
     background-color: var(--primary-pressed);
 }
 

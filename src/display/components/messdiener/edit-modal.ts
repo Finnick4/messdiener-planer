@@ -61,7 +61,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
     if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !delBtn) {
         modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-        console.error("Encountered issue with getting save button!");
+        console.error("Encountered issue with getting inputs of edit Messdiener modal!");
         return {
             element: modal,
             destroy: () => (() => {

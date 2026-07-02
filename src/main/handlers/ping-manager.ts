@@ -17,7 +17,7 @@ export const createPingDestination = (windowWebContents: WebContents): PingDesti
             windowWebContents.send('update-families', data);
         },
         onChurchesUpdate(data: Church[]): void {
-            windowWebContents.send('update-churches', data);
+            windowWebContents.send('update-church', data);
         },
     }
 }
