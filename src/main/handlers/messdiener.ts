@@ -1,5 +1,6 @@
-import {Family, Messdiener} from "../../shared/general";
+import {Family, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
 import {
+    areValidMessdienerIDs, changeMessdienerChurchActivity,
     changeMessdienerFamilyAssociation,
     changeMessdienerName,
     createMessdiener,
@@ -68,4 +69,22 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
         })
     })
 }
+export const changeMessdienerChurchActivityHandler = (_event: IpcMainEvent, activities: MessdienerChurchActivityStatus[]): Promise<void> => {
+    return areValidMessdienerIDs(activities.map(a => a.messdienerID)).then(resp => {
+        if (!resp) {
+            return;
+        }
+        let validChurchIDs = true;
+        activities.forEach(a => {
+            if (a.churchID <= 0) {
+                validChurchIDs = false;
+            }
+        })
+        if (!validChurchIDs) {
+            return;
+        }
+        return changeMessdienerChurchActivity(activities).then(() => pingMessdienerUpdate());
+    })
+}
+
 

@@ -1,5 +1,5 @@
-import {Church, Family, Messdiener} from "../shared/general";
-import {ipcRenderer, IpcRenderer} from "electron";
+import {Church, Family, Messdiener, MessdienerChurchActivityStatus} from "../shared/general";
+import {IpcRenderer} from "electron";
 
 declare global {
     interface Window {
@@ -13,7 +13,8 @@ declare global {
             editMessdiener: (messdiener: Messdiener) => void;
             createChurch: (name: string, location?: string) => void;
             deleteChurch: (id: number) => void;
-            editChurch: (church: Church) =>  void;
+            editChurch: (church: Church) => void;
+            changeMessdienerChurchActivity: (activities: MessdienerChurchActivityStatus[]) => void;
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer;
             onFamiliesUpdate: (callback: (data: Family[]) => void) => IpcRenderer;

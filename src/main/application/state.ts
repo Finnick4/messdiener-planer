@@ -1,4 +1,4 @@
-import {Church, Family, Messdiener} from "../../shared/general";
+import {Church, Family, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
 import {getDBConnection} from "./main";
 
 let allMessdiener: Messdiener[] = [];
@@ -119,6 +119,45 @@ export const changeChurchLocation = (id: number, newLocation: string): Promise<v
         const index = allChurches.findIndex(c => c.id == id);
         if (index >= 0) {
             allChurches[index].location = newLocation;
+        }
+    })
+}
+
+export const areValidMessdienerIDs = (toCheck: number[]): Promise<boolean> =>{
+    return getAllMessdiener().then(messdiener => {
+        for (const id of toCheck) {
+            if (id <= 0) {
+                return false;
+            }
+            const index = messdiener.findIndex(m => m.identifier == id);
+            if (index == -1) {
+                return false;
+            }
+        }
+        return true;
+    })
+}
+
+export const changeMessdienerChurchActivity = async (activities: MessdienerChurchActivityStatus[]): Promise<void> => {
+    return getDBConnection().then(db => {
+        return Promise.all(activities.map(activity => {
+            if (activity.isActive) {
+                return db.addMessdienerToChurch(activity.messdienerID, activity.churchID);
+            }
+            return db.removeMessdienerFromChurch(activity.messdienerID, activity.churchID);
+        }))
+
+    }).then(() => {
+        for (const activity of activities) {
+            const index = allMessdiener.findIndex(m => m.identifier == activity.messdienerID);
+            if (index == -1) {
+                continue;
+            }
+            if (activity.isActive) {
+                allMessdiener[index].churchActivity.add(activity.churchID);
+            } else {
+                allMessdiener[index].churchActivity.delete(activity.churchID);
+            }
         }
     })
 }

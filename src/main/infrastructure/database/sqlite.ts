@@ -124,7 +124,7 @@ export class SQLiteConnection implements DatabaseConnection {
                 lastNameDisplay: row.display_name,
                 lastNameShorthand: row.short == "" ? undefined : row.short,
                 familyID: row.fam_id,
-                churchActivity: []
+                churchActivity: new Set<number>()
             })
         }
         rows = await this.getRowsQuery(`
@@ -138,7 +138,7 @@ export class SQLiteConnection implements DatabaseConnection {
         for (const row of rows) {
             const index = messdiener.findIndex(m => m.identifier == row.messdiener_id);
             if (index >= 0) {
-                messdiener[index].churchActivity.push(row.church_id);
+                messdiener[index].churchActivity.add(row.church_id);
             }
         }
         return messdiener

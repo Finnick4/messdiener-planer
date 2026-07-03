@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import {
+    changeMessdienerChurchActivityHandler,
     createMessdienerHandler,
     editMessdienerHandler,
     getAllMessdienerHandler,
@@ -55,6 +56,7 @@ app.on('ready', () => {
     ipcMain.on('create-church', createChurchHandler);
     ipcMain.on('remove-church', removeChurchHandler);
     ipcMain.on('edit-church', editChurchHandler);
+    ipcMain.on('change-messdiener-church-activity', changeMessdienerChurchActivityHandler);
 });
 
 app.on('window-all-closed', () => {

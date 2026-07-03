@@ -104,7 +104,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
                     lastNameInternal: familyID == 0 ? inputFamIntern.value : "",
                     lastNameShorthand: familyID == 0 ? inputFamShort.value : "",
                     familyID: messdiener.familyID,
-                    churchActivity: []
+                    churchActivity: new Set<number>()
                 });
             }
         })

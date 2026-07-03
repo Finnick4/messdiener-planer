@@ -6,7 +6,7 @@ export type Messdiener = {
     lastNameShorthand?: string
     familyID: number
     identifier: number
-    churchActivity: number[]
+    churchActivity: Set<number>
 }
 
 export type Family = {
@@ -21,4 +21,10 @@ export type Church = {
     id: number
     name: string
     location?: string
+}
+
+export type MessdienerChurchActivityStatus = {
+    messdienerID: number
+    churchID: number
+    isActive: boolean
 }
