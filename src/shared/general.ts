@@ -28,3 +28,10 @@ export type MessdienerChurchActivityStatus = {
     churchID: number
     isActive: boolean
 }
+
+export type Mass = {
+    id: number
+    date: number
+    churchID: number
+    note?: string
+}

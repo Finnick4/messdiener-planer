@@ -1,5 +1,5 @@
 import {Database, verbose} from "sqlite3";
-import {Church, Family, Messdiener} from "../../../shared/general";
+import {Church, Family, Mass, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
 
 const sqlite3 = verbose();
@@ -16,7 +16,7 @@ export class SQLiteConnection implements DatabaseConnection {
             console.log("Connection to database established!")
         })
     }
-    private getRowsQuery (sqlStatement: string, params: string[] = []): Promise<any[]> {
+    private getRowsQuery (sqlStatement: string, params: any[] = []): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.db.all(sqlStatement, params, (err: Error, rows: any[]) => {
                 if (err) {
@@ -30,7 +30,7 @@ export class SQLiteConnection implements DatabaseConnection {
             })
         })
     }
-    private getRowQuery (sqlStatement: string, params: string[] = ["test"]): Promise<any> {
+    private getRowQuery (sqlStatement: string, params: any[] = ["test"]): Promise<any> {
         return new Promise((resolve, reject) => {
             this.db.get(sqlStatement, params, (err: Error, row: any) => {
                 if (err) {
@@ -69,14 +69,15 @@ export class SQLiteConnection implements DatabaseConnection {
                 location      TEXT
             )
         `);
+
         await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS church_activity
+            CREATE TABLE IF NOT EXISTS mass
             (
-                messdiener_id   INTEGER NOT NULL,
-                church_id       INTEGER NOT NULL,
-                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
-                FOREIGN KEY (church_id) REFERENCES church (id),
-                PRIMARY KEY (messdiener_id, church_id)
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                date          INTEGER NOT NULL,
+                church_id     INTEGER NOT NULL,
+                note          TEXT,
+                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE
             )
         `);
 
@@ -97,6 +98,28 @@ export class SQLiteConnection implements DatabaseConnection {
                 name               TEXT    NOT NULL,
                 family_association INTEGER NOT NULL,
                 FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
+            )
+        `);
+
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS church_activity
+            (
+                messdiener_id   INTEGER NOT NULL,
+                church_id       INTEGER NOT NULL,
+                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE,
+                PRIMARY KEY (messdiener_id, church_id)
+            )
+        `);
+
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS mass_messdiener_allocation
+            (
+                messdiener_id   INTEGER NOT NULL,
+                mass_id       INTEGER NOT NULL,
+                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                FOREIGN KEY (mass_id) REFERENCES mass (id) ON DELETE CASCADE,
+                PRIMARY KEY (messdiener_id, mass_id)
             )
         `);
     }
@@ -147,7 +170,7 @@ export class SQLiteConnection implements DatabaseConnection {
     async createMessdienerInFamily(name: string, familyID: number): Promise<number> {
         return (await this.getRowQuery(`
             INSERT INTO messdiener (name, family_association) VALUES (?, ?) RETURNING id;
-        `, [name, String(familyID)])).id
+        `, [name, familyID])).id
     }
     async createMessdienerAndFamily(name: string, lastName: string, internal = "", shorthand = ""): Promise<number> {
         return this.createFamily(lastName, internal, shorthand).then(famId => this.createMessdienerInFamily(name, famId))
@@ -292,4 +315,75 @@ export class SQLiteConnection implements DatabaseConnection {
         `, [messdienerID, churchID]);
     }
 
+    /*
+    Mass related queries
+     */
+
+    async createMass(date: number, churchID: number, note?: string): Promise<void> {
+        if (note == undefined) {
+            return (await this.getRowQuery(`            
+                INSERT INTO mass (date, church_id) VALUES (?, ?) RETURNING id;
+            `, [date, churchID])).id;
+        }
+        return (await this.getRowQuery(`
+            INSERT INTO mass (date, church_id, note) VALUES (?, ?, ?) RETURNING id;
+        `, [date, churchID, note])).id;
+    }
+
+    async getAllMasses(): Promise<Mass[]> {
+        const rows = await this.getRowsQuery(`
+            SELECT 
+                mass.id AS mass_id, 
+                mass.date AS date,
+                mass.church_id AS church_id,
+                COALESCE(mass.note, '') AS note
+            FROM mass;
+        `)
+        const masses: Mass[] = []
+
+        for (const row of rows) {
+            masses.push({
+                id: row.mass_id,
+                churchID: row.church_id,
+                date: row.date,
+                note: row.note == "" ? undefined : row.note,
+            })
+        }
+        return masses;
+    }
+
+    removeMass(id: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM mass WHERE id = ?;
+        `, [id]);
+    }
+
+    changeMassNote(id: number, note?: string): Promise<void> {
+        if (note == undefined) {
+            return this.runQuery(`
+                UPDATE mass SET note = NULL WHERE id = ?;
+            `, [id]);
+        }
+        return this.runQuery(`
+            UPDATE mass SET note = ? WHERE id = ?;
+        `, [note, id]);
+    }
+
+    changeMassDate(id: number, date: number): Promise<void> {
+        return this.runQuery(`
+            UPDATE mass SET date = ? WHERE id = ?;
+        `, [date, id]);
+    }
+
+    addMessdienerToMass(messdienerID: number, massID: number): Promise<void> {
+        return this.runQuery(`
+            INSERT OR IGNORE INTO mass_messdiener_allocation (messdiener_id, mass_id) VALUES (?, ?);
+        `, [messdienerID, massID]);
+    }
+
+    removeMessdienerFromMass(messdienerID: number, massID: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM mass_messdiener_allocation WHERE messdiener_id=? AND mass_id=?;
+        `, [messdienerID, massID]);
+    }
 }
