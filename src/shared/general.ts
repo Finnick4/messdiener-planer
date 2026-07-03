@@ -33,5 +33,6 @@ export type Mass = {
     id: number
     date: number
     churchID: number
+    allocatedMessdiener: Set<number>
     note?: string
 }

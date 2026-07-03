@@ -137,7 +137,7 @@ export class SQLiteConnection implements DatabaseConnection {
                  JOIN family ON family.id = family_association
             ORDER BY messdiener_id ASC;
         `);
-        const messdiener: Messdiener[] = []
+        const messdiener: Messdiener[] = [];
 
         for (const row of rows) {
             messdiener.push({
@@ -164,7 +164,7 @@ export class SQLiteConnection implements DatabaseConnection {
                 messdiener[index].churchActivity.add(row.church_id);
             }
         }
-        return messdiener
+        return messdiener;
     }
 
     async createMessdienerInFamily(name: string, familyID: number): Promise<number> {
@@ -331,7 +331,7 @@ export class SQLiteConnection implements DatabaseConnection {
     }
 
     async getAllMasses(): Promise<Mass[]> {
-        const rows = await this.getRowsQuery(`
+        let rows = await this.getRowsQuery(`
             SELECT 
                 mass.id AS mass_id, 
                 mass.date AS date,
@@ -347,8 +347,24 @@ export class SQLiteConnection implements DatabaseConnection {
                 churchID: row.church_id,
                 date: row.date,
                 note: row.note == "" ? undefined : row.note,
+                allocatedMessdiener: new Set<number>(),
             })
         }
+
+        rows = await this.getRowsQuery(`
+            SELECT
+                mass_messdiener_allocation.messdiener_id AS messdiener_id,
+                mass_messdiener_allocation.mass_id AS mass_id
+            FROM mass_messdiener_allocation
+            ORDER BY mass_id ASC;
+        `)
+        for (const row of rows) {
+            const index = masses.findIndex(m => m.id == row.mass_id);
+            if (index >= 0) {
+                masses[index].allocatedMessdiener.add(row.messdiener_id);
+            }
+        }
+
         return masses;
     }
 
