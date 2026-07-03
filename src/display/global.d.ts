@@ -8,7 +8,7 @@ declare global {
             getAllFamilies: () => Promise<Family[]>;
             getAllChurches: () => Promise<Church[]>;
 
-            createMessdiener: (name: string, family: Family | number) => void;
+            createMessdiener: (name: string, family: Family | number, churchActivity?: number[]) => void;
             deleteMessdiener: (id: number) => void;
             editMessdiener: (messdiener: Messdiener) => void;
             createChurch: (name: string, location?: string) => void;

@@ -1,6 +1,7 @@
 import {getUniqueCount} from "../../builder/utilities";
 import {FamilySelector} from "../family-selector";
 import {Family} from "../../../shared/general";
+import {ChurchSelectorMultiple} from "../church/church-selector-multiple";
 
 export class MessdienerCreateButton extends HTMLElement {
     private disconnectedHandler() {
@@ -17,7 +18,7 @@ export class MessdienerCreateButton extends HTMLElement {
         modal.classList.add("modal");
         modal.classList.add("form");
 
-        const numberOfInputElement = 4;
+        const numberOfInputElement = 6;
         const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
         for (let i = 0; i < numberOfInputElement; i++) {
             inputElementIDs[i] = `modal-create-messdiener-input-${getUniqueCount()}`;
@@ -45,6 +46,10 @@ export class MessdienerCreateButton extends HTMLElement {
             <label class="label" for="${inputElementIDs[4]}}">Familienkürzel (optional)</label>
             <input type="text" id="${inputElementIDs[4]}">
         </div>
+        <div class="field">
+            <label class="label" for="${inputElementIDs[5]}">Kirchengemeinden</label>
+            <select is="church-selector-multiple" id="${inputElementIDs[5]}"></select>
+        </div>
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Erstellen</button>
@@ -58,10 +63,11 @@ export class MessdienerCreateButton extends HTMLElement {
         const inputFamDispl = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
         const inputFamIntern = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[3]);
         const inputFamShort = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[4]);
+        const churchSelector = modal.querySelector<ChurchSelectorMultiple>("#" + inputElementIDs[5]);
 
         const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
 
-        if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort) {
+        if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !churchSelector) {
             modal.innerHTML = "<h1>A fatal error occurred!</h1>";
             return;
         }
@@ -86,12 +92,17 @@ export class MessdienerCreateButton extends HTMLElement {
                 id: -1,
                 memberSize: 1
             };
-            window.electronAPI.createMessdiener(inputName.value, familyID == 0 ? newFamily : familyID);
+            const activity: number[] = [];
+            churchSelector.getSelectedChurches().forEach(churchID => activity.push(churchID));
+
+            window.electronAPI.createMessdiener(inputName.value, familyID == 0 ? newFamily : familyID, activity.length == 0 ? undefined : activity);
             modal.close();
             inputName.value = "";
             inputFamDispl.value = "";
             inputFamIntern.value = "";
             inputFamShort.value = "";
+            familySelector.initialiseWithStartID(0);
+            churchSelector.initialiseWithStartIDs(new Set<number>());
         })
 
         this.onclick = () => {

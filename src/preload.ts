@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getAllFamilies: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllFamilies"),
     getAllChurches: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllChurches"),
 
-    createMessdiener: (name: string, family: Family | number): void => ipcRenderer.send("create-messdiener", name, family),
+    createMessdiener: (name: string, family: Family | number, churchActivity?: number[]): void => ipcRenderer.send("create-messdiener", name, family, churchActivity),
     deleteMessdiener: (id: number): void=> ipcRenderer.send("remove-messdiener", id),
     editMessdiener: (messdiener: Messdiener): void=> ipcRenderer.send("edit-messdiener", messdiener),
     createChurch: (name: string, location?: string): void => ipcRenderer.send("create-church", name, location),

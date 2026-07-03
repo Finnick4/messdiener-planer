@@ -13,7 +13,7 @@ import {pingMessdienerUpdate, pingFamiliesUpdate} from "./ping-manager";
 export const getAllMessdienerHandler = (): Promise<Messdiener[]> => {
     return getAllMessdiener()
 }
-export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: Family | number): Promise<number> => {
+export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: Family | number, churchActivity?: number[]): Promise<number> => {
     return new Promise<number>((resolve, reject) => {
         if (name == "" || name == undefined) {
             console.log("[HANDLER] (createMessdiener) Parameter issue: name is empty!");
@@ -26,10 +26,36 @@ export const createMessdienerHandler = (_event: IpcMainEvent, name: string, fami
             reject(-1);
             return
         }
+        let validChurchIDs = true;
+        churchActivity?.forEach(cID => {
+            if (cID <= 0) {
+                validChurchIDs = false;
+            }
+        })
+        if (!validChurchIDs) {
+            return;
+        }
+
+
         createMessdiener(name, family).then((id: number) => {
             pingMessdienerUpdate();
             pingFamiliesUpdate();
             resolve(id);
+
+            if (churchActivity == undefined) {
+                return;
+            }
+            const activities: MessdienerChurchActivityStatus[] = churchActivity.map(churchID => {
+                return {
+                    messdienerID: id,
+                    churchID: churchID,
+                    isActive: true
+                }
+            })
+            changeMessdienerChurchActivity(activities).then(() => {
+                pingMessdienerUpdate();
+                pingFamiliesUpdate();
+            });
         });
     })
 }
