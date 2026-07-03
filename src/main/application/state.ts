@@ -146,7 +146,6 @@ export const changeMessdienerChurchActivity = async (activities: MessdienerChurc
             }
             return db.removeMessdienerFromChurch(activity.messdienerID, activity.churchID);
         }))
-
     }).then(() => {
         for (const activity of activities) {
             const index = allMessdiener.findIndex(m => m.identifier == activity.messdienerID);

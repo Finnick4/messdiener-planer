@@ -1,8 +1,8 @@
-import {Family} from "../../shared/general";
-import {addSubscription, ListenerEndpoints} from "../state/state-manager";
-import {createInternalFamilyName} from "../logic/family";
+import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
+import {Church} from "../../../shared/general";
+import {createInternalChurchName} from "../../logic/church";
 
-export class FamilySelector extends HTMLSelectElement {
+export class ChurchSelector extends HTMLSelectElement {
     constructor() {
         super();
     }
@@ -12,7 +12,7 @@ export class FamilySelector extends HTMLSelectElement {
     private closeSubscription() {
         return;
     }
-    private selectedFamilyID = 0;
+    private selectedChurchID = 0;
 
     connectedCallback() {
         this.initialiseWithStartID(0);
@@ -20,24 +20,24 @@ export class FamilySelector extends HTMLSelectElement {
     }
     initialiseWithStartID(id: number) {
         this.closeSubscription();
-        this.selectedFamilyID = id;
+        this.selectedChurchID = id;
         this.onedit(id);
-        this.closeSubscription = addSubscription(ListenerEndpoints.AllFamilies, (data: Family[]) => {
+        this.closeSubscription = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
             const makeOptionElement = (text: string, id: number): HTMLOptionElement => {
                 const option = document.createElement("option");
                 option.innerText = text;
-                option.dataset.familyId = String(id);
+                option.dataset.churchId = String(id);
                 option.value = String(id);
                 option.addEventListener("mouseup", () => {
-                    this.selectedFamilyID = id;
+                    this.selectedChurchID = id;
                     this.onedit(id);
                 })
-                option.selected = this.selectedFamilyID == id;
+                option.selected = this.selectedChurchID == id;
 
                 return option;
             }
 
-            const options: HTMLOptionElement[] = [makeOptionElement("Neue Familie erstellen", 0)].concat(data.map(family => makeOptionElement(createInternalFamilyName(family.lastNameInternal, family.lastNameDisplay), family.id)));
+            const options: HTMLOptionElement[] = [makeOptionElement("Keine", 0)].concat(data.map(church => makeOptionElement(createInternalChurchName(church.name, church.location), church.id)));
 
             this.replaceChildren(...options);
         })
@@ -51,7 +51,7 @@ export class FamilySelector extends HTMLSelectElement {
         return;
     }
 
-    getSelectedFamily(): number {
-        return this.selectedFamilyID;
+    getSelectedChurch(): number {
+        return this.selectedChurchID;
     }
 }

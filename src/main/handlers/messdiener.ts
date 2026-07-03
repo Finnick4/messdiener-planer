@@ -51,7 +51,7 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
         if (messdiener.firstName != "") {
             waitGroup.push(changeMessdienerName(messdiener.identifier, messdiener.firstName));
         }
-        if (messdiener.familyID != 0 || messdiener.lastNameDisplay != "") {
+        if (messdiener.lastNameDisplay != "") {
             waitGroup.push(changeMessdienerFamilyAssociation(messdiener.identifier, {
                 lastNameDisplay: messdiener.lastNameDisplay,
                 lastNameInternal: messdiener.lastNameInternal,
@@ -59,6 +59,10 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
                 id: 0,
                 memberSize: 1
             }));
+        }
+
+        if (messdiener.familyID != 0) {
+            waitGroup.push(changeMessdienerFamilyAssociation(messdiener.identifier, messdiener.familyID));
         }
         Promise.all(waitGroup).then(() => {
             pingMessdienerUpdate();

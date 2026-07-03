@@ -170,6 +170,9 @@ church-list {
     select {
         width: calc(100% - 2 * var(--border-width));
     }
+    select.multiple {
+        height: fit-content;
+    }
 }
 
 .modal:open.form {

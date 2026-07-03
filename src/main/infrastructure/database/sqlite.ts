@@ -283,7 +283,7 @@ export class SQLiteConnection implements DatabaseConnection {
 
     addMessdienerToChurch(messdienerID: number, churchID: number): Promise<void> {
         return this.runQuery(`
-            INSERT INTO church_activity (messdiener_id, church_id) VALUES (?, ?);
+            INSERT OR IGNORE INTO church_activity (messdiener_id, church_id) VALUES (?, ?);
         `, [messdienerID, churchID]);
     }
     removeMessdienerFromChurch(messdienerID: number, churchID: number): Promise<void> {
