@@ -21,7 +21,7 @@ export interface DatabaseConnection {
     changeChurchName: (id: number, newName: string) => Promise<void>;
     changeChurchLocation: (id: number, newLocation: string) => Promise<void>;
 
-    createMass: (date: number, churchID: number, note?: string) => Promise<void>;
+    createMass: (date: number, churchID: number, note?: string) => Promise<number>;
     getAllMasses: () => Promise<Mass[]>;
     removeMass: (id: number) => Promise<void>;
     changeMassNote: (id: number, note?: string) => Promise<void>;

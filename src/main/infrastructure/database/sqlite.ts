@@ -319,7 +319,7 @@ export class SQLiteConnection implements DatabaseConnection {
     Mass related queries
      */
 
-    async createMass(date: number, churchID: number, note?: string): Promise<void> {
+    async createMass(date: number, churchID: number, note?: string): Promise<number> {
         if (note == undefined) {
             return (await this.getRowQuery(`            
                 INSERT INTO mass (date, church_id) VALUES (?, ?) RETURNING id;

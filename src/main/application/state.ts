@@ -1,9 +1,10 @@
-import {Church, Family, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
+import {Church, Family, Mass, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
 import {getDBConnection} from "./main";
 
 let allMessdiener: Messdiener[] = [];
 let allFamilies: Family[] = [];
 let allChurches: Church[] = [];
+let allMasses: Mass[] = [];
 
 export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     if (allMessdiener.length !== 0) {
@@ -34,6 +35,17 @@ export const getAllChurches = async (): Promise<Church[]> => {
     return getDBConnection().then(db => db.getAllChurches().then(churches => {
             allChurches = churches;
             return churches;
+        })
+    )
+}
+
+export const getAllMasses = async (): Promise<Mass[]> => {
+    if (allMasses.length !== 0) {
+        return allMasses;
+    }
+    return getDBConnection().then(db => db.getAllMasses().then(masses => {
+            allMasses = masses;
+            return masses;
         })
     )
 }
@@ -157,6 +169,36 @@ export const changeMessdienerChurchActivity = async (activities: MessdienerChurc
             } else {
                 allMessdiener[index].churchActivity.delete(activity.churchID);
             }
+        }
+    })
+}
+
+
+export const createMass = (date: number, churchID: number, note?: string): Promise<number> => {
+    return getDBConnection().then(db => db.createMass(date, churchID, note)).then(id => {
+        allMasses = [];
+        return id;
+    })
+}
+export const removeMass = (id: number): Promise<void> => {
+    return getDBConnection().then(db => db.removeMass(id)).then(() => {
+        allMasses = allMasses.filter(mass => mass.id != id);
+    })
+}
+export const changeMassNote = (id: number, note?: string): Promise<void> => {
+    return getDBConnection().then(db => db.changeMassNote(id, note)).then(() => {
+        const index = allMasses.findIndex(mass => mass.id == id);
+        if (index >= 0) {
+            allMasses[index].note = note;
+        }
+    })
+}
+
+export const changeMassDate = (id: number, newDate: number): Promise<void> => {
+    return getDBConnection().then(db => db.changeMassDate(id, newDate)).then(() => {
+        const index = allMasses.findIndex(mass => mass.id == id);
+        if (index >= 0) {
+            allMasses[index].date = newDate;
         }
     })
 }
