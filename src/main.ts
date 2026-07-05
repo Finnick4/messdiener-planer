@@ -9,7 +9,7 @@ import {
     removeMessdienerHandler
 } from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
-import {createChurch, getAllFamilies, removeChurch} from "./main/application/state";
+import {createChurch, getAllFamilies, getAllMasses, removeChurch} from "./main/application/state";
 import {getAllFamiliesHandler} from "./main/handlers/families";
 import {
     createChurchHandler,
@@ -17,6 +17,7 @@ import {
     getAllChurchesHandler,
     removeChurchHandler
 } from "./main/handlers/churches";
+import {createMassHandler, editMassHandler, getAllMassesHandler, removeMassHandler} from "./main/handlers/masses";
 
 if (started) {
   app.quit();
@@ -49,6 +50,7 @@ app.on('ready', () => {
     ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler);
     ipcMain.handle('dialog:getAllFamilies', getAllFamiliesHandler);
     ipcMain.handle('dialog:getAllChurches', getAllChurchesHandler);
+    ipcMain.handle('dialog:getAllMasses', getAllMassesHandler);
 
     ipcMain.on('create-messdiener', createMessdienerHandler);
     ipcMain.on('remove-messdiener', removeMessdienerHandler);
@@ -57,6 +59,9 @@ app.on('ready', () => {
     ipcMain.on('remove-church', removeChurchHandler);
     ipcMain.on('edit-church', editChurchHandler);
     ipcMain.on('change-messdiener-church-activity', changeMessdienerChurchActivityHandler);
+    ipcMain.on('create-mass', createMassHandler);
+    ipcMain.on('remove-mass', removeMassHandler);
+    ipcMain.on('edit-mass', editMassHandler);
 });
 
 app.on('window-all-closed', () => {

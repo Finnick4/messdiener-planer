@@ -1,4 +1,4 @@
-import {Church, Family, Messdiener, MessdienerChurchActivityStatus} from "../shared/general";
+import {Church, Family, Mass, Messdiener, MessdienerChurchActivityStatus} from "../shared/general";
 import {IpcRenderer} from "electron";
 
 declare global {
@@ -7,6 +7,7 @@ declare global {
             getAllMessdiener: () => Promise<Messdiener[]>;
             getAllFamilies: () => Promise<Family[]>;
             getAllChurches: () => Promise<Church[]>;
+            getAllMasses: () => Promise<Mass[]>;
 
             createMessdiener: (name: string, family: Family | number, churchActivity?: number[]) => void;
             deleteMessdiener: (id: number) => void;
@@ -15,10 +16,14 @@ declare global {
             deleteChurch: (id: number) => void;
             editChurch: (church: Church) => void;
             changeMessdienerChurchActivity: (activities: MessdienerChurchActivityStatus[]) => void;
+            createMass: (date: number, churchID: number, note?: string) => void;
+            deleteMass: (id: number) => void;
+            editMass: (mass: Mass) => void;
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer;
             onFamiliesUpdate: (callback: (data: Family[]) => void) => IpcRenderer;
             onChurchesUpdate: (callback: (data: Church[]) => void) => IpcRenderer;
+            onMassesUpdate: (callback: (data: Mass[]) => void) => IpcRenderer;
         }
     }
 }

@@ -52,3 +52,7 @@ addSubscription(ListenerEndpoints.AllFamilies, data => {
 addSubscription(ListenerEndpoints.AllChurches, data => {
     console.log(data)
 })
+addSubscription(ListenerEndpoints.AllMasses, data => {
+    console.log(data)
+})
+
