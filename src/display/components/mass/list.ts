@@ -1,9 +1,11 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {Mass, Messdiener} from "../../../shared/general";
 import {MassCreateButton} from "./create-button";
+import {generateEditMassModal} from "./edit-modal";
 
 export class MassList extends HTMLElement {
     connectedCallback() {
+        const closeModals: (() => void)[] = [];
         const cancel = addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
             if (data.length == 0) {
                 const placeholder = document.createElement("p");
@@ -52,6 +54,10 @@ export class MassList extends HTMLElement {
                     cancelInner()
                 });
 
+                const modal = generateEditMassModal(mass.id);
+                entry.addEventListener("click", () => modal.show());
+                closeModals.push(modal.destroy);
+
                 entry.appendChild(messdiener);
                 return entry;
             })
@@ -64,6 +70,7 @@ export class MassList extends HTMLElement {
         })
         this.disconnectedCallback = () => {
             cancel()
+            closeModals.forEach(fn => fn())
         }
     }
 

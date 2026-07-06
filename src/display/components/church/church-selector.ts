@@ -5,6 +5,7 @@ import {createInternalChurchName} from "../../logic/church";
 export class ChurchSelector extends HTMLSelectElement {
     constructor() {
         super();
+        this.readonly = false;
     }
     private removeModal() {
         return;
@@ -13,6 +14,7 @@ export class ChurchSelector extends HTMLSelectElement {
         return;
     }
     private selectedChurchID = 0;
+    readonly: boolean;
 
     connectedCallback() {
         this.initialiseWithStartID(0);
@@ -29,6 +31,9 @@ export class ChurchSelector extends HTMLSelectElement {
                 option.dataset.churchId = String(id);
                 option.value = String(id);
                 option.addEventListener("mouseup", () => {
+                    if (this.readonly) {
+                        return
+                    }
                     this.selectedChurchID = id;
                     this.onedit(id);
                 })

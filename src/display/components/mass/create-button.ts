@@ -14,7 +14,7 @@ export class MassCreateButton extends HTMLElement {
 
         modal.classList.add("mass-create", "modal", "form");
 
-        const numberOfInputElement = 2;
+        const numberOfInputElement = 3;
         const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
         for (let i = 0; i < numberOfInputElement; i++) {
             inputElementIDs[i] = `modal-create-mass-input-${getUniqueCount()}`;
