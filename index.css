@@ -254,3 +254,34 @@ option:checked {
     display: none;
 }
 
+mass-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem
+}
+
+.mass.entry {
+    display: grid;
+    grid-template-rows: repeat(2, auto) 1fr;
+    background-color: var(--bg-color-element);
+    border: var(--border);
+    padding: var(--padding-element);
+    border-radius: calc(var(--border-radius) - .25rem);
+    font-size: 1rem;
+
+    .date {
+        font-weight: 550;
+        text-align: center;
+    }
+    .section:not(.messdiener) {
+        border-bottom: var(--border);
+    }
+    .section {
+        padding: .25rem 0;
+        min-height: 1.25rem;
+    }
+    .section.messdiener:not(:has(.messdiener)) {
+        text-align: center;
+        margin: auto;
+    }
+}

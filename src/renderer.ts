@@ -11,6 +11,7 @@ import {ChurchCreateButton} from "./display/components/church/create-button";
 import {ChurchSelector} from "./display/components/church/church-selector";
 import {ChurchSelectorMultiple} from "./display/components/church/church-selector-multiple";
 import {MassCreateButton} from "./display/components/mass/create-button";
+import {MassList} from "./display/components/mass/list";
 
 interface CustomElementDefinition {
     name: string,
@@ -32,6 +33,7 @@ const customElementsList: CustomElementDefinition[] = [
     {name: "church-selector-multiple", constructor: ChurchSelectorMultiple, extends: "select"},
 
     {name: "mass-create-button", constructor: MassCreateButton, extends: null},
+    {name: "mass-list", constructor: MassList, extends: null},
 ]
 
 for (const elem of customElementsList) {
