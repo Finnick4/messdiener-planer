@@ -1,5 +1,6 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {Mass, Messdiener} from "../../../shared/general";
+import {MassCreateButton} from "./create-button";
 
 export class MassList extends HTMLElement {
     connectedCallback() {
@@ -56,6 +57,10 @@ export class MassList extends HTMLElement {
             })
 
             this.replaceChildren(...elements);
+
+            const createBtn = document.createElement("mass-create-button") as MassCreateButton;
+
+            this.appendChild(createBtn);
         })
         this.disconnectedCallback = () => {
             cancel()

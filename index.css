@@ -257,7 +257,22 @@ option:checked {
 mass-list {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 1rem
+    gap: 1rem;
+
+    .button.create {
+        width: calc(100% - 2 * var(--padding-button) - 2 * var(--border-width));
+        background-color: var(--secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .create.button:hover {
+        background-color: var(--secondary-hover);
+    }
+    .create.button:active {
+        background-color: var(--secondary-pressed);
+    }
 }
 
 .mass.entry {
@@ -268,6 +283,7 @@ mass-list {
     padding: var(--padding-element);
     border-radius: calc(var(--border-radius) - .25rem);
     font-size: 1rem;
+    transition: background-color .1s ease;
 
     .date {
         font-weight: 550;
@@ -284,4 +300,11 @@ mass-list {
         text-align: center;
         margin: auto;
     }
+}
+.mass.entry:hover {
+    background-color: var(--dropdown-button-pressed);
+}
+
+mass-list:has(.button.create) + .button.create {
+    display: none;
 }
