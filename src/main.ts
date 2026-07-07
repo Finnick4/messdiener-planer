@@ -9,7 +9,13 @@ import {
     removeMessdienerHandler
 } from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
-import {createChurch, getAllFamilies, getAllMasses, removeChurch} from "./main/application/state";
+import {
+    changeMessdienerMassAllocation,
+    createChurch,
+    getAllFamilies,
+    getAllMasses,
+    removeChurch
+} from "./main/application/state";
 import {getAllFamiliesHandler} from "./main/handlers/families";
 import {
     createChurchHandler,
@@ -17,7 +23,10 @@ import {
     getAllChurchesHandler,
     removeChurchHandler
 } from "./main/handlers/churches";
-import {createMassHandler, editMassHandler, getAllMassesHandler, removeMassHandler} from "./main/handlers/masses";
+import {
+    changeMessdienerMassAllocationHandler,
+    createMassHandler, editMassHandler, getAllMassesHandler, removeMassHandler
+} from "./main/handlers/masses";
 
 if (started) {
   app.quit();
@@ -62,6 +71,7 @@ app.on('ready', () => {
     ipcMain.on('create-mass', createMassHandler);
     ipcMain.on('remove-mass', removeMassHandler);
     ipcMain.on('edit-mass', editMassHandler);
+    ipcMain.on('change-messdiener-mass-allocation', changeMessdienerMassAllocationHandler);
 });
 
 app.on('window-all-closed', () => {

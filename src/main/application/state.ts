@@ -1,4 +1,11 @@
-import {Church, Family, Mass, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
+import {
+    Church,
+    Family,
+    Mass,
+    Messdiener,
+    MessdienerChurchActivityStatus,
+    MessdienerMassAllocation
+} from "../../shared/general";
 import {getDBConnection} from "./main";
 
 let allMessdiener: Messdiener[] = [];
@@ -199,6 +206,29 @@ export const changeMassDate = (id: number, newDate: number): Promise<void> => {
         const index = allMasses.findIndex(mass => mass.id == id);
         if (index >= 0) {
             allMasses[index].date = newDate;
+        }
+    })
+}
+
+export const changeMessdienerMassAllocation = async (activities: MessdienerMassAllocation[]): Promise<void> => {
+    return getDBConnection().then(db => {
+        return Promise.all(activities.map(activity => {
+            if (activity.isActive) {
+                return db.addMessdienerToMass(activity.messdienerID, activity.massID);
+            }
+            return db.removeMessdienerFromMass(activity.messdienerID, activity.massID);
+        }))
+    }).then(() => {
+        for (const activity of activities) {
+            const index = allMasses.findIndex(mass => mass.id == activity.messdienerID);
+            if (index == -1) {
+                continue;
+            }
+            if (activity.isActive) {
+                allMasses[index].allocatedMessdiener.add(activity.messdienerID);
+            } else {
+                allMasses[index].allocatedMessdiener.delete(activity.messdienerID);
+            }
         }
     })
 }

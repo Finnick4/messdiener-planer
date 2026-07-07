@@ -1,12 +1,13 @@
-import {Mass} from "../../shared/general";
+import {Mass, MessdienerChurchActivityStatus, MessdienerMassAllocation} from "../../shared/general";
 import {
+    areValidMessdienerIDs,
     changeMassDate,
-    changeMassNote,
+    changeMassNote, changeMessdienerChurchActivity, changeMessdienerMassAllocation,
     createMass, getAllMasses,
     removeMass
 } from "../application/state";
 import IpcMainEvent = Electron.IpcMainEvent;
-import {pingMassesUpdate} from "./ping-manager";
+import {pingMassesUpdate, pingMessdienerUpdate} from "./ping-manager";
 
 export const getAllMassesHandler = (): Promise<Mass[]> => {
     return getAllMasses();
@@ -55,6 +56,24 @@ export const editMassHandler = (_event: IpcMainEvent, mass: Mass): Promise<void>
             pingMassesUpdate();
             resolve();
         })
+    })
+}
+
+export const changeMessdienerMassAllocationHandler = (_event: IpcMainEvent, activities: MessdienerMassAllocation[]): Promise<void> => {
+    return areValidMessdienerIDs(activities.map(a => a.messdienerID)).then(resp => {
+        if (!resp) {
+            return;
+        }
+        let validMassIDs = true;
+        activities.forEach(a => {
+            if (a.massID <= 0) {
+                validMassIDs = false;
+            }
+        })
+        if (!validMassIDs) {
+            return;
+        }
+        return changeMessdienerMassAllocation(activities).then(() => pingMessdienerUpdate());
     })
 }
 

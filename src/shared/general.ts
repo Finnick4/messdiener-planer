@@ -36,3 +36,9 @@ export type Mass = {
     allocatedMessdiener: Set<number>
     note?: string
 }
+
+export type MessdienerMassAllocation = {
+    messdienerID: number
+    massID: number
+    isActive: boolean
+}
