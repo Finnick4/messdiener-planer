@@ -117,7 +117,8 @@ main {
     }
 }
 messdiener-list,
-church-list {
+church-list,
+messdiener-prepared-list {
     grid-template-columns: 1fr auto;
 }
 
