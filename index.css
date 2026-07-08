@@ -97,6 +97,7 @@ main {
 
 .list {
     display: grid;
+    grid-column-gap: .5rem;
     background-color: var(--bg-color-element);
     border: var(--border);
     padding: var(--padding-element);
@@ -107,6 +108,7 @@ main {
         grid-column: 1/final;
         grid-template-columns: subgrid;
         padding: var(--padding-row);
+        align-items: center;
         .button {
             border-radius: calc(var(--border-radius) - var(--padding-element));
             background-color: var(--bg-color-muted);
@@ -120,6 +122,10 @@ messdiener-list,
 church-list,
 messdiener-prepared-list {
     grid-template-columns: 1fr auto;
+}
+
+family-adder {
+    grid-template-columns: 1fr auto auto;
 }
 
 .modal:open {
@@ -308,4 +314,13 @@ mass-list {
 
 mass-list:has(.button.create) + .button.create {
     display: none;
+}
+
+messdiener-allocator {
+    display: grid;
+    gap: 1rem;
+}
+
+family-adder {
+
 }

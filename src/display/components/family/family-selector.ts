@@ -1,13 +1,10 @@
-import {Family} from "../../shared/general";
-import {addSubscription, ListenerEndpoints} from "../state/state-manager";
-import {createInternalFamilyName} from "../logic/family";
+import {Family} from "../../../shared/general";
+import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
+import {createInternalFamilyName} from "../../logic/family";
 
 export class FamilySelector extends HTMLSelectElement {
     constructor() {
         super();
-    }
-    private removeModal() {
-        return;
     }
     private closeSubscription() {
         return;
@@ -44,7 +41,6 @@ export class FamilySelector extends HTMLSelectElement {
     }
 
     disconnectedCallback() {
-        this.removeModal();
         this.closeSubscription();
     }
     onedit(newID: number) {

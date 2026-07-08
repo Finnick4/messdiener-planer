@@ -1,7 +1,7 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {Messdiener, MessdienerChurchActivityStatus} from "../../../shared/general";
 import {ModalManager} from "../../types";
-import {FamilySelector} from "../family-selector";
+import {FamilySelector} from "../family/family-selector";
 import {ChurchSelectorMultiple} from "../church/church-selector-multiple";
 
 let editMessdienerModalCount = 0;

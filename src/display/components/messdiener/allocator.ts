@@ -1,4 +1,5 @@
 import {MessdienerPreparedList} from "./prepared-list";
+import {FamilyAdder} from "../family/family-adder";
 
 export class MessdienerAllocator extends HTMLElement {
     constructor() {
@@ -14,6 +15,10 @@ export class MessdienerAllocator extends HTMLElement {
             this.onedit(this.allocatedIDs);
         }
         this.appendChild(messdienerList)
+
+        const familyAdder = document.createElement("family-adder") as FamilyAdder;
+
+        this.appendChild(familyAdder)
 
         this.setAllocatedMessdiener = (ids: Set<number>) => {
             this.allocatedIDs = ids;

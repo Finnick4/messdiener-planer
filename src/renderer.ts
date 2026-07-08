@@ -4,7 +4,7 @@ import {addSubscription, ListenerEndpoints} from "./display/state/state-manager"
 import {MessdienerList} from "./display/components/messdiener/list";
 import {MessdienerEditButton} from "./display/components/messdiener/edit-button";
 import {MessdienerCreateButton} from "./display/components/messdiener/create-button";
-import {FamilySelector} from "./display/components/family-selector";
+import {FamilySelector} from "./display/components/family/family-selector";
 import {ChurchList} from "./display/components/church/list";
 import {ChurchEditButton} from "./display/components/church/edit-button";
 import {ChurchCreateButton} from "./display/components/church/create-button";
@@ -14,6 +14,7 @@ import {MassCreateButton} from "./display/components/mass/create-button";
 import {MassList} from "./display/components/mass/list";
 import {MessdienerPreparedList} from "./display/components/messdiener/prepared-list";
 import {MessdienerAllocator} from "./display/components/messdiener/allocator";
+import {FamilyAdder} from "./display/components/family/family-adder";
 
 interface CustomElementDefinition {
     name: string,
@@ -38,6 +39,8 @@ const customElementsList: CustomElementDefinition[] = [
 
     {name: "mass-create-button", constructor: MassCreateButton, extends: null},
     {name: "mass-list", constructor: MassList, extends: null},
+
+    {name: "family-adder", constructor: FamilyAdder, extends: null},
 ]
 
 for (const elem of customElementsList) {
