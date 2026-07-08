@@ -73,7 +73,7 @@ export const changeMessdienerMassAllocationHandler = (_event: IpcMainEvent, acti
         if (!validMassIDs) {
             return;
         }
-        return changeMessdienerMassAllocation(activities).then(() => pingMessdienerUpdate());
+        return changeMessdienerMassAllocation(activities).then(() => pingMassesUpdate());
     })
 }
 

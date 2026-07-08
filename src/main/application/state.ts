@@ -219,16 +219,6 @@ export const changeMessdienerMassAllocation = async (activities: MessdienerMassA
             return db.removeMessdienerFromMass(activity.messdienerID, activity.massID);
         }))
     }).then(() => {
-        for (const activity of activities) {
-            const index = allMasses.findIndex(mass => mass.id == activity.messdienerID);
-            if (index == -1) {
-                continue;
-            }
-            if (activity.isActive) {
-                allMasses[index].allocatedMessdiener.add(activity.messdienerID);
-            } else {
-                allMasses[index].allocatedMessdiener.delete(activity.messdienerID);
-            }
-        }
+        allMasses = [];
     })
 }
