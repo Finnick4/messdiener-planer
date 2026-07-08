@@ -13,6 +13,7 @@ import {ChurchSelectorMultiple} from "./display/components/church/church-selecto
 import {MassCreateButton} from "./display/components/mass/create-button";
 import {MassList} from "./display/components/mass/list";
 import {MessdienerPreparedList} from "./display/components/messdiener/prepared-list";
+import {MessdienerAllocator} from "./display/components/messdiener/allocator";
 
 interface CustomElementDefinition {
     name: string,
@@ -25,6 +26,7 @@ const customElementsList: CustomElementDefinition[] = [
     {name: "messdiener-edit-button", constructor: MessdienerEditButton, extends: null},
     {name: "messdiener-create-button", constructor: MessdienerCreateButton, extends: null},
     {name: "messdiener-prepared-list", constructor: MessdienerPreparedList, extends: null},
+    {name: "messdiener-allocator", constructor: MessdienerAllocator, extends: null},
 
     {name: "church-list", constructor: ChurchList, extends: null},
     {name: "church-edit-button", constructor: ChurchEditButton, extends: null},

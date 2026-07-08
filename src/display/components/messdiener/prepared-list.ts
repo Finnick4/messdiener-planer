@@ -45,6 +45,7 @@ export class MessdienerPreparedList extends HTMLElement {
                     removeBtn.dataset.messdienerId = String(messdiener.identifier);
                     removeBtn.addEventListener("click", () => {
                         ids.delete(messdiener.identifier);
+                        this.onedit(messdiener.identifier);
                         entry.remove();
                     })
                     entry.appendChild(removeBtn);
@@ -62,6 +63,10 @@ export class MessdienerPreparedList extends HTMLElement {
         this.disconnectedCallback = () => {
             onDisconnect.forEach(fn => fn());
         }
+    }
+
+    onedit(removedID: number) {
+        return;
     }
 
     changePickedMessdiener(ids: Set<number>) {
