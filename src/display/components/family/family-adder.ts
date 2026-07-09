@@ -1,4 +1,4 @@
-import {Family, Messdiener} from "../../../shared/general";
+import {Family, Mass, Messdiener} from "../../../shared/general";
 import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
 import {createInternalFamilyName} from "../../logic/family";
 
@@ -67,13 +67,36 @@ export class FamilyAdder extends HTMLElement {
                 elem.replaceChildren(sizeTag, nameElem, countElem, addBtn);
 
                 getData(ListenerEndpoints.AllMessdiener).then((data: Messdiener[]) => {
+                    const familyMembers = data.filter(messdiener => messdiener.familyID == family.id);
+
                     if (this.referenceChurchID) {
-                        const effectiveSize = data.filter(messdiener => messdiener.familyID == family.id && this.referenceChurchID && messdiener.churchActivity.has(this.referenceChurchID)).length
+                        const effectiveSize = familyMembers.filter(messdiener => this.referenceChurchID && messdiener.churchActivity.has(this.referenceChurchID)).length
                         sizeTag.innerText = String(effectiveSize);
                         if (effectiveSize == 0) {
                             elem.remove()
                         }
                     }
+
+                    getData(ListenerEndpoints.AllMasses).then((masses: Mass[]) => {
+                        let massCount = 0;
+                        for (const mass of masses) {
+                            for (const member of familyMembers) {
+                                if (this.referenceChurchID) {
+                                    if (member.churchActivity.has(this.referenceChurchID) && mass.allocatedMessdiener.has(member.identifier)) {
+                                        massCount++;
+                                        break;
+                                    }
+                                } else {
+                                    if (mass.allocatedMessdiener.has(member.identifier)) {
+                                        massCount++;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        countElem.innerText = `${massCount} Messe${massCount != 1 ? "n" : ""}`;
+                    });
                 });
 
                 return elem;
@@ -95,3 +118,5 @@ export class FamilyAdder extends HTMLElement {
         return this.selectedFamilies;
     }
 }
+
+export default FamilyAdder

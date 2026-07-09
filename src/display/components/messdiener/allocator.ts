@@ -1,5 +1,5 @@
 import {MessdienerPreparedList} from "./prepared-list";
-import {FamilyAdder} from "../family/family-adder";
+import FamilyAdder from "../family/family-adder";
 import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
 import {Messdiener} from "../../../shared/general";
 

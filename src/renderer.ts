@@ -14,7 +14,7 @@ import {MassCreateButton} from "./display/components/mass/create-button";
 import {MassList} from "./display/components/mass/list";
 import {MessdienerPreparedList} from "./display/components/messdiener/prepared-list";
 import {MessdienerAllocator} from "./display/components/messdiener/allocator";
-import {FamilyAdder} from "./display/components/family/family-adder";
+import FamilyAdder from "./display/components/family/family-adder";
 
 interface CustomElementDefinition {
     name: string,
