@@ -1,5 +1,5 @@
-import {Family} from "../../../shared/general";
-import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
+import {Family, Messdiener} from "../../../shared/general";
+import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
 import {createInternalFamilyName} from "../../logic/family";
 
 export class FamilyAdder extends HTMLElement {
@@ -10,15 +10,22 @@ export class FamilyAdder extends HTMLElement {
         return;
     }
     private selectedFamilies = new Set<number>();
+    private referenceChurchID: number | undefined;
 
     connectedCallback() {
         this.setSelectedFamilies(new Set<number>());
         this.classList.add("select", "adder", "list");
     }
     setSelectedFamilies(ids: Set<number>) {
+        this.selectedFamilies = new Set<number>(ids);
+        this.updateContent();
+    }
+    setReferenceChurchID(id: number) {
+        this.referenceChurchID = id;
+        this.updateContent();
+    }
+    updateContent() {
         this.closeSubscription();
-        this.selectedFamilies = ids;
-        this.onedit(ids);
         this.closeSubscription = addSubscription(ListenerEndpoints.AllFamilies, (data: Family[]) => {
             const selectableFamilies = data.filter(family => !this.selectedFamilies.has(family.id));
             let familyPoolSize = selectableFamilies.length;
@@ -58,6 +65,16 @@ export class FamilyAdder extends HTMLElement {
                 elem.classList.add("row", "entry");
                 elem.dataset.familyId = String(family.id);
                 elem.replaceChildren(sizeTag, nameElem, countElem, addBtn);
+
+                getData(ListenerEndpoints.AllMessdiener).then((data: Messdiener[]) => {
+                    if (this.referenceChurchID) {
+                        const effectiveSize = data.filter(messdiener => messdiener.familyID == family.id && this.referenceChurchID && messdiener.churchActivity.has(this.referenceChurchID)).length
+                        sizeTag.innerText = String(effectiveSize);
+                        if (effectiveSize == 0) {
+                            elem.remove()
+                        }
+                    }
+                });
 
                 return elem;
             }

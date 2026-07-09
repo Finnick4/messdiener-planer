@@ -20,6 +20,9 @@ export class MessdienerAllocator extends HTMLElement {
 
         this.updateContent = () => {
             messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));
+            if (this.referenceChurchID) {
+                familyAdder.setReferenceChurchID(this.referenceChurchID);
+            }
 
             getData(ListenerEndpoints.AllMessdiener).then((data: Messdiener[]) => {
                 const mapped = new Map<number, Messdiener>(data.map((m) => [m.identifier, m]));
