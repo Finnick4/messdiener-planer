@@ -77,6 +77,15 @@ export const addSubscription = (listener: ListenerEndpoints, callback: CallbackF
     return states[listener].add(callback);
 }
 
+export const getData = (listener: ListenerEndpoints): Promise<any> =>  {
+    return new Promise<any>((resolve) => {
+        const cancel = addSubscription(listener, data => {
+            cancel();
+            resolve(data);
+        })
+    });
+}
+
 window.electronAPI.onMessdienerUpdate((data: Messdiener[]) => {
     const target = ListenerEndpoints.AllMessdiener;
     states[target].pushUpdate(data);

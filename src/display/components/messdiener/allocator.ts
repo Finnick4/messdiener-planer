@@ -1,6 +1,6 @@
 import {MessdienerPreparedList} from "./prepared-list";
 import {FamilyAdder} from "../family/family-adder";
-import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
+import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
 import {Messdiener} from "../../../shared/general";
 
 export class MessdienerAllocator extends HTMLElement {
@@ -9,21 +9,19 @@ export class MessdienerAllocator extends HTMLElement {
         this.allocatedIDs = new Set<number>();
     }
     private allocatedIDs: Set<number>;
+    private referenceChurchID: number | undefined;
 
     connectedCallback() {
         const messdienerList = document.createElement("messdiener-prepared-list") as MessdienerPreparedList;
-
         this.appendChild(messdienerList);
 
         const familyAdder = document.createElement("family-adder") as FamilyAdder;
-
         this.appendChild(familyAdder);
 
-        this.setAllocatedMessdiener = (ids: Set<number>) => {
-            this.allocatedIDs = ids;
+        this.updateContent = () => {
             messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));
 
-            const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
+            getData(ListenerEndpoints.AllMessdiener).then((data: Messdiener[]) => {
                 const mapped = new Map<number, Messdiener>(data.map((m) => [m.identifier, m]));
                 const allocatedFamilies = new Set<number>();
 
@@ -49,6 +47,9 @@ export class MessdienerAllocator extends HTMLElement {
                         }
                     })
                     data.filter(messdiener => messdiener.familyID == addedFamilyID).forEach(messdiener => {
+                        if (this.referenceChurchID && !messdiener.churchActivity.has(this.referenceChurchID)) {
+                            return;
+                        }
                         this.allocatedIDs.add(messdiener.identifier);
                         this.onedit(this.allocatedIDs);
                         messdienerList.changePickedMessdiener(this.allocatedIDs);
@@ -60,11 +61,10 @@ export class MessdienerAllocator extends HTMLElement {
                     updateFamilyAdder();
                     this.onedit(this.allocatedIDs);
                 }
-
-                cancel();
             })
         };
 
+        this.updateContent();
     }
 
     getAllocatedMessdiener(): Set<number> {
@@ -76,8 +76,17 @@ export class MessdienerAllocator extends HTMLElement {
     }
 
     setAllocatedMessdiener(ids: Set<number>) {
+        this.allocatedIDs = ids;
+        this.updateContent()
+    }
+    setReferenceChurchID(id: number) {
+        this.referenceChurchID = id;
+        this.updateContent()
+    }
+    updateContent() {
         return
     }
+
 
     disconnectedCallback() {
         return

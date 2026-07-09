@@ -1,15 +1,10 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {
-    Church,
     Mass,
-    Messdiener,
-    MessdienerChurchActivityStatus,
     MessdienerMassAllocation
 } from "../../../shared/general";
 import {ModalManager} from "../../types";
 import {ChurchSelector} from "../church/church-selector";
-import {setMainAndSidebar} from "../../builder/utilities";
-import {MessdienerPreparedList} from "../messdiener/prepared-list";
 import {MessdienerAllocator} from "../messdiener/allocator";
 
 let editMassModalCount = 0;
@@ -56,12 +51,12 @@ export const generateEditMassModal = (id: number): ModalManager => {
     const inputDate = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
     const churchSelector = modal.querySelector<ChurchSelector>("#" + inputElementIDs[1]);
     const inputNote = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
-    const messdienerList = modal.querySelector<MessdienerAllocator>("#" + inputElementIDs[3]);
+    const messdienerAllocator = modal.querySelector<MessdienerAllocator>("#" + inputElementIDs[3]);
 
     const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
     const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
 
-    if (!inputDate || !churchSelector || !inputNote || !saveBtn || !delBtn || !messdienerList) {
+    if (!inputDate || !churchSelector || !inputNote || !saveBtn || !delBtn || !messdienerAllocator) {
         modal.innerHTML = "<h1>A fatal error occurred!</h1>";
         console.error("Encountered issue with getting inputs of edit mass modal!");
         return {
@@ -91,7 +86,8 @@ export const generateEditMassModal = (id: number): ModalManager => {
             Number(String(mass.date).substring(6, 8)) + 1);
         const setNote = mass.note ? mass.note : "";
 
-        messdienerList.setAllocatedMessdiener(new Set<number>(mass.allocatedMessdiener));
+        messdienerAllocator.setAllocatedMessdiener(new Set<number>(mass.allocatedMessdiener));
+        messdienerAllocator.setReferenceChurchID(mass.churchID);
         inputDate.valueAsDate = setDate;
         inputNote.value = setNote;
         churchSelector.initialiseWithStartID(mass.churchID);
@@ -109,7 +105,7 @@ export const generateEditMassModal = (id: number): ModalManager => {
                 });
             }
             const setDivergences: MessdienerMassAllocation[] = [];
-            const malloced = messdienerList.getAllocatedMessdiener();
+            const malloced = messdienerAllocator.getAllocatedMessdiener();
 
             malloced.forEach(messdienerID => {
                 if (!mass.allocatedMessdiener.has(messdienerID)) {
