@@ -20,12 +20,18 @@ export class MessdienerPreparedList extends HTMLElement {
                     this.replaceChildren(placeholder);
                     return
                 }
-                if (ids.size == 0) {
-                    const placeholder = document.createElement("p");
-                    placeholder.classList.add("placeholder");
-                    placeholder.innerHTML = "Es wurden noch keine Messdiener ausgewält!"
-                    this.replaceChildren(placeholder);
-                    return
+                const checkIfEmpty = () => {
+                    if (ids.size == 0) {
+                        const placeholder = document.createElement("p");
+                        placeholder.classList.add("placeholder");
+                        placeholder.innerHTML = "Es wurden noch keine Messdiener ausgewält!"
+                        this.replaceChildren(placeholder);
+                        return true
+                    }
+                    return false
+                }
+                if (checkIfEmpty()) {
+                    return;
                 }
                 const relevantMessdiener = data.filter(messdiener => ids.has(messdiener.identifier));
 
@@ -47,6 +53,9 @@ export class MessdienerPreparedList extends HTMLElement {
                         ids.delete(messdiener.identifier);
                         this.onedit(messdiener.identifier);
                         entry.remove();
+                        if (checkIfEmpty()) {
+                            return;
+                        }
                     })
                     entry.appendChild(removeBtn);
 

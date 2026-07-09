@@ -12,10 +12,7 @@ export class MessdienerAllocator extends HTMLElement {
 
     connectedCallback() {
         const messdienerList = document.createElement("messdiener-prepared-list") as MessdienerPreparedList;
-        messdienerList.onedit = (id: number) => {
-            this.allocatedIDs.delete(id);
-            this.onedit(this.allocatedIDs);
-        }
+
         this.appendChild(messdienerList);
 
         const familyAdder = document.createElement("family-adder") as FamilyAdder;
@@ -24,19 +21,25 @@ export class MessdienerAllocator extends HTMLElement {
 
         this.setAllocatedMessdiener = (ids: Set<number>) => {
             this.allocatedIDs = ids;
-            messdienerList.changePickedMessdiener(this.allocatedIDs);
+            messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));
 
             const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
                 const mapped = new Map<number, Messdiener>(data.map((m) => [m.identifier, m]));
                 const allocatedFamilies = new Set<number>();
 
-                this.allocatedIDs.forEach(messdienerID => {
-                    const messdiener = mapped.get(messdienerID);
-                    if (messdiener) {
-                        allocatedFamilies.add(messdiener.familyID);
-                    }
-                })
-                familyAdder.setSelectedFamilies(new Set<number>(allocatedFamilies));
+                const updateFamilyAdder = () => {
+                    allocatedFamilies.clear();
+
+                    this.allocatedIDs.forEach(messdienerID => {
+                        const messdiener = mapped.get(messdienerID);
+                        if (messdiener) {
+                            allocatedFamilies.add(messdiener.familyID);
+                        }
+                    })
+                    familyAdder.setSelectedFamilies(new Set<number>(allocatedFamilies));
+                };
+
+                updateFamilyAdder();
 
                 familyAdder.onedit = (selectedFamilies: Set<number>)=>  {
                     let addedFamilyID = 0;
@@ -50,6 +53,12 @@ export class MessdienerAllocator extends HTMLElement {
                         this.onedit(this.allocatedIDs);
                         messdienerList.changePickedMessdiener(this.allocatedIDs);
                     })
+                }
+
+                messdienerList.onedit = (id: number) => {
+                    this.allocatedIDs.delete(id);
+                    updateFamilyAdder();
+                    this.onedit(this.allocatedIDs);
                 }
 
                 cancel();
