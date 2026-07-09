@@ -27,7 +27,7 @@ export const generateEditMassModal = (id: number): ModalManager => {
     }
 
     modal.innerHTML = `
-        <h1>Messe erstellen</h1>
+        <h1>Messe bearbeiten</h1>
         <div class="field">
             <label class="label" for="${inputElementIDs[0]}}">Datum</label>
             <input type="date" id="${inputElementIDs[0]}">
@@ -88,7 +88,7 @@ export const generateEditMassModal = (id: number): ModalManager => {
 
         const setDate = new Date(Number(String(mass.date).substring(0, 4)),
             Number(String(mass.date).substring(4, 6)) - 1,
-            Number(String(mass.date).substring(6, 8)));
+            Number(String(mass.date).substring(6, 8)) + 1);
         const setNote = mass.note ? mass.note : "";
 
         messdienerList.setAllocatedMessdiener(new Set<number>(mass.allocatedMessdiener));
