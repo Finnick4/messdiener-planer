@@ -1,4 +1,3 @@
-import {buildMainPage} from "./builder/main";
 import {buildMessdienerOverviewPage} from "./builder/messdiener-overview";
 import {buildChurchesOverviewPage} from "./builder/churches-overview";
 import {buildMassesOverviewPage} from "./builder/masses-overview";
@@ -15,7 +14,7 @@ export enum Pages {
 export const routeToPage = (destination: Pages) => {
     switch (destination) {
         case Pages.Main:
-            buildMainPage();
+            buildMessdienerOverviewPage();
             break;
         case Pages.MessdienerOverview:
             buildMessdienerOverviewPage();
@@ -27,7 +26,7 @@ export const routeToPage = (destination: Pages) => {
             buildMassesOverviewPage();
             break;
         default:
-            buildMainPage();
             console.warn("Did not find page to route to!");
+            routeToPage(Pages.Main);
     }
 }
