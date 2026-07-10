@@ -33,6 +33,9 @@ export class FamilySelector extends HTMLSelectElement {
 
                 return option;
             }
+            if (data == undefined) {
+                return
+            }
 
             const options: HTMLOptionElement[] = [makeOptionElement("Neue Familie erstellen", 0)].concat(data.map(family => makeOptionElement(createInternalFamilyName(family.lastNameInternal, family.lastNameDisplay), family.id)));
 
