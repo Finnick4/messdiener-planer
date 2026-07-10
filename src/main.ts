@@ -2,14 +2,31 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import {
+    changeMessdienerChurchActivityHandler,
     createMessdienerHandler,
     editMessdienerHandler,
     getAllMessdienerHandler,
     removeMessdienerHandler
 } from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
-import {getAllFamilies} from "./main/application/state";
+import {
+    changeMessdienerMassAllocation,
+    createChurch,
+    getAllFamilies,
+    getAllMasses,
+    removeChurch
+} from "./main/application/state";
 import {getAllFamiliesHandler} from "./main/handlers/families";
+import {
+    createChurchHandler,
+    editChurchHandler,
+    getAllChurchesHandler,
+    removeChurchHandler
+} from "./main/handlers/churches";
+import {
+    changeMessdienerMassAllocationHandler,
+    createMassHandler, editMassHandler, getAllMassesHandler, removeMassHandler
+} from "./main/handlers/masses";
 
 if (started) {
   app.quit();
@@ -41,10 +58,20 @@ app.on('ready', () => {
     createWindow()
     ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler);
     ipcMain.handle('dialog:getAllFamilies', getAllFamiliesHandler);
+    ipcMain.handle('dialog:getAllChurches', getAllChurchesHandler);
+    ipcMain.handle('dialog:getAllMasses', getAllMassesHandler);
 
     ipcMain.on('create-messdiener', createMessdienerHandler);
     ipcMain.on('remove-messdiener', removeMessdienerHandler);
     ipcMain.on('edit-messdiener', editMessdienerHandler);
+    ipcMain.on('create-church', createChurchHandler);
+    ipcMain.on('remove-church', removeChurchHandler);
+    ipcMain.on('edit-church', editChurchHandler);
+    ipcMain.on('change-messdiener-church-activity', changeMessdienerChurchActivityHandler);
+    ipcMain.on('create-mass', createMassHandler);
+    ipcMain.on('remove-mass', removeMassHandler);
+    ipcMain.on('edit-mass', editMassHandler);
+    ipcMain.on('change-messdiener-mass-allocation', changeMessdienerMassAllocationHandler);
 });
 
 app.on('window-all-closed', () => {

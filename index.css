@@ -95,19 +95,20 @@ main {
     margin-right: calc(var(--padding-element) + var(--border-width));
 }
 
-messdiener-list {
+.list {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-column-gap: .5rem;
     background-color: var(--bg-color-element);
     border: var(--border);
     padding: var(--padding-element);
     border-radius: var(--border-radius);
 
-    .messdiener {
+    .row {
         display: grid;
         grid-column: 1/final;
         grid-template-columns: subgrid;
         padding: var(--padding-row);
+        align-items: center;
         .button {
             border-radius: calc(var(--border-radius) - var(--padding-element));
             background-color: var(--bg-color-muted);
@@ -116,6 +117,23 @@ messdiener-list {
             align-self: center  ;
         }
     }
+}
+messdiener-list,
+church-list,
+messdiener-prepared-list {
+    grid-template-columns: 1fr auto;
+}
+
+family-adder {
+    grid-template-columns: auto 1fr auto auto;
+}
+
+.tag {
+    padding: var(--padding-row);
+    border: var(--border);
+    border-radius: calc(var(--border-radius) - var(--padding-element));
+    min-width: 1rem;
+    text-align: center;
 }
 
 .modal:open {
@@ -166,6 +184,9 @@ messdiener-list {
     }
     select {
         width: calc(100% - 2 * var(--border-width));
+    }
+    select.multiple {
+        height: fit-content;
     }
 }
 
@@ -225,7 +246,7 @@ option:checked {
     color: var(--text);
 }
 
-messdiener-create-button.button {
+.create.button {
     background-color: var(--primary);
     border-radius: calc(var(--border-radius) - var(--padding-button));
     display: block;
@@ -233,18 +254,82 @@ messdiener-create-button.button {
     width: fit-content;
 }
 
-messdiener-create-button.button:hover {
+.create.button:hover {
     background-color: var(--primary-hover);
 }
-messdiener-create-button.button:active {
+.create.button:active {
     background-color: var(--primary-pressed);
 }
 
 .placeholder {
     color: var(--text-muted);
     text-align: center;
+    margin: 0;
 }
 .hidden {
     display: none;
 }
 
+mass-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+
+    .button.create {
+        width: calc(100% - 2 * var(--padding-button) - 2 * var(--border-width));
+        background-color: var(--secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .create.button:hover {
+        background-color: var(--secondary-hover);
+    }
+    .create.button:active {
+        background-color: var(--secondary-pressed);
+    }
+}
+
+.mass.entry {
+    display: grid;
+    grid-template-rows: repeat(2, auto) 1fr;
+    background-color: var(--bg-color-element);
+    border: var(--border);
+    padding: var(--padding-element);
+    border-radius: calc(var(--border-radius) - .25rem);
+    font-size: 1rem;
+    transition: background-color .1s ease;
+
+    .date {
+        font-weight: 550;
+        text-align: center;
+    }
+    .section:not(.messdiener) {
+        border-bottom: var(--border);
+    }
+    .section {
+        padding: .25rem 0;
+        min-height: 1.25rem;
+    }
+    .section.messdiener:not(:has(.messdiener)) {
+        text-align: center;
+        margin: auto;
+    }
+}
+.mass.entry:hover {
+    background-color: var(--dropdown-button-pressed);
+}
+
+mass-list:has(.button.create) + .button.create {
+    display: none;
+}
+
+messdiener-allocator {
+    display: grid;
+    gap: 1rem;
+}
+
+family-adder {
+
+}

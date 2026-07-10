@@ -1,10 +1,12 @@
-import {Family, Messdiener} from "../../shared/general";
+import {Church, Family, Mass, Messdiener} from "../../shared/general";
 import WebContents = Electron.WebContents;
-import {getAllFamilies, getAllMessdiener} from "../application/state";
+import {getAllChurches, getAllFamilies, getAllMasses, getAllMessdiener} from "../application/state";
 
 export interface PingDestination {
     onMessdienerUpdate: (data: Messdiener[]) => void,
     onFamiliesUpdate: (data: Family[]) => void,
+    onChurchesUpdate: (data: Church[]) => void,
+    onMassesUpdate: (data: Mass[]) => void,
 }
 
 export const createPingDestination = (windowWebContents: WebContents): PingDestination => {
@@ -14,6 +16,12 @@ export const createPingDestination = (windowWebContents: WebContents): PingDesti
         },
         onFamiliesUpdate(data: Family[]): void {
             windowWebContents.send('update-families', data);
+        },
+        onChurchesUpdate(data: Church[]): void {
+            windowWebContents.send('update-church', data);
+        },
+        onMassesUpdate(data: Mass[]): void {
+            windowWebContents.send('update-mass', data);
         },
     }
 }
@@ -33,16 +41,30 @@ class PingManager implements PingDestination {
         this.destinations.forEach(dest => dest.onMessdienerUpdate(data));
     }
     onFamiliesUpdate(data: Family[]) {
-        this.destinations.forEach(dest => dest.onFamiliesUpdate(data))
+        this.destinations.forEach(dest => dest.onFamiliesUpdate(data));
+    }
+    onChurchesUpdate(data: Church[]) {
+        this.destinations.forEach(dest => dest.onChurchesUpdate(data));
+    }
+    onMassesUpdate(data: Mass[]) {
+        this.destinations.forEach(dest => dest.onMassesUpdate(data));
     }
 }
 
 export const pingManager = new PingManager();
 
+export const pingMessdienerUpdate = () => {
+    getAllMessdiener().then(messdiener => pingManager.onMessdienerUpdate(messdiener));
+}
+
 export const pingFamiliesUpdate = () => {
     getAllFamilies().then(families => pingManager.onFamiliesUpdate(families));
 }
 
-export const pingMessdienerUpdate = () => {
-    getAllMessdiener().then(messdiener => pingManager.onMessdienerUpdate(messdiener));
+export const pingChurchesUpdate = () => {
+    getAllChurches().then(churches => pingManager.onChurchesUpdate(churches));
+}
+
+export const pingMassesUpdate = () => {
+    getAllMasses().then(masses => pingManager.onMassesUpdate(masses));
 }

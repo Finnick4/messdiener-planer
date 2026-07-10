@@ -1,5 +1,5 @@
 import {Database, verbose} from "sqlite3";
-import {Family, Messdiener} from "../../../shared/general";
+import {Church, Family, Mass, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
 
 const sqlite3 = verbose();
@@ -16,7 +16,7 @@ export class SQLiteConnection implements DatabaseConnection {
             console.log("Connection to database established!")
         })
     }
-    private getRowsQuery (sqlStatement: string, params: string[] = []): Promise<any[]> {
+    private getRowsQuery (sqlStatement: string, params: any[] = []): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.db.all(sqlStatement, params, (err: Error, rows: any[]) => {
                 if (err) {
@@ -30,7 +30,7 @@ export class SQLiteConnection implements DatabaseConnection {
             })
         })
     }
-    private getRowQuery (sqlStatement: string, params: string[] = ["test"]): Promise<any> {
+    private getRowQuery (sqlStatement: string, params: any[] = ["test"]): Promise<any> {
         return new Promise((resolve, reject) => {
             this.db.get(sqlStatement, params, (err: Error, row: any) => {
                 if (err) {
@@ -62,6 +62,26 @@ export class SQLiteConnection implements DatabaseConnection {
 
     async initialiseDatabase(): Promise<void> {
         await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS church
+            (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                name          TEXT NOT NULL,
+                location      TEXT
+            )
+        `);
+
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS mass
+            (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                date          INTEGER NOT NULL,
+                church_id     INTEGER NOT NULL,
+                note          TEXT,
+                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE
+            )
+        `);
+
+        await this.runQuery(`
             CREATE TABLE IF NOT EXISTS family
             (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,13 +97,35 @@ export class SQLiteConnection implements DatabaseConnection {
                 id                 INTEGER PRIMARY KEY AUTOINCREMENT,
                 name               TEXT    NOT NULL,
                 family_association INTEGER NOT NULL,
-                FOREIGN KEY (family_association) REFERENCES family (id)
+                FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
+            )
+        `);
+
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS church_activity
+            (
+                messdiener_id   INTEGER NOT NULL,
+                church_id       INTEGER NOT NULL,
+                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE,
+                PRIMARY KEY (messdiener_id, church_id)
+            )
+        `);
+
+        await this.runQuery(`
+            CREATE TABLE IF NOT EXISTS mass_messdiener_allocation
+            (
+                messdiener_id   INTEGER NOT NULL,
+                mass_id       INTEGER NOT NULL,
+                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                FOREIGN KEY (mass_id) REFERENCES mass (id) ON DELETE CASCADE,
+                PRIMARY KEY (messdiener_id, mass_id)
             )
         `);
     }
 
     async getAllMessdiener(): Promise<Messdiener[]> {
-        const rows = await this.getRowsQuery(`
+        let rows = await this.getRowsQuery(`
             SELECT 
                 messdiener.id AS messdiener_id, 
                 name AS first_name, 
@@ -92,9 +134,10 @@ export class SQLiteConnection implements DatabaseConnection {
                 family.id AS fam_id,
                 COALESCE(family.shorthand, '') AS short
             FROM Messdiener
-                 JOIN family ON family.id = family_association;
-        `)
-        const messdiener: Messdiener[] = []
+                 JOIN family ON family.id = family_association
+            ORDER BY messdiener_id ASC;
+        `);
+        const messdiener: Messdiener[] = [];
 
         for (const row of rows) {
             messdiener.push({
@@ -103,35 +146,50 @@ export class SQLiteConnection implements DatabaseConnection {
                 lastNameInternal: row.internal_name,
                 lastNameDisplay: row.display_name,
                 lastNameShorthand: row.short == "" ? undefined : row.short,
-                familyID: row.fam_id
+                familyID: row.fam_id,
+                churchActivity: new Set<number>()
             })
         }
-        return messdiener
+        rows = await this.getRowsQuery(`
+            SELECT
+                messdiener.id AS messdiener_id,
+                church_activity.church_id AS church_id
+            FROM messdiener
+                     JOIN church_activity ON messdiener.id = church_activity.messdiener_id
+            ORDER BY messdiener.id ASC;
+        `)
+        for (const row of rows) {
+            const index = messdiener.findIndex(m => m.identifier == row.messdiener_id);
+            if (index >= 0) {
+                messdiener[index].churchActivity.add(row.church_id);
+            }
+        }
+        return messdiener;
     }
 
     async createMessdienerInFamily(name: string, familyID: number): Promise<number> {
         return (await this.getRowQuery(`
             INSERT INTO messdiener (name, family_association) VALUES (?, ?) RETURNING id;
-        `, [name, String(familyID)])).id
+        `, [name, familyID])).id
     }
     async createMessdienerAndFamily(name: string, lastName: string, internal = "", shorthand = ""): Promise<number> {
         return this.createFamily(lastName, internal, shorthand).then(famId => this.createMessdienerInFamily(name, famId))
     }
 
-    async removeMessdiener(id: number): Promise<void> {
-        return await this.runQuery(`
+    removeMessdiener(id: number): Promise<void> {
+        return this.runQuery(`
             DELETE FROM messdiener WHERE id = ?;
         `, [id]);
     }
 
-    async changeMessdienerName(id: number, newName: string): Promise<void> {
-        return await this.runQuery(`
+    changeMessdienerName(id: number, newName: string): Promise<void> {
+        return this.runQuery(`
             UPDATE messdiener SET name = ? WHERE id = ?;
         `, [newName, id]);
     }
 
     async changeMessdienerFamilyAssociation(messdienerID: number, newFamilyID: number): Promise<void> {
-        return await this.runQuery(`
+        return this.runQuery(`
             UPDATE messdiener SET family_association = ? WHERE id = ?;
         `, [newFamilyID, messdienerID]);
     }
@@ -190,5 +248,158 @@ export class SQLiteConnection implements DatabaseConnection {
             })
         }
         return families
+    }
+
+    /*
+    Church related queries
+     */
+
+    async createChurch(name: string, location?: string): Promise<number> {
+        if (location == undefined) {
+            return (await this.getRowQuery(`            
+                INSERT INTO church (name) VALUES (?) RETURNING id;
+            `, [name])).id;
+        }
+        return (await this.getRowQuery(`
+            INSERT INTO church (name, location) VALUES (?, ?) RETURNING id;
+        `, [name, location])).id;
+    }
+
+    removeChurch(id: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM church WHERE id = ?;
+        `, [id]);
+    }
+
+    async getAllChurches(): Promise<Church[]> {
+        const rows = await this.getRowsQuery(`
+            SELECT 
+                church.id AS church_id, 
+                church.name AS name, 
+                COALESCE(church.location, '') AS location
+            FROM church;
+        `)
+        const churches: Church[] = []
+
+        for (const row of rows) {
+            churches.push({
+                id: row.church_id,
+                name: row.name,
+                location: row.location == undefined ? undefined : row.location,
+            })
+        }
+        return churches;
+    }
+
+
+    changeChurchName(id: number, newName: string): Promise<void> {
+        return this.runQuery(`
+            UPDATE church SET name = ? WHERE id = ?;
+        `, [newName, id]);
+    }
+
+    changeChurchLocation(id: number, newLocation: string): Promise<void> {
+        return this.runQuery(`
+            UPDATE church SET location = ? WHERE id = ?;
+        `, [newLocation, id]);
+    }
+
+    addMessdienerToChurch(messdienerID: number, churchID: number): Promise<void> {
+        return this.runQuery(`
+            INSERT OR IGNORE INTO church_activity (messdiener_id, church_id) VALUES (?, ?);
+        `, [messdienerID, churchID]);
+    }
+    removeMessdienerFromChurch(messdienerID: number, churchID: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM church_activity WHERE messdiener_id=? AND church_id=?;
+        `, [messdienerID, churchID]);
+    }
+
+    /*
+    Mass related queries
+     */
+
+    async createMass(date: number, churchID: number, note?: string): Promise<number> {
+        if (note == undefined) {
+            return (await this.getRowQuery(`            
+                INSERT INTO mass (date, church_id) VALUES (?, ?) RETURNING id;
+            `, [date, churchID])).id;
+        }
+        return (await this.getRowQuery(`
+            INSERT INTO mass (date, church_id, note) VALUES (?, ?, ?) RETURNING id;
+        `, [date, churchID, note])).id;
+    }
+
+    async getAllMasses(): Promise<Mass[]> {
+        let rows = await this.getRowsQuery(`
+            SELECT 
+                mass.id AS mass_id, 
+                mass.date AS date,
+                mass.church_id AS church_id,
+                COALESCE(mass.note, '') AS note
+            FROM mass;
+        `)
+        const masses: Mass[] = []
+
+        for (const row of rows) {
+            masses.push({
+                id: row.mass_id,
+                churchID: row.church_id,
+                date: row.date,
+                note: row.note == "" ? undefined : row.note,
+                allocatedMessdiener: new Set<number>(),
+            })
+        }
+
+        rows = await this.getRowsQuery(`
+            SELECT
+                mass_messdiener_allocation.messdiener_id AS messdiener_id,
+                mass_messdiener_allocation.mass_id AS mass_id
+            FROM mass_messdiener_allocation
+            ORDER BY mass_id ASC;
+        `)
+        for (const row of rows) {
+            const index = masses.findIndex(m => m.id == row.mass_id);
+            if (index >= 0) {
+                masses[index].allocatedMessdiener.add(row.messdiener_id);
+            }
+        }
+
+        return masses;
+    }
+
+    removeMass(id: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM mass WHERE id = ?;
+        `, [id]);
+    }
+
+    changeMassNote(id: number, note?: string): Promise<void> {
+        if (note == undefined) {
+            return this.runQuery(`
+                UPDATE mass SET note = NULL WHERE id = ?;
+            `, [id]);
+        }
+        return this.runQuery(`
+            UPDATE mass SET note = ? WHERE id = ?;
+        `, [note, id]);
+    }
+
+    changeMassDate(id: number, date: number): Promise<void> {
+        return this.runQuery(`
+            UPDATE mass SET date = ? WHERE id = ?;
+        `, [date, id]);
+    }
+
+    addMessdienerToMass(messdienerID: number, massID: number): Promise<void> {
+        return this.runQuery(`
+            INSERT OR IGNORE INTO mass_messdiener_allocation (messdiener_id, mass_id) VALUES (?, ?);
+        `, [messdienerID, massID]);
+    }
+
+    removeMessdienerFromMass(messdienerID: number, massID: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM mass_messdiener_allocation WHERE messdiener_id=? AND mass_id=?;
+        `, [messdienerID, massID]);
     }
 }

@@ -6,6 +6,7 @@ export type Messdiener = {
     lastNameShorthand?: string
     familyID: number
     identifier: number
+    churchActivity: Set<number>
 }
 
 export type Family = {
@@ -16,3 +17,28 @@ export type Family = {
     shorthand?: string
 }
 
+export type Church = {
+    id: number
+    name: string
+    location?: string
+}
+
+export type MessdienerChurchActivityStatus = {
+    messdienerID: number
+    churchID: number
+    isActive: boolean
+}
+
+export type Mass = {
+    id: number
+    date: number
+    churchID: number
+    allocatedMessdiener: Set<number>
+    note?: string
+}
+
+export type MessdienerMassAllocation = {
+    messdienerID: number
+    massID: number
+    isActive: boolean
+}

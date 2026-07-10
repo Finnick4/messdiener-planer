@@ -5,6 +5,7 @@ export enum SidebarEntries {
     "plan_creator",
     "messdiener",
     "masses",
+    "churches",
     "absence"
 }
 
@@ -35,6 +36,7 @@ const updateSidebar = (currentEntry: SidebarEntries) => {
         {id: SidebarEntries.plan_creator, text: "Plan erstellen", onclick: () => routeToPage(Pages.Planner)},
         {id: SidebarEntries.messdiener, text: "Alle Messdiener", onclick: () => routeToPage(Pages.MessdienerOverview)},
         {id: SidebarEntries.masses, text: "Messen ändern", onclick: () => routeToPage(Pages.MassesOverview)},
+        {id: SidebarEntries.churches, text: "Kirchen", onclick: () => routeToPage(Pages.ChurchesOverview)},
         {id: SidebarEntries.absence, text: "Abwesenheitszeiträume", onclick: () => routeToPage(Pages.AbsencesOverview)}
     ]
     sidebarElem.innerHTML = "";

@@ -1,5 +1,5 @@
 import {CallbackFunction} from "../../shared/state-manager";
-import {Family, Messdiener} from "../../shared/general";
+import {Church, Family, Mass, Messdiener} from "../../shared/general";
 
 interface SubscriptionListElement<T> {
     fn: CallbackFunction<T>
@@ -57,25 +57,51 @@ const states = {
     }),
     AllFamilies: new State<Family[]>(() => {
         return window.electronAPI.getAllFamilies();
-    })
+    }),
+    AllChurches: new State<Church[]>(() => {
+        return window.electronAPI.getAllChurches();
+    }),
+    AllMasses: new State<Mass[]>(() => {
+        return window.electronAPI.getAllMasses();
+    }),
 }
 
 export enum ListenerEndpoints {
     AllMessdiener = "AllMessdiener",
     AllFamilies = "AllFamilies",
+    AllChurches = "AllChurches",
+    AllMasses = "AllMasses",
 }
 
 export const addSubscription = (listener: ListenerEndpoints, callback: CallbackFunction<any>): () => void => {
     return states[listener].add(callback);
 }
 
+export const getData = (listener: ListenerEndpoints): Promise<any> =>  {
+    return new Promise<any>((resolve) => {
+        const cancel = addSubscription(listener, data => {
+            cancel();
+            resolve(data);
+        })
+    });
+}
+
 window.electronAPI.onMessdienerUpdate((data: Messdiener[]) => {
     const target = ListenerEndpoints.AllMessdiener;
     states[target].pushUpdate(data);
-})
+});
 
 window.electronAPI.onFamiliesUpdate((data: Family[]) => {
     const target = ListenerEndpoints.AllFamilies;
     states[target].pushUpdate(data);
-})
+});
 
+window.electronAPI.onChurchesUpdate((data: Church[]) => {
+    const target = ListenerEndpoints.AllChurches;
+    states[target].pushUpdate(data);
+});
+
+window.electronAPI.onMassesUpdate((data: Mass[]) => {
+    const target = ListenerEndpoints.AllMasses;
+    states[target].pushUpdate(data);
+});

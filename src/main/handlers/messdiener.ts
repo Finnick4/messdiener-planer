@@ -1,5 +1,6 @@
-import {Family, Messdiener} from "../../shared/general";
+import {Family, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
 import {
+    areValidMessdienerIDs, changeMessdienerChurchActivity,
     changeMessdienerFamilyAssociation,
     changeMessdienerName,
     createMessdiener,
@@ -12,7 +13,7 @@ import {pingMessdienerUpdate, pingFamiliesUpdate} from "./ping-manager";
 export const getAllMessdienerHandler = (): Promise<Messdiener[]> => {
     return getAllMessdiener()
 }
-export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: Family | number): Promise<number> => {
+export const createMessdienerHandler = (_event: IpcMainEvent, name: string, family: Family | number, churchActivity?: number[]): Promise<number> => {
     return new Promise<number>((resolve, reject) => {
         if (name == "" || name == undefined) {
             console.log("[HANDLER] (createMessdiener) Parameter issue: name is empty!");
@@ -25,10 +26,36 @@ export const createMessdienerHandler = (_event: IpcMainEvent, name: string, fami
             reject(-1);
             return
         }
+        let validChurchIDs = true;
+        churchActivity?.forEach(cID => {
+            if (cID <= 0) {
+                validChurchIDs = false;
+            }
+        })
+        if (!validChurchIDs) {
+            return;
+        }
+
+
         createMessdiener(name, family).then((id: number) => {
             pingMessdienerUpdate();
             pingFamiliesUpdate();
             resolve(id);
+
+            if (churchActivity == undefined) {
+                return;
+            }
+            const activities: MessdienerChurchActivityStatus[] = churchActivity.map(churchID => {
+                return {
+                    messdienerID: id,
+                    churchID: churchID,
+                    isActive: true
+                }
+            })
+            changeMessdienerChurchActivity(activities).then(() => {
+                pingMessdienerUpdate();
+                pingFamiliesUpdate();
+            });
         });
     })
 }
@@ -50,7 +77,7 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
         if (messdiener.firstName != "") {
             waitGroup.push(changeMessdienerName(messdiener.identifier, messdiener.firstName));
         }
-        if (messdiener.familyID != 0 || messdiener.lastNameDisplay != "") {
+        if (messdiener.lastNameDisplay != "") {
             waitGroup.push(changeMessdienerFamilyAssociation(messdiener.identifier, {
                 lastNameDisplay: messdiener.lastNameDisplay,
                 lastNameInternal: messdiener.lastNameInternal,
@@ -58,6 +85,10 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
                 id: 0,
                 memberSize: 1
             }));
+        }
+
+        if (messdiener.familyID != 0) {
+            waitGroup.push(changeMessdienerFamilyAssociation(messdiener.identifier, messdiener.familyID));
         }
         Promise.all(waitGroup).then(() => {
             pingMessdienerUpdate();
@@ -68,4 +99,22 @@ export const editMessdienerHandler = (_event: IpcMainEvent, messdiener: Messdien
         })
     })
 }
+export const changeMessdienerChurchActivityHandler = (_event: IpcMainEvent, activities: MessdienerChurchActivityStatus[]): Promise<void> => {
+    return areValidMessdienerIDs(activities.map(a => a.messdienerID)).then(resp => {
+        if (!resp) {
+            return;
+        }
+        let validChurchIDs = true;
+        activities.forEach(a => {
+            if (a.churchID <= 0) {
+                validChurchIDs = false;
+            }
+        })
+        if (!validChurchIDs) {
+            return;
+        }
+        return changeMessdienerChurchActivity(activities).then(() => pingMessdienerUpdate());
+    })
+}
+
 

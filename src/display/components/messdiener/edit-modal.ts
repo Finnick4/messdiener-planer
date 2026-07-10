@@ -1,7 +1,8 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
-import {Family, Messdiener} from "../../../shared/general";
+import {Messdiener, MessdienerChurchActivityStatus} from "../../../shared/general";
 import {ModalManager} from "../../types";
-import {FamilySelector} from "../family-selector";
+import {FamilySelector} from "../family/family-selector";
+import {ChurchSelectorMultiple} from "../church/church-selector-multiple";
 
 let editMessdienerModalCount = 0;
 
@@ -13,7 +14,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
     modal.classList.add("modal");
     modal.classList.add("form");
 
-    const numberOfInputElement = 4;
+    const numberOfInputElement = 6;
     const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
     for (let i = 0; i < numberOfInputElement; i++) {
         inputElementIDs[i] = `modal-edit-messdiener-${thisModalCount}-input-${i}`;
@@ -41,6 +42,10 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
             <label class="label" for="${inputElementIDs[4]}}">Familienkürzel (optional)</label>
             <input type="text" id="${inputElementIDs[4]}">
         </div>
+        <div class="field">
+            <label class="label" for="${inputElementIDs[5]}">Kirchengemeinden</label>
+            <select is="church-selector-multiple" id="${inputElementIDs[5]}"></select>
+        </div>
         <div class="field controls">
             <button class="cancel">Abbrechen</button>
             <button class="save">Speichern</button>
@@ -55,13 +60,14 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
     const inputFamDispl = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
     const inputFamIntern = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[3]);
     const inputFamShort = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[4]);
+    const churchSelector = modal.querySelector<ChurchSelectorMultiple>("#" + inputElementIDs[5]);
 
     const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
     const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
 
-    if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !delBtn) {
+    if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !delBtn || !churchSelector) {
         modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-        console.error("Encountered issue with getting save button!");
+        console.error("Encountered issue with getting inputs of edit Messdiener modal!");
         return {
             element: modal,
             destroy: () => (() => {
@@ -89,6 +95,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
     const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
         const messdiener = data.filter(m => m.identifier == id)[0];
         familySelector.initialiseWithStartID(messdiener.familyID);
+        churchSelector.initialiseWithStartIDs(new Set<number>(messdiener.churchActivity));
 
         inputName.value = messdiener.firstName;
 
@@ -103,8 +110,35 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
                     lastNameDisplay: familyID == 0 ? inputFamDispl.value : "",
                     lastNameInternal: familyID == 0 ? inputFamIntern.value : "",
                     lastNameShorthand: familyID == 0 ? inputFamShort.value : "",
-                    familyID: messdiener.familyID
+                    familyID: familyID == messdiener.familyID ? 0 : familyID,
+                    churchActivity: new Set<number>()
                 });
+            }
+            const setDivergences: MessdienerChurchActivityStatus[] = [];
+
+            const selChurches = churchSelector.getSelectedChurches();
+
+            selChurches.forEach(churchID => {
+                if (!messdiener.churchActivity.has(churchID)) {
+                    setDivergences.push({
+                        messdienerID: id,
+                        churchID: churchID,
+                        isActive: true
+                    })
+                }
+            })
+            messdiener.churchActivity.forEach(churchID => {
+                if (!selChurches.has(churchID)) {
+                    setDivergences.push({
+                        messdienerID: id,
+                        churchID: churchID,
+                        isActive: false
+                    })
+                }
+            })
+            if (setDivergences.length != 0) {
+                modal.close();
+                window.electronAPI.changeMessdienerChurchActivity(setDivergences);
             }
         })
     })
