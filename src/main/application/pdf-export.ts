@@ -26,6 +26,11 @@ export const texExport = (): Promise<string> => {
                     return makeLaTeXStringFromMass(mass, mappedMessdiener)
                 }).reduce((accumulator, currentValue) => accumulator + currentValue)
                 + "\\end{table}");
+            
+            const allocationCount = getMassAllocationMap(allMasses);
+            const familyOrientedAllocations = makeFamilyAllocationMap(allMessdiener, allocationCount);
+
+            const allocationOverviewLaTeXString = makeAllocationsOverviewLaTeXString(familyOrientedAllocations, mappedMessdiener);
 
             const tex = `\\documentclass[]{article} \\title{${title}} \\date{(${version}) \\\\Stand: ${lastUpdate}} \\pagestyle{empty}
 
@@ -33,7 +38,8 @@ export const texExport = (): Promise<string> => {
     \\maketitle
     
     ${massesLaTeXString}
-            
+    
+    ${allocationOverviewLaTeXString}
 \\end{document}`;
 
             const path = `./messdienerplan.tex`
@@ -48,6 +54,112 @@ export const texExport = (): Promise<string> => {
             })
         });
     })
+}
+
+const getMassAllocationMap = (masses: Mass[]): Map<number, number> => {
+    const map = new Map<number, number>();
+
+    for (const mass of masses) {
+        for (const messdienerID of mass.allocatedMessdiener) {
+            const currentCount = map.get(messdienerID)
+            if (currentCount == undefined) {
+                map.set(messdienerID, 1);
+                continue;
+            }
+            map.set(messdienerID, currentCount + 1);
+        }
+    }
+
+    return map;
+}
+
+const makeFamilyAllocationMap = (allMessdiener: Messdiener[], messdienerAllocationCount: Map<number, number>): Map<number, Map<number, number>>  => {
+    const familyAllocationMap = new Map<number, Map<number, number>>();
+
+    for (const messdiener of allMessdiener) {
+        const allocations = messdienerAllocationCount.get(messdiener.identifier);
+        if (allocations == undefined) {
+            continue;
+        }
+
+        const familyMap = familyAllocationMap.get(messdiener.familyID);
+        if (familyMap == undefined) {
+            const family = new Map<number, number>();
+            family.set(messdiener.identifier, allocations);
+            familyAllocationMap.set(messdiener.familyID, family);
+            continue;
+        }
+
+        familyMap.set(messdiener.identifier, allocations);
+    }
+
+    return familyAllocationMap;
+}
+
+const makeAllocationsOverviewLaTeXString = (familyAllocations: Map<number, Map<number, number>>, allMessdiener: Map<number, Messdiener>): string => {
+    let totalAllocatedMessdiener = 0;
+    let largestFamily = 0;
+    for (const family of familyAllocations) {
+        totalAllocatedMessdiener += family[1].size;
+        if (largestFamily < family[1].size) {
+            largestFamily = family[1].size;
+        }
+    }
+
+    const displayedFamilies = new Set<number>();
+    const targetRows = 3;
+    const maxMessdienerCapacityPerRow = Math.ceil(totalAllocatedMessdiener / targetRows) < largestFamily ? largestFamily : Math.ceil(totalAllocatedMessdiener / targetRows);
+    let tableFormat = "";
+    for (let i = 0; i < (targetRows * 2) - 1; i++) {
+        tableFormat += "c ";
+    }
+    tableFormat = tableFormat.substring(0, tableFormat.length - 1);
+
+    let overviewTable = `\\begin{center}
+\\begin{tabular}{ ${tableFormat} }\n`
+
+    for (let i = 0; i < targetRows; i++) {
+        let row = `\\begin{tabular}{ c c }\n`;
+        let usedCapacity = 0;
+        for (const family of familyAllocations) {
+            const familyID = family[0];
+            const familyMemberAllocations = family[1];
+
+            if (usedCapacity >= maxMessdienerCapacityPerRow) {
+                break;
+            }
+            if (familyMemberAllocations.size > maxMessdienerCapacityPerRow - usedCapacity || displayedFamilies.has(familyID)) {
+                continue;
+            }
+
+            for (const messdienerAllocation of familyMemberAllocations) {
+                const messdienerID = messdienerAllocation[0];
+                const allocations = messdienerAllocation[1];
+
+                row += `${allMessdiener.get(messdienerID) ? allMessdiener.get(messdienerID)?.firstName : messdienerID} & ${allocations}\\\\\n`
+            }
+            row += `\\hfill \\\\\n`
+
+            displayedFamilies.add(family[0]);
+            usedCapacity += family[1].size;
+        }
+
+        if (i != targetRows - 1) {
+            row += `\\end{tabular} & &\n`;
+        } else {
+            row += `\\end{tabular}\n`;
+        }
+        overviewTable += row;
+    }
+
+    for (const family of familyAllocations) {
+        const familyID = family[0];
+        if (!displayedFamilies.has(familyID)) {
+            console.error(`Did not include family ${familyID} into account!`)
+        }
+    }
+
+    return overviewTable + `\\end{tabular}\n\\end{center}\n\n`;
 }
 
 const makeDateStringFromDateNumber = (dateNum: number): string => {
@@ -67,14 +179,19 @@ const makeLaTeXStringFromMass = (mass: Mass, messdienerMap: Map<number, Messdien
             messdienerList += messdiener.firstName + "\\\\";
         }
     })
+    if (mass.allocatedMessdiener.size < minMessdienerSize && mass.allocatedMessdiener.size > 0) {
+        for (let i = 0; i < minMessdienerSize - mass.allocatedMessdiener.size; i++) {
+            messdienerList += "\\\\";
+        }
+    }
     if (messdienerList.length == 0) {
         const lineForTextIndex = Math.floor(minMessdienerSize / 2) - 1;
         for (let i = 0; i < minMessdienerSize; i++) {
             if ((i == 0 && lineForTextIndex < 0) || i == lineForTextIndex) {
-                messdienerList += "Alle \\\\ ";
+                messdienerList += "Alle \\\\";
                 continue;
             }
-            messdienerList += "\\\\ ";
+            messdienerList += "\\\\";
         }
     }
 
@@ -85,7 +202,7 @@ const makeLaTeXStringFromMass = (mass: Mass, messdienerMap: Map<number, Messdien
     \\textbf{${makeDateStringFromDateNumber(mass.date)}} \\\\ \\hline
     ${mass.note ? mass.note : ""} \\\\ \\hline
     \\begin{tabular}[c]{@{}l@{}} ${messdienerList} \\end{tabular} \\\\ \\hline
-\\end{tabular}`
+\\end{tabular}\n`
 
     return texStr;
 }
