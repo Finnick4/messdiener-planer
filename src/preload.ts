@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteMass: (id: number): void=> ipcRenderer.send("remove-mass", id),
     editMass: (mass: Mass): void=> ipcRenderer.send("edit-mass", mass),
     changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]): void=> ipcRenderer.send("change-messdiener-mass-allocation", activities),
+    exportPlan: (): void => ipcRenderer.send("export-plan"),
 
     onMessdienerUpdate: (callback: (data: Messdiener[]) => void): IpcRenderer => ipcRenderer.on('update-messdiener', (_event, value) => callback(value)),
     onFamiliesUpdate: (callback: (data: Family[]) => void): IpcRenderer => ipcRenderer.on('update-families', (_event, value) => callback(value)),

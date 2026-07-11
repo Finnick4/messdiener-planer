@@ -27,6 +27,7 @@ import {
     changeMessdienerMassAllocationHandler,
     createMassHandler, editMassHandler, getAllMassesHandler, removeMassHandler
 } from "./main/handlers/masses";
+import {exportPlanHandler} from "./main/handlers/plans";
 
 if (started) {
   app.quit();
@@ -72,6 +73,7 @@ app.on('ready', () => {
     ipcMain.on('remove-mass', removeMassHandler);
     ipcMain.on('edit-mass', editMassHandler);
     ipcMain.on('change-messdiener-mass-allocation', changeMessdienerMassAllocationHandler);
+    ipcMain.on('export-plan', exportPlanHandler);
 });
 
 app.on('window-all-closed', () => {
