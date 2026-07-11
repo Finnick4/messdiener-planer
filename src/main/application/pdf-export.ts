@@ -18,14 +18,17 @@ export const texExport = (): Promise<string> => {
             const mappedMessdiener = new Map<number, Messdiener>(allMessdiener.map((m) => [m.identifier, m]));
             const massesPerRow = 5;
 
-            const massesLaTeXString = ("\\begin{table}[] "
-                + allMasses.map((mass, index) => {
-                    if (index % massesPerRow == massesPerRow - 1) {
-                        return makeLaTeXStringFromMass(mass, mappedMessdiener) + "\\hfill \\break";
-                    }
-                    return makeLaTeXStringFromMass(mass, mappedMessdiener)
-                }).reduce((accumulator, currentValue) => accumulator + currentValue)
-                + "\\end{table}");
+            let massesLaTeXString = "\\begin{table}[] "
+            const individualMassesStrings = allMasses.map((mass, index) => {
+                if (index % massesPerRow == massesPerRow - 1) {
+                    return makeLaTeXStringFromMass(mass, mappedMessdiener) + "\\hfill \\break";
+                }
+                return makeLaTeXStringFromMass(mass, mappedMessdiener)
+            });
+            if (individualMassesStrings.length > 0) {
+                massesLaTeXString += individualMassesStrings.reduce((accumulator, currentValue) => accumulator + currentValue);
+            }
+            massesLaTeXString += "\\end{table}";
             
             const allocationCount = getMassAllocationMap(allMasses);
             const familyOrientedAllocations = makeFamilyAllocationMap(allMessdiener, allocationCount);
