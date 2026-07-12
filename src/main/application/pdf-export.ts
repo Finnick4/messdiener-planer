@@ -13,7 +13,7 @@ export const texExport = (): Promise<string> => {
         });
 
         Promise.all([getAllMasses(), getAllMessdiener()]).then(responses => {
-            const allMasses = responses[0];
+            const allMasses = responses[0].sort((a, b) => a.date - b.date);
             const allMessdiener = responses[1];
             const mappedMessdiener = new Map<number, Messdiener>(allMessdiener.map((m) => [m.identifier, m]));
             const massesPerRow = 5;
@@ -170,7 +170,7 @@ const makeDateStringFromDateNumber = (dateNum: number): string => {
         Number(String(dateNum).substring(4, 6)) - 1,
         Number(String(dateNum).substring(6, 8))).toLocaleString("de", {
         day: "numeric",
-        month: "long"
+        month: "short"
     });
 }
 

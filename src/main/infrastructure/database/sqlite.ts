@@ -356,7 +356,7 @@ export class SQLiteConnection implements DatabaseConnection {
                 mass_messdiener_allocation.messdiener_id AS messdiener_id,
                 mass_messdiener_allocation.mass_id AS mass_id
             FROM mass_messdiener_allocation
-            ORDER BY mass_id ASC;
+            ORDER BY messdiener_id ASC;
         `)
         for (const row of rows) {
             const index = masses.findIndex(m => m.id == row.mass_id);
