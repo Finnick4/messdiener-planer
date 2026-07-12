@@ -183,13 +183,13 @@ const makeLaTeXStringFromMass = (mass: Mass, messdienerMap: Map<number, Messdien
         }
     })
     if (mass.allocatedMessdiener.size < minMessdienerSize && mass.allocatedMessdiener.size > 0) {
-        for (let i = 0; i < minMessdienerSize - mass.allocatedMessdiener.size; i++) {
+        for (let i = 0; i <= minMessdienerSize - mass.allocatedMessdiener.size; i++) {
             messdienerList += "\\\\";
         }
     }
     if (messdienerList.length == 0) {
         const lineForTextIndex = Math.floor(minMessdienerSize / 2) - 1;
-        for (let i = 0; i < minMessdienerSize; i++) {
+        for (let i = 0; i <= minMessdienerSize; i++) {
             if ((i == 0 && lineForTextIndex < 0) || i == lineForTextIndex) {
                 messdienerList += "Alle \\\\";
                 continue;

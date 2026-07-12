@@ -5,8 +5,10 @@ import {generateEditMassModal} from "./edit-modal";
 
 export class MassList extends HTMLElement {
     connectedCallback() {
-        const closeModals: (() => void)[] = [];
+        let closeModals: (() => void)[] = [];
         const cancel = addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
+            closeModals.forEach(fn => fn());
+            closeModals = [];
             if (data.length == 0) {
                 const placeholder = document.createElement("p");
                 placeholder.classList.add("placeholder");
