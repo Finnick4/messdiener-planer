@@ -11,7 +11,7 @@ export class ChurchList extends HTMLElement {
             if (data.length == 0) {
                 const placeholder = document.createElement("p");
                 placeholder.classList.add("placeholder");
-                placeholder.innerHTML = "Es wurden noch keine Kirchen erstellt!"
+                placeholder.innerText = "Es wurden noch keine Kirchen erstellt!"
                 this.replaceChildren(placeholder);
                 return
             }

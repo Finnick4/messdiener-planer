@@ -57,7 +57,7 @@ export const generateEditMassModal = (id: number): ModalManager => {
     const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
 
     if (!inputDate || !churchSelector || !inputNote || !saveBtn || !delBtn || !messdienerAllocator) {
-        modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+        modal.innerText = "<h1>A fatal error occurred!</h1>";
         console.error("Encountered issue with getting inputs of edit mass modal!");
         return {
             element: modal,

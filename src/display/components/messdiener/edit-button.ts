@@ -6,7 +6,7 @@ export class MessdienerEditButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "&#8943;";
+        this.innerHTML= "&#8943;";
         this.classList.add("button");
     }
     setMessdiener(id: number) {

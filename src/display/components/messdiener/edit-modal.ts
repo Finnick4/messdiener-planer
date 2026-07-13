@@ -66,7 +66,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
     const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
 
     if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !delBtn || !churchSelector) {
-        modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+        modal.innerText = "<h1>A fatal error occurred!</h1>";
         console.error("Encountered issue with getting inputs of edit Messdiener modal!");
         return {
             element: modal,

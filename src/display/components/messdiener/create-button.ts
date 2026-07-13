@@ -9,7 +9,7 @@ export class MessdienerCreateButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "Messdiener erstellen";
+        this.innerText = "Messdiener erstellen";
         this.classList.add("button", "create");
 
         const modal = document.createElement("dialog");
@@ -68,7 +68,7 @@ export class MessdienerCreateButton extends HTMLElement {
         const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
 
         if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !churchSelector) {
-            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+            modal.innerText = "<h1>A fatal error occurred!</h1>";
             return;
         }
         familySelector.onedit = (changedID: number) => {

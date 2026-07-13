@@ -6,7 +6,7 @@ export class ChurchCreateButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "Kirche erstellen";
+        this.innerText = "Kirche erstellen";
         this.classList.add("button", "create");
 
         const modal = document.createElement("dialog");
@@ -45,7 +45,7 @@ export class ChurchCreateButton extends HTMLElement {
         const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
 
         if (!inputName || !saveBtn || !inputLocation) {
-            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+            modal.innerText = "<h1>A fatal error occurred!</h1>";
             return;
         }
 

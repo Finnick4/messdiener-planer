@@ -34,7 +34,7 @@ export class FamilyAdder extends HTMLElement {
                 if (familyPoolSize == 0) {
                     const placeholder = document.createElement("p");
                     placeholder.classList.add("placeholder");
-                    placeholder.innerHTML = "Es bestehen keine Familien, welche der Messe zugewiesen werden können!"
+                    placeholder.innerText = "Es bestehen keine Familien, welche der Messe zugewiesen werden können!"
                     this.replaceChildren(placeholder);
                 }
             }

@@ -7,7 +7,7 @@ export class MassCreateButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "Messe erstellen";
+        this.innerText = "Messe erstellen";
         this.classList.add("button", "create");
 
         const modal = document.createElement("dialog");
@@ -49,7 +49,7 @@ export class MassCreateButton extends HTMLElement {
         const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
 
         if (!inputDate || !churchSelector || !inputNote || !saveBtn) {
-            modal.innerHTML = "<h1>A fatal error occurred!</h1>";
+            modal.innerText = "<h1>A fatal error occurred!</h1>";
             return;
         }
 
