@@ -61,15 +61,9 @@ export const generateEditMassModal = (id: number): ModalManager => {
         console.error("Encountered issue with getting inputs of edit mass modal!");
         return {
             element: modal,
-            destroy: () => (() => {
-                let modalExists = true;
-                return () => {
-                    if (modalExists) {
-                        modal.remove();
-                        modalExists = false;
-                    }
-                }
-            })(),
+            destroy: () => {
+                modal.remove();
+            },
             show: () => modal.showModal(),
             hide: () => modal.close(),
         };
@@ -147,16 +141,9 @@ export const generateEditMassModal = (id: number): ModalManager => {
 
     return {
         element: modal,
-        destroy: () => (() => {
-            let modalExists = true;
-            return () => {
-                if (modalExists) {
-                    cancel();
-                    modal.remove();
-                    modalExists = false;
-                }
-            }
-        })(),
+        destroy: () => {
+            modal.remove();
+        },
         show: () => modal.showModal(),
         hide: () => modal.close(),
     };

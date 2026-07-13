@@ -5,6 +5,10 @@ import {createInternalChurchName} from "../../logic/church";
 
 
 export class ChurchList extends HTMLElement {
+    private disconnectedHandler = () => {
+        return;
+    };
+
     connectedCallback() {
         this.classList.add("list");
         const cancel = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
@@ -35,12 +39,13 @@ export class ChurchList extends HTMLElement {
 
             this.replaceChildren(...elements);
         })
-        this.disconnectedCallback = () => {
-            cancel()
-        }
+        this.disconnectedHandler = () => {
+            cancel();
+        };
     }
 
     disconnectedCallback() {
-        return
+        this.disconnectedHandler();
+        return;
     }
 }

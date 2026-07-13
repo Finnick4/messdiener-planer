@@ -4,6 +4,10 @@ import {MassCreateButton} from "./create-button";
 import {generateEditMassModal} from "./edit-modal";
 
 export class MassList extends HTMLElement {
+    private disconnectedHandler = () => {
+        return;
+    };
+
     connectedCallback() {
         let closeModals: (() => void)[] = [];
         const cancel = addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
@@ -70,13 +74,14 @@ export class MassList extends HTMLElement {
 
             this.appendChild(createBtn);
         })
-        this.disconnectedCallback = () => {
-            cancel()
-            closeModals.forEach(fn => fn())
-        }
+        this.disconnectedHandler = () => {
+            cancel();
+            closeModals.forEach(fn => fn());
+        };
     }
 
     disconnectedCallback() {
+        this.disconnectedHandler();
         return
     }
 }

@@ -4,6 +4,10 @@ import {MessdienerEditButton} from "./edit-button";
 
 
 export class MessdienerList extends HTMLElement {
+    private disconnectHandler = () => {
+        return;
+    };
+
     connectedCallback() {
         this.classList.add("list");
         const cancel = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
@@ -36,12 +40,14 @@ export class MessdienerList extends HTMLElement {
 
             this.replaceChildren(...elements);
         })
-        this.disconnectedCallback = () => {
-            cancel()
+        this.disconnectHandler = () => {
+            cancel();
+            this.remove();
         }
     }
 
     disconnectedCallback() {
-        return
+        this.disconnectHandler()
+        return;
     }
 }

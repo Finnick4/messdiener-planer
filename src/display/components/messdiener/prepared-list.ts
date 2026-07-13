@@ -6,6 +6,10 @@ export class MessdienerPreparedList extends HTMLElement {
     constructor() {
         super();
     }
+    private disconnectedHandler = () => {
+        return;
+    };
+
     connectedCallback() {
         this.classList.add("list", "prepared");
 
@@ -69,7 +73,7 @@ export class MessdienerPreparedList extends HTMLElement {
 
         this.changePickedMessdiener(new Set<number>());
 
-        this.disconnectedCallback = () => {
+        this.disconnectedHandler = () => {
             onDisconnect.forEach(fn => fn());
         }
     }
@@ -83,6 +87,7 @@ export class MessdienerPreparedList extends HTMLElement {
     }
 
     disconnectedCallback() {
-        return
+        this.disconnectedHandler();
+        return;
     }
 }

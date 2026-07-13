@@ -70,15 +70,9 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
         console.error("Encountered issue with getting inputs of edit Messdiener modal!");
         return {
             element: modal,
-            destroy: () => (() => {
-                let modalExists = true;
-                return () => {
-                    if (modalExists) {
-                        modal.remove();
-                        modalExists = false;
-                    }
-                }
-            })(),
+            destroy: () => {
+                modal.remove();
+            },
             show: () => modal.showModal(),
             hide: () => modal.close(),
         };
@@ -157,16 +151,9 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
     return {
         element: modal,
-        destroy: () => (() => {
-            let modalExists = true;
-            return () => {
-                if (modalExists) {
-                    cancel();
-                    modal.remove();
-                    modalExists = false;
-                }
-            }
-        })(),
+        destroy: () => {
+            modal.remove();
+        },
         show: () => modal.showModal(),
         hide: () => modal.close(),
     };

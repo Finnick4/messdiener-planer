@@ -21,6 +21,6 @@ export class MessdienerEditButton extends HTMLElement {
         }
     }
     disconnectedCallback() {
-        this.removeModal()
+        this.removeModal();
     }
 }
