@@ -1,5 +1,5 @@
-import {getUniqueCount} from "../../builder/utilities";
 import {ChurchSelector} from "../church/church-selector";
+import {generateHTMLElementsForm} from "../form-creator";
 
 export class MassCreateButton extends HTMLElement {
     private disconnectedHandler() {
@@ -14,44 +14,36 @@ export class MassCreateButton extends HTMLElement {
 
         modal.classList.add("mass-create", "modal", "form");
 
-        const numberOfInputElement = 3;
-        const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
-        for (let i = 0; i < numberOfInputElement; i++) {
-            inputElementIDs[i] = `modal-create-mass-input-${getUniqueCount()}`;
-        }
+        const headerElem = document.createElement("h1");
+        headerElem.innerText = "Messe erstellen";
 
-        modal.innerHTML = `
-        <h1>Messe erstellen</h1>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[0]}}">Datum</label>
-            <input type="date" id="${inputElementIDs[0]}">
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[1]}}">Kirche</label>
-            <select is="church-selector" id="${inputElementIDs[1]}"></select>
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[2]}}">Notiz (Optional)</label>
-            <input type="text" id="${inputElementIDs[2]}">
-        </div>
-        <div class="field controls">
-            <button class="cancel">Abbrechen</button>
-            <button class="save">Erstellen</button>
-        </div>
-        `
+        const formElements = generateHTMLElementsForm([
+            {tagName: "input", labelText: "Datum", type: "date"},
+            {tagName: "select", labelText: "Kirche (Final)", is: "church-selector"},
+            {tagName: "input", labelText: "Notiz (Optional)", type: "text"},
+        ])
+
+        const controlsField = document.createElement("div");
+        const cancelBtn = document.createElement("button");
+        const saveBtn = document.createElement("button");
+        cancelBtn.innerText = "Abbrechen";
+        saveBtn.innerText = "Speichern";
+        controlsField.classList.add("field", "controls");
+        cancelBtn.classList.add("cancel");
+        saveBtn.classList.add("save");
+
+
+        controlsField.replaceChildren(cancelBtn, saveBtn);
+
+        modal.replaceChildren(headerElem, ...(formElements.nodes), controlsField);
 
         document.body.appendChild(modal);
 
-        const inputDate = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
-        const churchSelector = modal.querySelector<ChurchSelector>("#" + inputElementIDs[1]);
-        const inputNote = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
+        const inputDate = formElements.elements[0] as HTMLInputElement;
+        const churchSelector = formElements.elements[1] as ChurchSelector;
+        const inputNote = formElements.elements[2] as HTMLInputElement;
 
-        const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
-
-        if (!inputDate || !churchSelector || !inputNote || !saveBtn) {
-            modal.innerText = "<h1>A fatal error occurred!</h1>";
-            return;
-        }
+        document.body.appendChild(modal);
 
         saveBtn.addEventListener("click", () => {
             if (inputDate.value == "") {
