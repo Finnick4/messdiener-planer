@@ -1,4 +1,5 @@
 import {getUniqueCount} from "../../builder/utilities";
+import {generateHTMLElementsForm} from "../form-creator";
 
 export class ChurchCreateButton extends HTMLElement {
     private disconnectedHandler() {
@@ -11,43 +12,37 @@ export class ChurchCreateButton extends HTMLElement {
 
         const modal = document.createElement("dialog");
 
-        modal.classList.add("church-create");
-        modal.classList.add("modal");
-        modal.classList.add("form");
+        modal.classList.add("church-create", "modal", "form");
 
-        const numberOfInputElement = 2;
-        const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
-        for (let i = 0; i < numberOfInputElement; i++) {
-            inputElementIDs[i] = `modal-create-church-input-${getUniqueCount()}`;
-        }
+        const headerElem = document.createElement("h1");
+        headerElem.innerText = "Kirche erstellen";
 
-        modal.innerHTML = `
-        <h1>Kirche erstellen</h1>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[0]}}">Name</label>
-            <input type="text" id="${inputElementIDs[0]}">
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[1]}}">Ort (Optional)</label>
-            <input type="text" id="${inputElementIDs[1]}">
-        </div>
-        <div class="field controls">
-            <button class="cancel">Abbrechen</button>
-            <button class="save">Erstellen</button>
-        </div>
-        `
+        const formElements = generateHTMLElementsForm([
+            {tagName: "input", labelText: "Name", type: "text"},
+            {tagName: "input", labelText: "Ort (Optional)", type: "text"},
+        ])
+
+        const controlsField = document.createElement("div");
+        const cancelBtn = document.createElement("button");
+        const saveBtn = document.createElement("button");
+        cancelBtn.innerText = "Abbrechen";
+        saveBtn.innerText = "Speichern";
+        controlsField.classList.add("field", "controls");
+        cancelBtn.classList.add("cancel");
+        saveBtn.classList.add("save");
+
+
+        controlsField.replaceChildren(cancelBtn, saveBtn);
+
+        modal.replaceChildren(headerElem, ...(formElements.nodes), controlsField);
 
         document.body.appendChild(modal);
 
-        const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
-        const inputLocation = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[1]);
+        const inputName = formElements.elements[0] as HTMLInputElement;
+        const inputLocation = formElements.elements[1] as HTMLInputElement;
 
-        const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
 
-        if (!inputName || !saveBtn || !inputLocation) {
-            modal.innerText = "<h1>A fatal error occurred!</h1>";
-            return;
-        }
+        document.body.appendChild(modal);
 
         saveBtn.addEventListener("click", () => {
             if (inputName.value == "") {

@@ -1,60 +1,45 @@
 import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {Church} from "../../../shared/general";
 import {ModalManager} from "../../types";
+import {generateHTMLElementsForm} from "../form-creator";
 
-let editChurchModalCount = 0;
 
 export const generateEditChurchModal = (id: number): ModalManager => {
-    const thisModalCount = editChurchModalCount++;
-    const modal = document.createElement("dialog");
+   const modal = document.createElement("dialog");
 
-    modal.classList.add("church-edit");
-    modal.classList.add("modal");
-    modal.classList.add("form");
+    modal.classList.add("church-edit", "modal", "form");
 
-    const numberOfInputElement = 2;
-    const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
-    for (let i = 0; i < numberOfInputElement; i++) {
-        inputElementIDs[i] = `modal-edit-church-${thisModalCount}-input-${i}`;
-    }
+    const headerElem = document.createElement("h1");
+    headerElem.innerText = "Kirche bearbeiten";
 
-    modal.innerHTML = `
-        <h1>Messdiener bearbeiten</h1>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[0]}}">Vorname</label>
-            <input type="text" id="${inputElementIDs[0]}">
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[1]}}">Familienname</label>
-            <input type="text" id="${inputElementIDs[1]}">
-        </div>
-        <div class="field controls">
-            <button class="cancel">Abbrechen</button>
-            <button class="save">Speichern</button>
-            <button class="delete">Löschen</button>
-        </div>
-        `
+    const formElements = generateHTMLElementsForm([
+        {tagName: "input", labelText: "Name", type: "text"},
+        {tagName: "input", labelText: "Ort (Optional)", type: "text"},
+    ])
+
+    const controlsField = document.createElement("div");
+    const cancelBtn = document.createElement("button");
+    const saveBtn = document.createElement("button");
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "Löschen";
+    cancelBtn.innerText = "Abbrechen";
+    saveBtn.innerText = "Speichern";
+    controlsField.classList.add("field", "controls");
+    cancelBtn.classList.add("cancel");
+    saveBtn.classList.add("save");
+    delBtn.classList.add("delete");
+
+
+    controlsField.replaceChildren(cancelBtn, saveBtn);
+
+    modal.replaceChildren(headerElem, ...(formElements.nodes), controlsField);
 
     document.body.appendChild(modal);
 
-    const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
-    const inputLocation = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[1]);
+    const inputName = formElements.elements[0] as HTMLInputElement;
+    const inputLocation = formElements.elements[1] as HTMLInputElement;
 
-    const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
-    const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
-
-    if (!inputName || !saveBtn || !inputLocation || !delBtn) {
-        modal.innerText = "<h1>A fatal error occurred!</h1>";
-        console.error("Encountered issue with getting inputs of edit church modal!");
-        return {
-            element: modal,
-            destroy: () => {
-                modal.remove();
-            },
-            show: () => modal.showModal(),
-            hide: () => modal.close(),
-        };
-    }
+    document.body.appendChild(modal);
 
     const cancel = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
         const church = data.filter(c => c.id == id)[0];
@@ -90,6 +75,7 @@ export const generateEditChurchModal = (id: number): ModalManager => {
     return {
         element: modal,
         destroy: () => {
+            cancel();
             modal.remove();
         },
         show: () => modal.showModal(),
