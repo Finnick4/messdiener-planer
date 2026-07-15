@@ -36,9 +36,9 @@ export const generateEditMassModal = (id: number): ModalManager => {
     delBtn.classList.add("delete");
 
 
-    controlsField.replaceChildren(cancelBtn, saveBtn);
+    controlsField.append(cancelBtn, saveBtn, delBtn);
 
-    modal.replaceChildren(headerElem, ...(formElements.nodes), controlsField);
+    modal.append(headerElem, ...(formElements.nodes), controlsField);
 
     document.body.appendChild(modal);
 
@@ -46,8 +46,6 @@ export const generateEditMassModal = (id: number): ModalManager => {
     const churchSelector = formElements.elements[1] as ChurchSelector;
     const inputNote = formElements.elements[2] as HTMLInputElement;
     const messdienerAllocator = formElements.elements[3] as MessdienerAllocator;
-
-    document.body.appendChild(modal);
 
     churchSelector.readonly = true;
 
@@ -104,7 +102,6 @@ export const generateEditMassModal = (id: number): ModalManager => {
             })
             if (setDivergences.length != 0) {
                 modal.close();
-                console.log(setDivergences);
                 window.electronAPI.changeMessdienerMassAllocation(setDivergences);
             }
         })
