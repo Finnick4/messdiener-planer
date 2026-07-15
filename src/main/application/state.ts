@@ -15,44 +15,44 @@ let allMasses: Mass[] = [];
 
 export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     if (allMessdiener.length !== 0) {
-        return allMessdiener;
+        return structuredClone(allMessdiener);
     }
     return getDBConnection().then(db => db.getAllMessdiener().then(messdiener => {
             allMessdiener = messdiener;
-            return messdiener;
+            return structuredClone(messdiener);
         })
     )
 }
 
 export const getAllFamilies = async (): Promise<Family[]> => {
     if (allFamilies.length !== 0) {
-        return allFamilies;
+        return structuredClone(allFamilies);
     }
     return getDBConnection().then(db => db.getAllFamilies().then(families => {
             allFamilies = families;
-            return families;
+            return structuredClone(families);
         })
     )
 }
 
 export const getAllChurches = async (): Promise<Church[]> => {
     if (allChurches.length !== 0) {
-        return allChurches;
+        return structuredClone(allChurches);
     }
     return getDBConnection().then(db => db.getAllChurches().then(churches => {
             allChurches = churches;
-            return churches;
+            return structuredClone(churches);
         })
     )
 }
 
 export const getAllMasses = async (): Promise<Mass[]> => {
     if (allMasses.length !== 0) {
-        return allMasses;
+        return structuredClone(allMasses);
     }
     return getDBConnection().then(db => db.getAllMasses().then(masses => {
             allMasses = masses;
-            return masses;
+            return structuredClone(masses);
         })
     )
 }

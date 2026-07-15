@@ -38,7 +38,7 @@ class State<T> {
                 throw new Error("Undefined data within state!");
             }
             this.savedData = data;
-            fn(this.savedData)
+            fn(structuredClone(this.savedData));
         })
         return () => {
             this.remove(elem.id)
@@ -47,7 +47,7 @@ class State<T> {
     pushUpdate(data: T) {
         this.savedData = data
         for (const elem of this.subscriptions) {
-            elem.fn(this.savedData)
+            elem.fn(structuredClone<T>(this.savedData))
         }
     }
     private remove(id: number) {
