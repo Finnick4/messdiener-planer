@@ -1,7 +1,7 @@
 import {MessdienerPreparedList} from "./prepared-list";
 import FamilyAdder from "../family/family-adder";
-import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
 import {Messdiener} from "../../../shared/general";
+import {getData, ListenerEndpoints} from "../../state/state-manager";
 
 export class MessdienerAllocator extends HTMLElement {
     constructor() {
@@ -13,10 +13,9 @@ export class MessdienerAllocator extends HTMLElement {
 
     connectedCallback() {
         const messdienerList = document.createElement("messdiener-prepared-list") as MessdienerPreparedList;
-        this.appendChild(messdienerList);
 
         const familyAdder = document.createElement("family-adder") as FamilyAdder;
-        this.appendChild(familyAdder);
+        this.replaceChildren(messdienerList, familyAdder);
 
         this.updateContent = () => {
             messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));

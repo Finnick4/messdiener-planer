@@ -1,4 +1,3 @@
-import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {
     Mass,
     MessdienerMassAllocation
@@ -7,6 +6,7 @@ import {ModalManager} from "../../types";
 import {ChurchSelector} from "../church/church-selector";
 import {MessdienerAllocator} from "../messdiener/allocator";
 import {generateHTMLElementsForm} from "../form-creator";
+import {getMass} from "../../state/specific-entries";
 
 export const generateEditMassModal = (id: number): ModalManager => {
     const modal = document.createElement("dialog");
@@ -51,9 +51,12 @@ export const generateEditMassModal = (id: number): ModalManager => {
 
     churchSelector.readonly = true;
 
-
-    const cancel = addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
-        const mass = data.filter(m => m.id == id)[0];
+    getMass(id).then((mass: Mass | undefined) => {
+        if (!mass) {
+            headerElem.innerText = "Unbekannte Messe!";
+            modal.replaceChildren(headerElem);
+            return;
+        }
 
         const setDate = new Date(Number(String(mass.date).substring(0, 4)),
             Number(String(mass.date).substring(4, 6)) - 1,
@@ -122,7 +125,6 @@ export const generateEditMassModal = (id: number): ModalManager => {
     return {
         element: modal,
         destroy: () => {
-            cancel();
             modal.remove();
         },
         show: () => modal.showModal(),
