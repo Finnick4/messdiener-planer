@@ -5,9 +5,11 @@ let messdienerMap: Map<number, Messdiener> | undefined = undefined;
 let familyMap: Map<number, Family> | undefined = undefined;
 let churchMap: Map<number, Church> |undefined = undefined;
 let massMap: Map<number, Mass> | undefined= undefined;
+let familyMemberships: Map<number, Set<Messdiener>> | undefined = undefined;
 
 addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
     messdienerMap = new Map(data.map((m) => [m.identifier, m]));
+    familyMemberships = undefined;
 });
 addSubscription(ListenerEndpoints.AllFamilies, (data: Family[]) => {
     familyMap = new Map(data.map((f) => [f.id, f]));
@@ -80,5 +82,32 @@ export const getMassMap = (): Promise<Map<number, Mass>> =>  {
             return;
         }
         resolve(structuredClone(massMap));
+    });
+};
+
+const updateFamilyMemberships = (data: Messdiener[]) => {
+    familyMemberships = new Map<number, Set<Messdiener>>();
+    data.forEach(messdiener =>  {
+        const family = familyMemberships?.get(messdiener.familyID);
+        if (family) {
+            family.add(messdiener);
+            familyMemberships?.set(messdiener.familyID, family);
+            return;
+        }
+        familyMemberships?.set(messdiener.familyID, new Set<Messdiener>([messdiener]));
+    })
+}
+
+export const getFamilyMembershipsMap = (): Promise<Map<number, Set<Messdiener>>> =>  {
+    return new Promise<Map<number, Set<Messdiener>>>((resolve) => {
+        if (familyMemberships == undefined) {
+            getData(ListenerEndpoints.AllMessdiener).then((data: Messdiener[]) => {
+                familyMemberships = new Map<number, Set<Messdiener>>();
+                updateFamilyMemberships(data);
+                resolve(structuredClone(familyMemberships));
+            });
+            return;
+        }
+        resolve(structuredClone(familyMemberships));
     });
 };
