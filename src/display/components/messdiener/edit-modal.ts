@@ -3,86 +3,49 @@ import {Messdiener, MessdienerChurchActivityStatus} from "../../../shared/genera
 import {ModalManager} from "../../types";
 import {FamilySelector} from "../family/family-selector";
 import {ChurchSelectorMultiple} from "../church/church-selector-multiple";
-
-let editMessdienerModalCount = 0;
+import {generateHTMLElementsForm} from "../form-creator";
 
 export const generateEditMessdienerModal = (id: number): ModalManager => {
-    const thisModalCount = editMessdienerModalCount++;
     const modal = document.createElement("dialog");
 
-    modal.classList.add("messdiener-edit");
-    modal.classList.add("modal");
-    modal.classList.add("form");
+    modal.classList.add("messdiener-edit", "modal", "form");
 
-    const numberOfInputElement = 6;
-    const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
-    for (let i = 0; i < numberOfInputElement; i++) {
-        inputElementIDs[i] = `modal-edit-messdiener-${thisModalCount}-input-${i}`;
-    }
+    const headerElem = document.createElement("h1");
+    headerElem.innerText = "Messdiener bearbeiten";
 
-    modal.innerHTML = `
-        <h1>Messdiener bearbeiten</h1>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[0]}}">Vorname</label>
-            <input type="text" id="${inputElementIDs[0]}">
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[1]}">Familienanhehörigkeit</label>
-            <select is="family-selector" id="${inputElementIDs[1]}"></select>
-        </div>
-        <div class="field family">
-            <label class="label" for="${inputElementIDs[2]}}">Familienname</label>
-            <input type="text" id="${inputElementIDs[2]}">
-        </div>
-        <div class="field family">
-            <label class="label" for="${inputElementIDs[3]}}">Abweichender interner Name (optional)</label>
-            <input type="text" id="${inputElementIDs[3]}">
-        </div>
-        <div class="field family">
-            <label class="label" for="${inputElementIDs[4]}}">Familienkürzel (optional)</label>
-            <input type="text" id="${inputElementIDs[4]}">
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[5]}">Kirchengemeinden</label>
-            <select is="church-selector-multiple" id="${inputElementIDs[5]}"></select>
-        </div>
-        <div class="field controls">
-            <button class="cancel">Abbrechen</button>
-            <button class="save">Speichern</button>
-            <button class="delete">Löschen</button>
-        </div>
-        `
+    const formElements = generateHTMLElementsForm([
+        {tagName: "input", labelText: "Vorname", type: "text"},
+        {tagName: "select", labelText: "Familienanhehörigkeit", is: "family-selector"},
+        {tagName: "input", labelText: "Familienname", type: "text", fieldClasses: ["family"]},
+        {tagName: "input", labelText: "Abweichender interner Name (optional)", type: "text", fieldClasses: ["family"]},
+        {tagName: "input", labelText: "Familienkürzel (optional)", type: "text", fieldClasses: ["family"]},
+        {tagName: "select", labelText: "Kirchengemeinden", is: "church-selector-multiple"},
+    ])
+
+    const controlsField = document.createElement("div");
+    const cancelBtn = document.createElement("button");
+    const saveBtn = document.createElement("button");
+    const delBtn = document.createElement("button");
+    cancelBtn.innerText = "Abbrechen";
+    saveBtn.innerText = "Speichern";
+    delBtn.innerText = "Löschen";
+    controlsField.classList.add("field", "controls");
+    cancelBtn.classList.add("cancel");
+    saveBtn.classList.add("save");
+    delBtn.classList.add("delete");
+
+    controlsField.replaceChildren(cancelBtn, saveBtn, delBtn);
+
+    modal.replaceChildren(headerElem, ...(formElements.nodes), controlsField);
 
     document.body.appendChild(modal);
 
-    const inputName = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
-    const familySelector = modal.querySelector<FamilySelector>("#" + inputElementIDs[1]);
-    const inputFamDispl = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
-    const inputFamIntern = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[3]);
-    const inputFamShort = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[4]);
-    const churchSelector = modal.querySelector<ChurchSelectorMultiple>("#" + inputElementIDs[5]);
-
-    const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
-    const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
-
-    if (!inputName || !saveBtn || !familySelector || !inputFamDispl || !inputFamIntern || !inputFamShort || !delBtn || !churchSelector) {
-        modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-        console.error("Encountered issue with getting inputs of edit Messdiener modal!");
-        return {
-            element: modal,
-            destroy: () => (() => {
-                let modalExists = true;
-                return () => {
-                    if (modalExists) {
-                        modal.remove();
-                        modalExists = false;
-                    }
-                }
-            })(),
-            show: () => modal.showModal(),
-            hide: () => modal.close(),
-        };
-    }
+    const inputName = formElements.elements[0] as HTMLInputElement;
+    const familySelector = formElements.elements[1] as FamilySelector;
+    const inputFamDispl = formElements.elements[2] as HTMLInputElement;
+    const inputFamIntern = formElements.elements[3] as HTMLInputElement;
+    const inputFamShort = formElements.elements[4] as HTMLInputElement;
+    const churchSelector = formElements.elements[5] as ChurchSelectorMultiple;
 
     familySelector.onedit = (changedID: number) => {
         if (changedID == 0) {
@@ -157,16 +120,10 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
     return {
         element: modal,
-        destroy: () => (() => {
-            let modalExists = true;
-            return () => {
-                if (modalExists) {
-                    cancel();
-                    modal.remove();
-                    modalExists = false;
-                }
-            }
-        })(),
+        destroy: () => {
+            modal.remove();
+            cancel();
+        },
         show: () => modal.showModal(),
         hide: () => modal.close(),
     };

@@ -1,6 +1,7 @@
 import {buildMessdienerOverviewPage} from "./builder/messdiener-overview";
 import {buildChurchesOverviewPage} from "./builder/churches-overview";
 import {buildMassesOverviewPage} from "./builder/masses-overview";
+import {buildPlanCreatorPage} from "./builder/plan-creator";
 
 export enum Pages {
     Main,
@@ -13,6 +14,9 @@ export enum Pages {
 
 export const routeToPage = (destination: Pages) => {
     switch (destination) {
+        case Pages.Planner:
+            buildPlanCreatorPage();
+            break;
         case Pages.Main:
             buildMessdienerOverviewPage();
             break;

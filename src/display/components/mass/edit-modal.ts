@@ -1,4 +1,3 @@
-import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {
     Mass,
     MessdienerMassAllocation
@@ -6,80 +5,56 @@ import {
 import {ModalManager} from "../../types";
 import {ChurchSelector} from "../church/church-selector";
 import {MessdienerAllocator} from "../messdiener/allocator";
-
-let editMassModalCount = 0;
+import {generateHTMLElementsForm} from "../form-creator";
+import {getMass} from "../../state/specific-entries";
 
 export const generateEditMassModal = (id: number): ModalManager => {
-    const thisModalCount = editMassModalCount++;
     const modal = document.createElement("dialog");
 
     modal.classList.add("mass-edit", "modal", "form");
 
-    const numberOfInputElement = 4;
-    const inputElementIDs: string[] = new Array<string>(numberOfInputElement);
-    for (let i = 0; i < numberOfInputElement; i++) {
-        inputElementIDs[i] = `modal-edit-mass-${thisModalCount}-input-${i}`;
-    }
+    const headerElem = document.createElement("h1");
+    headerElem.innerText = "Messe bearbeiten";
 
-    modal.innerHTML = `
-        <h1>Messe bearbeiten</h1>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[0]}}">Datum</label>
-            <input type="date" id="${inputElementIDs[0]}">
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[1]}}">Kirche (Final)</label>
-            <select is="church-selector" id="${inputElementIDs[1]}"></select>
-        </div>
-        <div class="field">
-            <label class="label" for="${inputElementIDs[2]}}">Notiz (Optional)</label>
-            <input type="text" id="${inputElementIDs[2]}">
-        </div>
-        <div class="field messdiener-allocation">
-            <label class="label" for="${inputElementIDs[3]}}">Messdiener Zuweisung</label>
-            <messdiener-allocator id="${inputElementIDs[3]}"></messdiener-allocator>
-        </div>
-        <div class="field controls">
-            <button class="cancel">Abbrechen</button>
-            <button class="save">Speichern</button>
-            <button class="delete">Löschen</button>
-        </div>
-        `
+    const formElements = generateHTMLElementsForm([
+        {tagName: "input", labelText: "Datum", type: "date"},
+        {tagName: "select", labelText: "Kirche (Final)", is: "church-selector"},
+        {tagName: "input", labelText: "Notiz (Optional)", type: "text"},
+        {tagName: "messdiener-allocator", labelText: "Messdiener Zuweisung"},
+    ])
+
+    const controlsField = document.createElement("div");
+    const cancelBtn = document.createElement("button");
+    const saveBtn = document.createElement("button");
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "Löschen";
+    cancelBtn.innerText = "Abbrechen";
+    saveBtn.innerText = "Speichern";
+    controlsField.classList.add("field", "controls");
+    cancelBtn.classList.add("cancel");
+    saveBtn.classList.add("save");
+    delBtn.classList.add("delete");
+
+
+    controlsField.append(cancelBtn, saveBtn, delBtn);
+
+    modal.append(headerElem, ...(formElements.nodes), controlsField);
 
     document.body.appendChild(modal);
 
-    const inputDate = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[0]);
-    const churchSelector = modal.querySelector<ChurchSelector>("#" + inputElementIDs[1]);
-    const inputNote = modal.querySelector<HTMLInputElement>("#" + inputElementIDs[2]);
-    const messdienerAllocator = modal.querySelector<MessdienerAllocator>("#" + inputElementIDs[3]);
-
-    const saveBtn = modal.querySelector<HTMLButtonElement>("button.save");
-    const delBtn = modal.querySelector<HTMLButtonElement>("button.delete");
-
-    if (!inputDate || !churchSelector || !inputNote || !saveBtn || !delBtn || !messdienerAllocator) {
-        modal.innerHTML = "<h1>A fatal error occurred!</h1>";
-        console.error("Encountered issue with getting inputs of edit mass modal!");
-        return {
-            element: modal,
-            destroy: () => (() => {
-                let modalExists = true;
-                return () => {
-                    if (modalExists) {
-                        modal.remove();
-                        modalExists = false;
-                    }
-                }
-            })(),
-            show: () => modal.showModal(),
-            hide: () => modal.close(),
-        };
-    }
+    const inputDate = formElements.elements[0] as HTMLInputElement;
+    const churchSelector = formElements.elements[1] as ChurchSelector;
+    const inputNote = formElements.elements[2] as HTMLInputElement;
+    const messdienerAllocator = formElements.elements[3] as MessdienerAllocator;
 
     churchSelector.readonly = true;
 
-
-    const cancel = addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
-        const mass = data.filter(m => m.id == id)[0];
+    getMass(id).then((mass: Mass | undefined) => {
+        if (!mass) {
+            headerElem.innerText = "Unbekannte Messe!";
+            modal.replaceChildren(headerElem);
+            return;
+        }
 
         const setDate = new Date(Number(String(mass.date).substring(0, 4)),
             Number(String(mass.date).substring(4, 6)) - 1,
@@ -127,7 +102,6 @@ export const generateEditMassModal = (id: number): ModalManager => {
             })
             if (setDivergences.length != 0) {
                 modal.close();
-                console.log(setDivergences);
                 window.electronAPI.changeMessdienerMassAllocation(setDivergences);
             }
         })
@@ -147,16 +121,9 @@ export const generateEditMassModal = (id: number): ModalManager => {
 
     return {
         element: modal,
-        destroy: () => (() => {
-            let modalExists = true;
-            return () => {
-                if (modalExists) {
-                    cancel();
-                    modal.remove();
-                    modalExists = false;
-                }
-            }
-        })(),
+        destroy: () => {
+            modal.remove();
+        },
         show: () => modal.showModal(),
         hide: () => modal.close(),
     };

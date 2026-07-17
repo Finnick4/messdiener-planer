@@ -6,7 +6,7 @@ import {
     MessdienerChurchActivityStatus,
     MessdienerMassAllocation
 } from "../shared/general";
-import {ipcRenderer, IpcRenderer} from "electron";
+import {IpcRenderer} from "electron";
 
 declare global {
     interface Window {
@@ -27,6 +27,7 @@ declare global {
             deleteMass: (id: number) => void;
             editMass: (mass: Mass) => void;
             changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]) => void;
+            exportPlan: () => void;
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer;
             onFamiliesUpdate: (callback: (data: Family[]) => void) => IpcRenderer;

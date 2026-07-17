@@ -291,6 +291,7 @@ mass-list {
     }
 }
 
+mass-list .placeholder,
 .mass.entry {
     display: grid;
     grid-template-rows: repeat(2, auto) 1fr;

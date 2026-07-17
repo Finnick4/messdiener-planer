@@ -1,9 +1,17 @@
-import {setMainAndSidebar} from "./utilities";
+import {setMainAndSidebar, SidebarEntries} from "./utilities";
+import {MessdienerList} from "../components/messdiener/list";
+import {MessdienerCreateButton} from "../components/messdiener/create-button";
 
 export const buildMessdienerOverviewPage = () => {
-    setMainAndSidebar(`
-        <h1>Alle Messdiener</h1>
-        <messdiener-list></messdiener-list>
-        <messdiener-create-button class="centered"></messdiener-create-button>
-    `)
+    const header = document.createElement("h1");
+    header.innerText = `Alle Messdiener`;
+    const messdienerList = document.createElement("messdiener-list") as MessdienerList;
+    const messdienerCreateBtn = document.createElement("messdiener-create-button") as MessdienerCreateButton;
+    messdienerCreateBtn.classList.add("centered");
+
+    setMainAndSidebar([
+        header,
+        messdienerList,
+        messdienerCreateBtn,
+    ], SidebarEntries.messdiener)
 }

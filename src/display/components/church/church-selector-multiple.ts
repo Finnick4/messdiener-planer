@@ -42,6 +42,11 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
                 return option;
             }
 
+            if (data == undefined) {
+                return
+            }
+
+
             const options: HTMLOptionElement[] = data.map(church => makeOptionElement(createInternalChurchName(church.name, church.location), church.id));
 
             this.replaceChildren(...options);

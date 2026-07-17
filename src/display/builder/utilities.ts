@@ -12,7 +12,7 @@ export enum SidebarEntries {
 let sidebarElem: HTMLDivElement;
 let mainElem: HTMLElement;
 
-export const setMainAndSidebar = (mainHTML: string, sidebarHighlight = SidebarEntries.unselected) => {
+export const setMainAndSidebar = (mainChildren: Node[], sidebarHighlight = SidebarEntries.unselected) => {
     if (!sidebarElem) {
         sidebarElem = document.createElement("div");
         sidebarElem.classList.add("sidebar");
@@ -22,7 +22,7 @@ export const setMainAndSidebar = (mainHTML: string, sidebarHighlight = SidebarEn
         mainElem = document.createElement("main");
         document.body.appendChild(mainElem);
     }
-    mainElem.innerHTML = mainHTML;
+    mainElem.replaceChildren(...mainChildren);
     updateSidebar(sidebarHighlight);
 }
 
@@ -39,17 +39,18 @@ const updateSidebar = (currentEntry: SidebarEntries) => {
         {id: SidebarEntries.churches, text: "Kirchen", onclick: () => routeToPage(Pages.ChurchesOverview)},
         {id: SidebarEntries.absence, text: "Abwesenheitszeiträume", onclick: () => routeToPage(Pages.AbsencesOverview)}
     ]
-    sidebarElem.innerHTML = "";
+    const htmlElements: HTMLButtonElement[] = [];
     for (const element of elements) {
         const elem = document.createElement("button");
-        elem.innerHTML = element.text;
+        elem.innerText = element.text;
         elem.onclick = element.onclick;
         elem.dataset.id = String(element.id);
         if (element.id == currentEntry) {
             elem.classList.add("selected");
         }
-        sidebarElem.appendChild(elem);
+        htmlElements.push(elem);
     }
+    sidebarElem.replaceChildren(...htmlElements)
 }
 
 let idCounter = 0;

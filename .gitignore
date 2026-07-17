@@ -93,3 +93,6 @@ out/
 package-lock.json
 .idea
 *.db
+
+*.tex
+*.pdf

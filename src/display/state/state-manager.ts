@@ -9,9 +9,7 @@ interface SubscriptionListElement<T> {
 class State<T> {
     private subscriptions: SubscriptionListElement<T>[];
     private idCounter: number;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    private savedData: T;
+    private savedData: T | undefined;
     private queryDataFunction: () => Promise<T>;
 
     constructor(fn: () => Promise<T>) {
@@ -26,15 +24,21 @@ class State<T> {
             id: this.idCounter++,
         }
         let p: Promise<T>;
-        if (this.idCounter == 1) {
+        if (this.savedData == undefined) {
             p = this.queryDataFunction();
         } else {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             p = new Promise<T>((resolve) => resolve(this.savedData))
         }
         this.subscriptions.push(elem)
         p.then(data => {
+            if (data == undefined) {
+                console.error("undefined data!!!");
+                throw new Error("Undefined data within state!");
+            }
             this.savedData = data;
-            fn(this.savedData)
+            fn(structuredClone(this.savedData));
         })
         return () => {
             this.remove(elem.id)
@@ -43,7 +47,7 @@ class State<T> {
     pushUpdate(data: T) {
         this.savedData = data
         for (const elem of this.subscriptions) {
-            elem.fn(this.savedData)
+            elem.fn(structuredClone<T>(this.savedData))
         }
     }
     private remove(id: number) {
@@ -52,18 +56,10 @@ class State<T> {
 }
 
 const states = {
-    AllMessdiener: new State<Array<Messdiener>>(() => {
-        return window.electronAPI.getAllMessdiener();
-    }),
-    AllFamilies: new State<Family[]>(() => {
-        return window.electronAPI.getAllFamilies();
-    }),
-    AllChurches: new State<Church[]>(() => {
-        return window.electronAPI.getAllChurches();
-    }),
-    AllMasses: new State<Mass[]>(() => {
-        return window.electronAPI.getAllMasses();
-    }),
+    AllMessdiener: new State<Array<Messdiener>>(window.electronAPI.getAllMessdiener),
+    AllFamilies: new State<Family[]>(window.electronAPI.getAllFamilies),
+    AllChurches: new State<Church[]>(window.electronAPI.getAllChurches),
+    AllMasses: new State<Mass[]>(window.electronAPI.getAllMasses),
 }
 
 export enum ListenerEndpoints {

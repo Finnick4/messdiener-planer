@@ -6,6 +6,10 @@ export class MessdienerPreparedList extends HTMLElement {
     constructor() {
         super();
     }
+    private disconnectedHandler = () => {
+        return;
+    };
+
     connectedCallback() {
         this.classList.add("list", "prepared");
 
@@ -16,7 +20,7 @@ export class MessdienerPreparedList extends HTMLElement {
                 if (data.length == 0) {
                     const placeholder = document.createElement("p");
                     placeholder.classList.add("placeholder");
-                    placeholder.innerHTML = "Bisher existieren noch keine Messdiener!"
+                    placeholder.innerText = "Bisher existieren noch keine Messdiener!"
                     this.replaceChildren(placeholder);
                     return
                 }
@@ -24,7 +28,7 @@ export class MessdienerPreparedList extends HTMLElement {
                     if (ids.size == 0) {
                         const placeholder = document.createElement("p");
                         placeholder.classList.add("placeholder");
-                        placeholder.innerHTML = "Es wurden noch keine Messdiener ausgewält!"
+                        placeholder.innerText = "Es wurden noch keine Messdiener ausgewält!"
                         this.replaceChildren(placeholder);
                         return true
                     }
@@ -69,7 +73,7 @@ export class MessdienerPreparedList extends HTMLElement {
 
         this.changePickedMessdiener(new Set<number>());
 
-        this.disconnectedCallback = () => {
+        this.disconnectedHandler = () => {
             onDisconnect.forEach(fn => fn());
         }
     }
@@ -83,6 +87,7 @@ export class MessdienerPreparedList extends HTMLElement {
     }
 
     disconnectedCallback() {
-        return
+        this.disconnectedHandler();
+        return;
     }
 }

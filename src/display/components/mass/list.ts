@@ -1,22 +1,31 @@
-import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
+import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
 import {Mass, Messdiener} from "../../../shared/general";
 import {MassCreateButton} from "./create-button";
 import {generateEditMassModal} from "./edit-modal";
+import {getMessdienerMap} from "../../state/specific-entries";
 
 export class MassList extends HTMLElement {
+    private disconnectedHandler = () => {
+        return;
+    };
+
     connectedCallback() {
-        const closeModals: (() => void)[] = [];
+        let closeModals: (() => void)[] = [];
         const cancel = addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
+            closeModals.forEach(fn => fn());
+            closeModals = [];
             if (data.length == 0) {
                 const placeholder = document.createElement("p");
                 placeholder.classList.add("placeholder");
-                placeholder.innerHTML = "Es wurden noch keine Messen erstellt!"
+                placeholder.innerText = "Es wurden noch keine Messen erstellt!"
                 this.replaceChildren(placeholder);
                 return
             }
             data = data.sort((a, b) => a.date - b.date);
 
-            const elements = data.map(mass => {
+            const elements: HTMLDivElement[] = [];
+
+            for (const mass of data) {
                 const entry = document.createElement("div");
                 entry.dataset.id = String(mass.id);
                 entry.classList.add("mass", "entry");
@@ -41,17 +50,14 @@ export class MassList extends HTMLElement {
                 messdiener.textContent = mass.allocatedMessdiener.size == 0 ? "Alle" : "";
                 messdiener.classList.add("messdiener", "section");
 
-                const cancelInner = addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
-                    const mapped = new Map<number, Messdiener>(data.map((m) => [m.identifier, m]));
-
-                    mass.allocatedMessdiener.forEach(mini => {
-                        const m = document.createElement("div");
-                        const name = mapped.get(mini)?.firstName
-                        m.textContent = name ? name : "Unbekannt";
-                        m.classList.add("messdiener");
-                        messdiener.appendChild(m);
-                    })
-                    cancelInner()
+                getMessdienerMap().then((mapped: Map<number, Messdiener>) => {
+                    mass.allocatedMessdiener.forEach(allocatedMessdienerID => {
+                        const messdienerPlaque = document.createElement("div");
+                        const name = mapped.get(allocatedMessdienerID)?.firstName
+                        messdienerPlaque.textContent = name ? name : "Unbekannt";
+                        messdienerPlaque.classList.add("messdiener");
+                        messdiener.appendChild(messdienerPlaque);
+                    });
                 });
 
                 const modal = generateEditMassModal(mass.id);
@@ -59,8 +65,8 @@ export class MassList extends HTMLElement {
                 closeModals.push(modal.destroy);
 
                 entry.appendChild(messdiener);
-                return entry;
-            })
+                elements.push(entry);
+            }
 
             this.replaceChildren(...elements);
 
@@ -68,13 +74,14 @@ export class MassList extends HTMLElement {
 
             this.appendChild(createBtn);
         })
-        this.disconnectedCallback = () => {
-            cancel()
-            closeModals.forEach(fn => fn())
-        }
+        this.disconnectedHandler = () => {
+            cancel();
+            closeModals.forEach(fn => fn());
+        };
     }
 
     disconnectedCallback() {
+        this.disconnectedHandler();
         return
     }
 }

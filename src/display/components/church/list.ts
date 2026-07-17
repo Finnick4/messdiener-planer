@@ -5,13 +5,17 @@ import {createInternalChurchName} from "../../logic/church";
 
 
 export class ChurchList extends HTMLElement {
+    private disconnectedHandler = () => {
+        return;
+    };
+
     connectedCallback() {
         this.classList.add("list");
         const cancel = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
             if (data.length == 0) {
                 const placeholder = document.createElement("p");
                 placeholder.classList.add("placeholder");
-                placeholder.innerHTML = "Es wurden noch keine Kirchen erstellt!"
+                placeholder.innerText = "Es wurden noch keine Kirchen erstellt!"
                 this.replaceChildren(placeholder);
                 return
             }
@@ -35,12 +39,13 @@ export class ChurchList extends HTMLElement {
 
             this.replaceChildren(...elements);
         })
-        this.disconnectedCallback = () => {
-            cancel()
-        }
+        this.disconnectedHandler = () => {
+            cancel();
+        };
     }
 
     disconnectedCallback() {
-        return
+        this.disconnectedHandler();
+        return;
     }
 }
