@@ -9,15 +9,9 @@ export const buildMassesOverviewPage = () => {
     const massCreateBtn = document.createElement("mass-create-button") as MassCreateButton;
     massCreateBtn.classList.add("centered");
 
-    // TODO remove this button!
-    const temporaryExportButton = document.createElement("button");
-    temporaryExportButton.classList.add("export");
-    temporaryExportButton.addEventListener("click", () => window.electronAPI.exportPlan());
-
     setMainAndSidebar([
         header,
         massList,
         massCreateBtn,
-        temporaryExportButton,
     ], SidebarEntries.masses);
 }
