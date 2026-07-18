@@ -61,8 +61,14 @@ export const texExport = (): Promise<string> => {
 
 const getMassAllocationMap = (masses: Mass[]): Map<number, number> => {
     const map = new Map<number, number>();
+    let allAllocated = 0;
 
     for (const mass of masses) {
+        if (mass.allocatedMessdiener.size == 0) {
+            allAllocated++;
+            continue;
+        }
+
         for (const messdienerID of mass.allocatedMessdiener) {
             const currentCount = map.get(messdienerID)
             if (currentCount == undefined) {
@@ -71,6 +77,11 @@ const getMassAllocationMap = (masses: Mass[]): Map<number, number> => {
             }
             map.set(messdienerID, currentCount + 1);
         }
+    }
+    if (allAllocated > 0) {
+        map.forEach((value, key) => {
+            map.set(key, value + allAllocated);
+        })
     }
 
     return map;
