@@ -1,5 +1,5 @@
-import {getAllMasses, getAllMessdiener} from "./state";
-import {ExportSettings, Mass, Messdiener} from "../../shared/general";
+import {getAllChurches, getAllMasses, getAllMessdiener} from "./state";
+import {Church, ExportSettings, Mass, Messdiener} from "../../shared/general";
 import * as fs from "node:fs";
 
 export const texExport = (settings: ExportSettings): Promise<string> => {
@@ -12,14 +12,25 @@ export const texExport = (settings: ExportSettings): Promise<string> => {
             year: "numeric"
         });
 
-        Promise.all([getAllMasses(), getAllMessdiener()]).then(responses => {
+        Promise.all([
+            getAllMasses(),
+            getAllMessdiener(),
+            getAllChurches(),
+        ]).then(responses => {
             const allMasses = responses[0].filter(mass => settings.displayedChurchIDs.has(mass.churchID)).sort((a, b) => a.date - b.date);
             const allMessdiener = responses[1];
+            const allChurches = responses[2];
+
             const mappedMessdiener = new Map<number, Messdiener>(allMessdiener.map((m) => [m.identifier, m]));
+            const mappedChurches = new Map<number, Church>(allChurches.map((c) => [c.id, c]));
             const massesPerRow = 5;
 
             let massesLaTeXString = "\\begin{table}[] "
             const individualMassesStrings = allMasses.map((mass, index) => {
+                if (settings.otherChurchComment && mass.churchID != settings.mainChurchID) {
+                    const additionalNote = settings.otherChurchCommentUseLocation ? mappedChurches.get(mass.churchID)?.location : mappedChurches.get(mass.churchID)?.name
+                    mass.note = additionalNote ? `${mass.note} (${additionalNote})` : mass.note;
+                }
                 if (index % massesPerRow == massesPerRow - 1) {
                     return makeLaTeXStringFromMass(mass, mappedMessdiener) + "\\hfill \\break";
                 }
