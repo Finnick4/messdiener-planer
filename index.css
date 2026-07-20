@@ -161,9 +161,6 @@ family-adder {
         margin-bottom: .5rem;
         display: block;
     }
-    input {
-        width: calc(100% - 2*var(--border-width) - 2*var(--padding-button));
-    }
     .controls {
         display: flex;
         justify-content: flex-start;
@@ -182,12 +179,6 @@ family-adder {
     button.delete {
         margin-left: auto;
     }
-    select {
-        width: calc(100% - 2 * var(--border-width));
-    }
-    select.multiple {
-        height: fit-content;
-    }
 }
 
 .modal:open.form {
@@ -197,6 +188,25 @@ family-adder {
 
 .button.centered {
     margin: 1rem auto;
+}
+
+.form:not(.modal) {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin-block-end: .5rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    input {
+        width: calc(100% - 2*var(--border-width) - 2*var(--padding-button));
+    }
+}
+.field.controls {
+    flex-direction: row;
 }
 
 input {
@@ -215,6 +225,11 @@ select {
     width: calc(100% - 2 * var(--border-width));
     font-size: 1rem;
     appearance: base-select;
+}
+select.multiple {
+    height: fit-content;
+    width: calc(100% - 2 * var(--border-width) - 1rem);
+
 }
 select::picker-icon {
     color: var(--text-muted);
@@ -273,6 +288,7 @@ option:checked {
 mass-list {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: 1fr;
     gap: 1rem;
 
     .button.create {
@@ -331,6 +347,51 @@ messdiener-allocator {
     gap: 1rem;
 }
 
-family-adder {
 
+input.switch {
+    --knob-size: 1rem;
+    --knob-location: 0%;
+    padding: var(--padding-row);
+    width: calc(var(--knob-size) * 2 + var(--padding-row) * 2);
+    appearance: none;
+    flex-shrink: 0;
+    display: grid;
+    align-items: center;
+    grid: [track] 1fr / [track] 1fr;
+    cursor: pointer;
+    user-select: none;
+    transition: translate .1s ease, background-color .1s ease;
+}
+input.switch:checked {
+    --knob-location: calc(100% - var(--padding-row));
+    background-color: var(--secondary-pressed);
+}
+
+input.switch:hover {
+    translate: 0 -2px;
+}
+input.switch:hover:checked {
+    background-color: var(--secondary-hover);
+}
+
+input.switch::before {
+    content: "";
+    grid-area: track;
+    width: var(--knob-size);
+    height: var(--knob-size);
+
+    background: var(--secondary);
+    border-radius: 50%;
+    transform: translateX(var(--knob-location));
+    transition: transform .1s ease;
+}
+input.switch:hover::before {
+    background-color: var(--secondary-hover);
+}
+
+input.switch:checked::before {
+    background: var(--primary);
+}
+input.switch:hover:checked::before {
+    background-color: var(--primary-hover);
 }

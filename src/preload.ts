@@ -1,7 +1,7 @@
 
 import { contextBridge, ipcRenderer, IpcRenderer } from 'electron';
 import {
-    Church,
+    Church, ExportSettings,
     Family,
     Mass,
     Messdiener,
@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteMass: (id: number): void=> ipcRenderer.send("remove-mass", id),
     editMass: (mass: Mass): void=> ipcRenderer.send("edit-mass", mass),
     changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]): void=> ipcRenderer.send("change-messdiener-mass-allocation", activities),
-    exportPlan: (): void => ipcRenderer.send("export-plan"),
+    exportPlan: (settings: ExportSettings): void => ipcRenderer.send("export-plan", settings),
 
     onMessdienerUpdate: (callback: (data: Messdiener[]) => void): IpcRenderer => ipcRenderer.on('update-messdiener', (_event, value) => callback(value)),
     onFamiliesUpdate: (callback: (data: Family[]) => void): IpcRenderer => ipcRenderer.on('update-families', (_event, value) => callback(value)),

@@ -1,25 +1,40 @@
-import {getAllMasses, getAllMessdiener} from "./state";
-import {Mass, Messdiener} from "../../shared/general";
+import {getAllChurches, getAllMasses, getAllMessdiener} from "./state";
+import {Church, ExportSettings, Mass, Messdiener} from "../../shared/general";
 import * as fs from "node:fs";
 
-export const texExport = (): Promise<string> => {
+export const texExport = (settings: ExportSettings): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
-        const title = "Messdienerplan";
-        const version = "2026.2";
+        const title = settings.title;
+        const version = settings.version;
         const lastUpdate = new Date().toLocaleString("de", {
             day: "numeric",
             month: "long",
             year: "numeric"
         });
 
-        Promise.all([getAllMasses(), getAllMessdiener()]).then(responses => {
-            const allMasses = responses[0].sort((a, b) => a.date - b.date);
+        Promise.all([
+            getAllMasses(),
+            getAllMessdiener(),
+            getAllChurches(),
+        ]).then(responses => {
+            const allMasses = responses[0].filter(mass => settings.displayedChurchIDs.has(mass.churchID)).sort((a, b) => a.date - b.date);
             const allMessdiener = responses[1];
+            const allChurches = responses[2];
+
             const mappedMessdiener = new Map<number, Messdiener>(allMessdiener.map((m) => [m.identifier, m]));
+            const mappedChurches = new Map<number, Church>(allChurches.map((c) => [c.id, c]));
             const massesPerRow = 5;
 
             let massesLaTeXString = "\\begin{table}[] "
             const individualMassesStrings = allMasses.map((mass, index) => {
+                if (settings.otherChurchComment && mass.churchID != settings.mainChurchID) {
+                    const additionalNote = settings.otherChurchCommentUseLocation ? mappedChurches.get(mass.churchID)?.location : mappedChurches.get(mass.churchID)?.name;
+                    if (mass.note) {
+                        mass.note = additionalNote ? `${mass.note} (${additionalNote})` : mass.note;
+                    } else {
+                        mass.note = additionalNote ? `(${additionalNote})` : undefined;
+                    }
+                }
                 if (index % massesPerRow == massesPerRow - 1) {
                     return makeLaTeXStringFromMass(mass, mappedMessdiener) + "\\hfill \\break";
                 }
@@ -61,8 +76,14 @@ export const texExport = (): Promise<string> => {
 
 const getMassAllocationMap = (masses: Mass[]): Map<number, number> => {
     const map = new Map<number, number>();
+    let allAllocated = 0;
 
     for (const mass of masses) {
+        if (mass.allocatedMessdiener.size == 0) {
+            allAllocated++;
+            continue;
+        }
+
         for (const messdienerID of mass.allocatedMessdiener) {
             const currentCount = map.get(messdienerID)
             if (currentCount == undefined) {
@@ -71,6 +92,11 @@ const getMassAllocationMap = (masses: Mass[]): Map<number, number> => {
             }
             map.set(messdienerID, currentCount + 1);
         }
+    }
+    if (allAllocated > 0) {
+        map.forEach((value, key) => {
+            map.set(key, value + allAllocated);
+        })
     }
 
     return map;
