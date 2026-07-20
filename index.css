@@ -161,9 +161,6 @@ family-adder {
         margin-bottom: .5rem;
         display: block;
     }
-    input {
-        width: calc(100% - 2*var(--border-width) - 2*var(--padding-button));
-    }
     .controls {
         display: flex;
         justify-content: flex-start;
@@ -182,12 +179,6 @@ family-adder {
     button.delete {
         margin-left: auto;
     }
-    select {
-        width: calc(100% - 2 * var(--border-width));
-    }
-    select.multiple {
-        height: fit-content;
-    }
 }
 
 .modal:open.form {
@@ -197,6 +188,10 @@ family-adder {
 
 .button.centered {
     margin: 1rem auto;
+}
+
+.field input {
+    width: calc(100% - 2*var(--border-width) - 2*var(--padding-button));
 }
 
 input {
@@ -215,6 +210,11 @@ select {
     width: calc(100% - 2 * var(--border-width));
     font-size: 1rem;
     appearance: base-select;
+}
+select.multiple {
+    height: fit-content;
+    width: calc(100% - 2 * var(--border-width) - 1rem);
+
 }
 select::picker-icon {
     color: var(--text-muted);

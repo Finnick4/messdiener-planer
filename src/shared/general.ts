@@ -42,3 +42,12 @@ export type MessdienerMassAllocation = {
     massID: number
     isActive: boolean
 }
+
+export type ExportSettings = {
+    title: string
+    version: string
+    displayedChurchIDs: Set<number>
+    mainChurchID: number
+    otherChurchComment: boolean
+    otherChurchCommentUseLocation: boolean
+}

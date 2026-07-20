@@ -1,11 +1,11 @@
 import {getAllMasses, getAllMessdiener} from "./state";
-import {Mass, Messdiener} from "../../shared/general";
+import {ExportSettings, Mass, Messdiener} from "../../shared/general";
 import * as fs from "node:fs";
 
-export const texExport = (): Promise<string> => {
+export const texExport = (settings: ExportSettings): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
-        const title = "Messdienerplan";
-        const version = "2026.2";
+        const title = settings.title;
+        const version = settings.version;
         const lastUpdate = new Date().toLocaleString("de", {
             day: "numeric",
             month: "long",
@@ -13,7 +13,7 @@ export const texExport = (): Promise<string> => {
         });
 
         Promise.all([getAllMasses(), getAllMessdiener()]).then(responses => {
-            const allMasses = responses[0].sort((a, b) => a.date - b.date);
+            const allMasses = responses[0].filter(mass => settings.displayedChurchIDs.has(mass.churchID)).sort((a, b) => a.date - b.date);
             const allMessdiener = responses[1];
             const mappedMessdiener = new Map<number, Messdiener>(allMessdiener.map((m) => [m.identifier, m]));
             const massesPerRow = 5;

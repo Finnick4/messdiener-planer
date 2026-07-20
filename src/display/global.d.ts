@@ -1,5 +1,5 @@
 import {
-    Church,
+    Church, ExportSettings,
     Family,
     Mass,
     Messdiener,
@@ -27,7 +27,7 @@ declare global {
             deleteMass: (id: number) => void;
             editMass: (mass: Mass) => void;
             changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]) => void;
-            exportPlan: () => void;
+            exportPlan: (settings: ExportSettings) => void;
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer;
             onFamiliesUpdate: (callback: (data: Family[]) => void) => IpcRenderer;
