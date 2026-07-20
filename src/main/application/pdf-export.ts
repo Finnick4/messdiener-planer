@@ -28,8 +28,12 @@ export const texExport = (settings: ExportSettings): Promise<string> => {
             let massesLaTeXString = "\\begin{table}[] "
             const individualMassesStrings = allMasses.map((mass, index) => {
                 if (settings.otherChurchComment && mass.churchID != settings.mainChurchID) {
-                    const additionalNote = settings.otherChurchCommentUseLocation ? mappedChurches.get(mass.churchID)?.location : mappedChurches.get(mass.churchID)?.name
-                    mass.note = additionalNote ? `${mass.note} (${additionalNote})` : mass.note;
+                    const additionalNote = settings.otherChurchCommentUseLocation ? mappedChurches.get(mass.churchID)?.location : mappedChurches.get(mass.churchID)?.name;
+                    if (mass.note) {
+                        mass.note = additionalNote ? `${mass.note} (${additionalNote})` : mass.note;
+                    } else {
+                        mass.note = additionalNote ? `(${additionalNote})` : undefined;
+                    }
                 }
                 if (index % massesPerRow == massesPerRow - 1) {
                     return makeLaTeXStringFromMass(mass, mappedMessdiener) + "\\hfill \\break";

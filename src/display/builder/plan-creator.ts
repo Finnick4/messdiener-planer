@@ -21,18 +21,28 @@ export const buildPlanCreatorPage = () => {
 
     const settingsHeader = document.createElement("h2");
     settingsHeader.innerText = `Exporteinstellungen`;
+    const formDiv = document.createElement("div");
+    formDiv.classList.add("form");
 
     const formElements = generateHTMLElementsForm([
         {tagName: "input", labelText: "Titel", type: "text"},
         {tagName: "input", labelText: "Version", type: "text"},
         {tagName: "select", labelText: "Kirchengemeinden", is: "church-selector-multiple"},
         {tagName: "select", labelText: "Hauptkirche", is: "church-selector"},
+        {tagName: "input", labelText: "Zweitkirchennotiz", type: "checkbox"},
+        {tagName: "input", labelText: "Zweitkirchennotiz als Ortsangabe", type: "checkbox"},
     ]);
+    formDiv.replaceChildren(...formElements.nodes)
 
     const inputTitle = formElements.elements[0] as HTMLInputElement;
     const inputVersion = formElements.elements[1] as HTMLInputElement;
     const churchSelector = formElements.elements[2] as ChurchSelectorMultiple;
     const mainChurch = formElements.elements[3] as ChurchSelector;
+    const switchNote = formElements.elements[4] as HTMLInputElement;
+    const switchNoteLocation = formElements.elements[5] as HTMLInputElement;
+
+    switchNote.classList.add("switch");
+    switchNoteLocation.classList.add("switch")
 
     inputTitle.value = "Messdienerplan"
 
@@ -48,8 +58,8 @@ export const buildPlanCreatorPage = () => {
         window.electronAPI.exportPlan({
             displayedChurchIDs: churchSelector.getSelectedChurches(),
             mainChurchID: mainChurch.getSelectedChurch(),
-            otherChurchComment: false,
-            otherChurchCommentUseLocation: false,
+            otherChurchComment: switchNote.checked,
+            otherChurchCommentUseLocation: switchNoteLocation.checked,
             title: inputTitle.value,
             version: inputVersion.value,
         })
@@ -60,7 +70,7 @@ export const buildPlanCreatorPage = () => {
         noticesHeader,
         ...notices,
         settingsHeader,
-        ...formElements.nodes,
+        formDiv,
         exportBtn,
     ], SidebarEntries.plan_creator);
 }
