@@ -1,6 +1,7 @@
 import {getAllChurches, getAllMasses, getAllMessdiener} from "./state";
 import {Church, ExportSettings, Mass, Messdiener} from "../../shared/general";
 import * as fs from "node:fs";
+import {writeExportSettings} from "../infrastructure/settings";
 
 export const texExport = (settings: ExportSettings): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
@@ -16,6 +17,7 @@ export const texExport = (settings: ExportSettings): Promise<string> => {
             getAllMasses(),
             getAllMessdiener(),
             getAllChurches(),
+            writeExportSettings(settings),
         ]).then(responses => {
             const allMasses = responses[0].filter(mass => settings.displayedChurchIDs.has(mass.churchID)).sort((a, b) => a.date - b.date);
             const allMessdiener = responses[1];
