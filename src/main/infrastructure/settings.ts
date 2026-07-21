@@ -10,16 +10,34 @@ type ExportSettingsStorage = {
     otherChurchCommentUseLocation: boolean
 }
 
-export const readExportSettings = (): Promise<ExportSettings> => {
-    return new Promise<ExportSettings>((resolve, reject) => {
+const safeParseJSON = <T>(str: string): T | undefined => {
+    try {
+        const obj: T = JSON.parse(str);
+        return obj;
+    } catch {
+        return undefined;
+    }
+}
+
+export const readExportSettings = (): Promise<ExportSettings | undefined> => {
+    return new Promise<ExportSettings | undefined>((resolve, reject) => {
         fs.readFile("exportSettings.json", (err, result) => {
             if (err) {
+                if (err.code == "ENOENT") {
+                    console.log("Did not find any saved export settings!");
+                    resolve(undefined);
+                    return;
+                }
                 console.error("Error while reading export settings:")
                 console.error(err.message);
                 reject(err);
                 return;
             }
-            const settings: ExportSettingsStorage = JSON.parse(result.toString());
+            const settings = safeParseJSON<ExportSettingsStorage>(result.toString());
+            if (!settings) {
+                resolve(undefined);
+                return;
+            }
             const converted: ExportSettings = {
                 mainChurchID: settings.mainChurchID,
                 otherChurchComment: settings.otherChurchComment,
@@ -28,7 +46,6 @@ export const readExportSettings = (): Promise<ExportSettings> => {
                 version: settings.version,
                 displayedChurchIDs: new Set<number>(settings.displayedChurchIDs)
             };
-            console.log(converted)
             resolve(converted);
         })
     })

@@ -1,4 +1,4 @@
-import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
+import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {Mass, Messdiener} from "../../../shared/general";
 import {MassCreateButton} from "./create-button";
 import {generateEditMassModal} from "./edit-modal";

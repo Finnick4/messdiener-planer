@@ -1,4 +1,4 @@
-import { Messdiener } from "src/shared/general";
+import {Messdiener} from "src/shared/general";
 import {getData, ListenerEndpoints} from "../state/state-manager";
 
 export const createInternalFamilyName = (internalName: string, displayName: string): string => {

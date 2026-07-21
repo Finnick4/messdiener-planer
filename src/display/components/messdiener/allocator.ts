@@ -1,7 +1,6 @@
 import {MessdienerPreparedList} from "./prepared-list";
 import FamilyAdder from "../family/family-adder";
 import {Messdiener} from "../../../shared/general";
-import {getData, ListenerEndpoints} from "../../state/state-manager";
 import {getMessdienerMap} from "../../state/specific-entries";
 
 export class MessdienerAllocator extends HTMLElement {
