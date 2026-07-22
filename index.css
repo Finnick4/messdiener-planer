@@ -31,12 +31,12 @@
     --border-width: .1rem;
     --border: solid hsl(0, 6%, 80%) var(--border-width);
     --border-radius: 1.5rem;
+
+    --fonts: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, Helvetica, Arial, sans-serif;
 }
 
 body {
-    font-family:
-        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, Helvetica, Arial
-        sans-serif;
+    font-family: var(--fonts), sans-serif;
     background-color: var(--bg-color-muted);
     margin: 0;
     color: var(--text);
@@ -53,7 +53,7 @@ body {
     top: 0;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     border: var(--border);
-    background-color: var(--bg-color-element);
+    background-color: var(--bg-color-muted);
     font-size: 1rem;
     gap: .25rem;
 
@@ -61,11 +61,10 @@ body {
         font-size: 1rem;
         border-radius: calc(var(--border-radius) - var(--padding-element));
         background-color: var(--bg-color-element);
-        border: solid hsl(0, 6%, 95%) var(--border-width);
+        border: solid hsl(0, 6%, 92%) var(--border-width);
     }
     button:hover {
         background-color: var(--dropdown-button-highlight);
-        border: var(--border);
     }
     button:active {
         background-color: var(--dropdown-button-pressed);
@@ -209,12 +208,14 @@ family-adder {
     flex-direction: row;
 }
 
-input {
+input,textarea {
     padding: var(--padding-button);
     background-color: var(--bg-color-element);
     font-size: 1rem;
     border-radius: calc(var(--border-radius) - var(--padding-button));
     border: var(--border);
+    color: var(--text);
+    font-family: var(--fonts), sans-serif;
 }
 
 select {
@@ -305,6 +306,10 @@ mass-list {
     .create.button:active {
         background-color: var(--secondary-pressed);
     }
+
+    .entry.hidden {
+        display: none;
+    }
 }
 
 mass-list .placeholder,
@@ -394,4 +399,21 @@ input.switch:checked::before {
 }
 input.switch:hover:checked::before {
     background-color: var(--primary-hover);
+}
+
+textarea {
+    resize: none;
+}
+
+details summary + .form {
+    margin-top: .5rem;
+}
+
+details summary {
+    font-weight: 550;
+    user-select: none;
+}
+
+details {
+    margin-bottom: 1rem;
 }

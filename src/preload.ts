@@ -1,7 +1,7 @@
-
-import { contextBridge, ipcRenderer, IpcRenderer } from 'electron';
+import {contextBridge, ipcRenderer, IpcRenderer} from 'electron';
 import {
-    Church, ExportSettings,
+    Church,
+    ExportSettings,
     Family,
     Mass,
     Messdiener,
@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getAllFamilies: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllFamilies"),
     getAllChurches: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllChurches"),
     getAllMasses: (): Promise<Mass[]> => ipcRenderer.invoke("dialog:getAllMasses"),
+    getRecentExportSettings: (): Promise<ExportSettings | undefined> => ipcRenderer.invoke("dialog:getRecentExportSettings"),
 
     createMessdiener: (name: string, family: Family | number, churchActivity?: number[]): void => ipcRenderer.send("create-messdiener", name, family, churchActivity),
     deleteMessdiener: (id: number): void=> ipcRenderer.send("remove-messdiener", id),

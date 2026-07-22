@@ -1,5 +1,6 @@
 import {
-    Church, ExportSettings,
+    Church,
+    ExportSettings,
     Family,
     Mass,
     Messdiener,
@@ -15,6 +16,7 @@ declare global {
             getAllFamilies: () => Promise<Family[]>;
             getAllChurches: () => Promise<Church[]>;
             getAllMasses: () => Promise<Mass[]>;
+            getRecentExportSettings: () => Promise<ExportSettings | undefined>,
 
             createMessdiener: (name: string, family: Family | number, churchActivity?: number[]) => void;
             deleteMessdiener: (id: number) => void;

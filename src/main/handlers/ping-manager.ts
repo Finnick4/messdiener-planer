@@ -1,6 +1,6 @@
 import {Church, Family, Mass, Messdiener} from "../../shared/general";
-import WebContents = Electron.WebContents;
 import {getAllChurches, getAllFamilies, getAllMasses, getAllMessdiener} from "../application/state";
+import WebContents = Electron.WebContents;
 
 export interface PingDestination {
     onMessdienerUpdate: (data: Messdiener[]) => void,

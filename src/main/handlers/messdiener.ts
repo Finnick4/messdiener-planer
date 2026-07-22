@@ -1,14 +1,15 @@
 import {Family, Messdiener, MessdienerChurchActivityStatus} from "../../shared/general";
 import {
-    areValidMessdienerIDs, changeMessdienerChurchActivity,
+    areValidMessdienerIDs,
+    changeMessdienerChurchActivity,
     changeMessdienerFamilyAssociation,
     changeMessdienerName,
     createMessdiener,
     getAllMessdiener,
     removeMessdiener
 } from "../application/state";
+import {pingFamiliesUpdate, pingMessdienerUpdate} from "./ping-manager";
 import IpcMainEvent = Electron.IpcMainEvent;
-import {pingMessdienerUpdate, pingFamiliesUpdate} from "./ping-manager";
 
 export const getAllMessdienerHandler = (): Promise<Messdiener[]> => {
     return getAllMessdiener()

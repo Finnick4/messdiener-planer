@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import {app, BrowserWindow, ipcMain} from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import {
@@ -9,13 +9,6 @@ import {
     removeMessdienerHandler
 } from "./main/handlers/messdiener";
 import {createPingDestination, pingManager} from "./main/handlers/ping-manager";
-import {
-    changeMessdienerMassAllocation,
-    createChurch,
-    getAllFamilies,
-    getAllMasses,
-    removeChurch
-} from "./main/application/state";
 import {getAllFamiliesHandler} from "./main/handlers/families";
 import {
     createChurchHandler,
@@ -25,9 +18,12 @@ import {
 } from "./main/handlers/churches";
 import {
     changeMessdienerMassAllocationHandler,
-    createMassHandler, editMassHandler, getAllMassesHandler, removeMassHandler
+    createMassHandler,
+    editMassHandler,
+    getAllMassesHandler,
+    removeMassHandler
 } from "./main/handlers/masses";
-import {exportPlanHandler} from "./main/handlers/plans";
+import {exportPlanHandler, recentExportSettingsHandler} from "./main/handlers/plans";
 
 if (started) {
   app.quit();
@@ -61,6 +57,7 @@ app.on('ready', () => {
     ipcMain.handle('dialog:getAllFamilies', getAllFamiliesHandler);
     ipcMain.handle('dialog:getAllChurches', getAllChurchesHandler);
     ipcMain.handle('dialog:getAllMasses', getAllMassesHandler);
+    ipcMain.handle('dialog:getRecentExportSettings', recentExportSettingsHandler)
 
     ipcMain.on('create-messdiener', createMessdienerHandler);
     ipcMain.on('remove-messdiener', removeMessdienerHandler);

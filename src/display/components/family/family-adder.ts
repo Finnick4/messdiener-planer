@@ -1,7 +1,6 @@
-import {Family, Mass, Messdiener} from "../../../shared/general";
-import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
+import {Family, Mass} from "../../../shared/general";
+import {getData, ListenerEndpoints} from "../../state/state-manager";
 import {createInternalFamilyName} from "../../logic/family";
-import {getAllFamilies} from "../../../main/application/state";
 import {getFamilyMembershipsMap} from "../../state/specific-entries";
 
 export class FamilyAdder extends HTMLElement {
@@ -87,7 +86,7 @@ export class FamilyAdder extends HTMLElement {
                     }
                     sizeTag.innerText = String(effectiveSize);
                     if (effectiveSize == 0) {
-                        elem.remove()
+                        elem.classList.add("no-effective-size");
                     }
                 }
 
@@ -114,6 +113,7 @@ export class FamilyAdder extends HTMLElement {
             }
 
             this.replaceChildren(...(selectableFamilies.map(makeElement)));
+            this.querySelectorAll(".no-effective-size").forEach(e => e.remove());
             checkIfEmpty();
         })
     }

@@ -1,13 +1,15 @@
-import {Mass, MessdienerChurchActivityStatus, MessdienerMassAllocation} from "../../shared/general";
+import {Mass, MessdienerMassAllocation} from "../../shared/general";
 import {
     areValidMessdienerIDs,
     changeMassDate,
-    changeMassNote, changeMessdienerChurchActivity, changeMessdienerMassAllocation,
-    createMass, getAllMasses,
+    changeMassNote,
+    changeMessdienerMassAllocation,
+    createMass,
+    getAllMasses,
     removeMass
 } from "../application/state";
+import {pingMassesUpdate} from "./ping-manager";
 import IpcMainEvent = Electron.IpcMainEvent;
-import {pingMassesUpdate, pingMessdienerUpdate} from "./ping-manager";
 
 export const getAllMassesHandler = (): Promise<Mass[]> => {
     return getAllMasses();

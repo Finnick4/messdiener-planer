@@ -1,13 +1,7 @@
 import {Church} from "../../shared/general";
-import {
-    changeChurchLocation,
-    changeChurchName,
-    createChurch,
-    getAllChurches,
-    removeChurch
-} from "../application/state";
-import IpcMainEvent = Electron.IpcMainEvent;
+import {changeChurchLocation, changeChurchName, createChurch, getAllChurches, removeChurch} from "../application/state";
 import {pingChurchesUpdate} from "./ping-manager";
+import IpcMainEvent = Electron.IpcMainEvent;
 
 export const getAllChurchesHandler = (): Promise<Church[]> => {
     return getAllChurches()

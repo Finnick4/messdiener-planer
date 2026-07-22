@@ -1,4 +1,4 @@
-import {addSubscription, getData, ListenerEndpoints} from "../../state/state-manager";
+import {addSubscription, ListenerEndpoints} from "../../state/state-manager";
 import {Mass, Messdiener} from "../../../shared/general";
 import {MassCreateButton} from "./create-button";
 import {generateEditMassModal} from "./edit-modal";
@@ -28,6 +28,8 @@ export class MassList extends HTMLElement {
             for (const mass of data) {
                 const entry = document.createElement("div");
                 entry.dataset.id = String(mass.id);
+                entry.dataset.churchId = String(mass.churchID);
+                entry.dataset.originalNote = mass.note ? mass.note : "";
                 entry.classList.add("mass", "entry");
 
                 const date = document.createElement("div");

@@ -2,6 +2,8 @@ import {setMainAndSidebar, SidebarEntries} from "./utilities";
 import {generateHTMLElementsForm} from "../components/form-creator";
 import {ChurchSelector} from "../components/church/church-selector";
 import {ChurchSelectorMultiple} from "../components/church/church-selector-multiple";
+import {ExportSettings} from "../../shared/general";
+import {ExpandingTextArea} from "../components/expanding-text-area";
 
 export const buildPlanCreatorPage = () => {
     const header = document.createElement("h1");
@@ -27,6 +29,7 @@ export const buildPlanCreatorPage = () => {
     const formElements = generateHTMLElementsForm([
         {tagName: "input", labelText: "Titel", type: "text"},
         {tagName: "input", labelText: "Version", type: "text"},
+        {tagName: "textarea", labelText: "Hinweistext", is: "expanding-text-area"},
         {tagName: "select", labelText: "Kirchengemeinden", is: "church-selector-multiple"},
         {tagName: "select", labelText: "Hauptkirche", is: "church-selector"},
         {tagName: "input", labelText: "Zweitkirchennotiz", type: "checkbox"},
@@ -36,15 +39,28 @@ export const buildPlanCreatorPage = () => {
 
     const inputTitle = formElements.elements[0] as HTMLInputElement;
     const inputVersion = formElements.elements[1] as HTMLInputElement;
-    const churchSelector = formElements.elements[2] as ChurchSelectorMultiple;
-    const mainChurch = formElements.elements[3] as ChurchSelector;
-    const switchNote = formElements.elements[4] as HTMLInputElement;
-    const switchNoteLocation = formElements.elements[5] as HTMLInputElement;
+    const hintElem = formElements.elements[2] as ExpandingTextArea;
+    const churchSelector = formElements.elements[3] as ChurchSelectorMultiple;
+    const mainChurch = formElements.elements[4] as ChurchSelector;
+    const switchNote = formElements.elements[5] as HTMLInputElement;
+    const switchNoteLocation = formElements.elements[6] as HTMLInputElement;
 
     switchNote.classList.add("switch");
     switchNoteLocation.classList.add("switch")
 
-    inputTitle.value = "Messdienerplan"
+    window.electronAPI.getRecentExportSettings().then((settings: ExportSettings | undefined)=> {
+        if (!settings) {
+            return;
+        }
+        inputTitle.value = settings.title;
+        inputVersion.value = settings.version;
+        hintElem.value = settings.hint;
+        hintElem.resize();
+        mainChurch.initialiseWithStartID(settings.mainChurchID);
+        churchSelector.initialiseWithStartIDs(settings.displayedChurchIDs);
+        switchNote.checked = settings.otherChurchComment;
+        switchNoteLocation.checked = settings.otherChurchCommentUseLocation;
+    })
 
     const exportBtn = document.createElement("button");
     exportBtn.innerText = "Plan exportieren";
@@ -60,6 +76,7 @@ export const buildPlanCreatorPage = () => {
             mainChurchID: mainChurch.getSelectedChurch(),
             otherChurchComment: switchNote.checked,
             otherChurchCommentUseLocation: switchNoteLocation.checked,
+            hint: hintElem.value,
             title: inputTitle.value,
             version: inputVersion.value,
         })

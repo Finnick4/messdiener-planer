@@ -96,3 +96,4 @@ package-lock.json
 
 *.tex
 *.pdf
+exportSettings.json

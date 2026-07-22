@@ -1,7 +1,4 @@
-import {
-    Mass,
-    MessdienerMassAllocation
-} from "../../../shared/general";
+import {Mass, MessdienerMassAllocation} from "../../../shared/general";
 import {ModalManager} from "../../types";
 import {ChurchSelector} from "../church/church-selector";
 import {MessdienerAllocator} from "../messdiener/allocator";
