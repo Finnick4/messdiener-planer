@@ -4,6 +4,7 @@ import * as fs from "node:fs";
 type ExportSettingsStorage = {
     title: string
     version: string
+    hint: string
     displayedChurchIDs: number[]
     mainChurchID: number
     otherChurchComment: boolean
@@ -44,6 +45,7 @@ export const readExportSettings = (): Promise<ExportSettings | undefined> => {
                 otherChurchCommentUseLocation: settings.otherChurchCommentUseLocation,
                 title: settings.title,
                 version: settings.version,
+                hint: settings.hint,
                 displayedChurchIDs: new Set<number>(settings.displayedChurchIDs)
             };
             resolve(converted);
@@ -60,6 +62,7 @@ export const writeExportSettings = (settings: ExportSettings): Promise<void> => 
             otherChurchCommentUseLocation: settings.otherChurchCommentUseLocation,
             title: settings.title,
             version: settings.version,
+            hint: settings.hint,
             displayedChurchIDs: Array.from(settings.displayedChurchIDs)
         }
         fs.writeFile("exportSettings.json", JSON.stringify(converted), err => {

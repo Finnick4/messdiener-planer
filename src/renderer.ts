@@ -15,6 +15,7 @@ import {MassList} from "./display/components/mass/list";
 import {MessdienerPreparedList} from "./display/components/messdiener/prepared-list";
 import {MessdienerAllocator} from "./display/components/messdiener/allocator";
 import FamilyAdder from "./display/components/family/family-adder";
+import {ExpandingTextArea} from "./display/components/expanding-text-area";
 
 interface CustomElementDefinition {
     name: string,
@@ -41,6 +42,8 @@ const customElementsList: CustomElementDefinition[] = [
     {name: "mass-list", constructor: MassList, extends: null},
 
     {name: "family-adder", constructor: FamilyAdder, extends: null},
+
+    {name: "expanding-text-area", constructor: ExpandingTextArea, extends: "textarea"},
 ]
 
 for (const elem of customElementsList) {

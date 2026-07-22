@@ -5,8 +5,6 @@ import {saveExportSettings} from "./settings-cache";
 
 export const texExport = (settings: ExportSettings): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
-        const title = settings.title;
-        const version = settings.version;
         const lastUpdate = new Date().toLocaleString("de", {
             day: "numeric",
             month: "long",
@@ -52,14 +50,17 @@ export const texExport = (settings: ExportSettings): Promise<string> => {
 
             const allocationOverviewLaTeXString = makeAllocationsOverviewLaTeXString(familyOrientedAllocations, mappedMessdiener);
 
-            const tex = `\\documentclass[]{article} \\title{${title}} \\date{(${version}) \\\\Stand: ${lastUpdate}} \\pagestyle{empty}
+            const tex = `\\documentclass[]{article} \\title{${settings.title}} \\date{(${settings.version}) \\\\Stand: ${lastUpdate}} \\pagestyle{empty}
 
 \\begin{document}
-    \\maketitle
+\\maketitle
     
-    ${massesLaTeXString}
+${massesLaTeXString}
     
-    ${allocationOverviewLaTeXString}
+${allocationOverviewLaTeXString}
+    
+\\centering
+${settings.hint}  
 \\end{document}`;
 
             const path = `./messdienerplan.tex`

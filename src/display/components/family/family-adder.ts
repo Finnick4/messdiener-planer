@@ -86,7 +86,7 @@ export class FamilyAdder extends HTMLElement {
                     }
                     sizeTag.innerText = String(effectiveSize);
                     if (effectiveSize == 0) {
-                        elem.remove()
+                        elem.classList.add("no-effective-size");
                     }
                 }
 
@@ -113,6 +113,7 @@ export class FamilyAdder extends HTMLElement {
             }
 
             this.replaceChildren(...(selectableFamilies.map(makeElement)));
+            this.querySelectorAll(".no-effective-size").forEach(e => e.remove());
             checkIfEmpty();
         })
     }
