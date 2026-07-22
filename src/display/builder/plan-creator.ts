@@ -2,6 +2,7 @@ import {setMainAndSidebar, SidebarEntries} from "./utilities";
 import {generateHTMLElementsForm} from "../components/form-creator";
 import {ChurchSelector} from "../components/church/church-selector";
 import {ChurchSelectorMultiple} from "../components/church/church-selector-multiple";
+import {ExportSettings} from "../../shared/general";
 
 export const buildPlanCreatorPage = () => {
     const header = document.createElement("h1");
@@ -44,7 +45,17 @@ export const buildPlanCreatorPage = () => {
     switchNote.classList.add("switch");
     switchNoteLocation.classList.add("switch")
 
-    inputTitle.value = "Messdienerplan"
+    window.electronAPI.getRecentExportSettings().then((settings: ExportSettings | undefined)=> {
+        if (!settings) {
+            return;
+        }
+        inputTitle.value = settings.title;
+        inputVersion.value = settings.version;
+        mainChurch.initialiseWithStartID(settings.mainChurchID);
+        churchSelector.initialiseWithStartIDs(settings.displayedChurchIDs);
+        switchNote.checked = settings.otherChurchComment;
+        switchNoteLocation.checked = settings.otherChurchCommentUseLocation;
+    })
 
     const exportBtn = document.createElement("button");
     exportBtn.innerText = "Plan exportieren";
