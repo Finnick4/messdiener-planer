@@ -53,7 +53,7 @@ body {
     top: 0;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     border: var(--border);
-    background-color: var(--bg-color-element);
+    background-color: var(--bg-color-muted);
     font-size: 1rem;
     gap: .25rem;
 
@@ -61,11 +61,10 @@ body {
         font-size: 1rem;
         border-radius: calc(var(--border-radius) - var(--padding-element));
         background-color: var(--bg-color-element);
-        border: solid hsl(0, 6%, 95%) var(--border-width);
+        border: solid hsl(0, 6%, 92%) var(--border-width);
     }
     button:hover {
         background-color: var(--dropdown-button-highlight);
-        border: var(--border);
     }
     button:active {
         background-color: var(--dropdown-button-pressed);
@@ -307,6 +306,10 @@ mass-list {
     .create.button:active {
         background-color: var(--secondary-pressed);
     }
+
+    .entry.hidden {
+        display: none;
+    }
 }
 
 mass-list .placeholder,
@@ -400,4 +403,17 @@ input.switch:hover:checked::before {
 
 textarea {
     resize: none;
+}
+
+details summary + .form {
+    margin-top: .5rem;
+}
+
+details summary {
+    font-weight: 550;
+    user-select: none;
+}
+
+details {
+    margin-bottom: 1rem;
 }

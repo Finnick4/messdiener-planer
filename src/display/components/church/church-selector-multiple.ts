@@ -21,8 +21,8 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
     }
     initialiseWithStartIDs(ids: Set<number>) {
         this.closeSubscription();
-        this.selectedChurchesIDs = ids;
-        this.onedit(ids);
+        this.selectedChurchesIDs = structuredClone(ids);
+        this.onedit(structuredClone(ids));
         this.closeSubscription = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
             const makeOptionElement = (text: string, id: number): HTMLOptionElement => {
                 const option = document.createElement("option");
@@ -35,7 +35,7 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
                     } else {
                         this.selectedChurchesIDs.add(id);
                     }
-                    this.onedit(this.selectedChurchesIDs);
+                    this.onedit(structuredClone(this.selectedChurchesIDs));
                 })
                 option.selected = this.selectedChurchesIDs.has(id);
 
