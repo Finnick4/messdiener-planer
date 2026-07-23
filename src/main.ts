@@ -24,6 +24,12 @@ import {
     removeMassHandler
 } from "./main/handlers/masses";
 import {exportPlanHandler, recentExportSettingsHandler} from "./main/handlers/plans";
+import {
+    createAbsenceHandler,
+    editAbsenceAffectionsHandler,
+    editAbsencesHandler,
+    getAllAbsencesHandler
+} from "./main/handlers/absences";
 
 if (started) {
   app.quit();
@@ -57,7 +63,8 @@ app.on('ready', () => {
     ipcMain.handle('dialog:getAllFamilies', getAllFamiliesHandler);
     ipcMain.handle('dialog:getAllChurches', getAllChurchesHandler);
     ipcMain.handle('dialog:getAllMasses', getAllMassesHandler);
-    ipcMain.handle('dialog:getRecentExportSettings', recentExportSettingsHandler)
+    ipcMain.handle('dialog:getAllAbsences', getAllAbsencesHandler);
+    ipcMain.handle('dialog:getRecentExportSettings', recentExportSettingsHandler);
 
     ipcMain.on('create-messdiener', createMessdienerHandler);
     ipcMain.on('remove-messdiener', removeMessdienerHandler);
@@ -71,6 +78,9 @@ app.on('ready', () => {
     ipcMain.on('edit-mass', editMassHandler);
     ipcMain.on('change-messdiener-mass-allocation', changeMessdienerMassAllocationHandler);
     ipcMain.on('export-plan', exportPlanHandler);
+    ipcMain.on('create-absence', createAbsenceHandler);
+    ipcMain.on('edit-absence', editAbsencesHandler);
+    ipcMain.on('change-absence-messdiener-affection', editAbsenceAffectionsHandler);
 });
 
 app.on('window-all-closed', () => {

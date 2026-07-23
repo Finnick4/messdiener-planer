@@ -1,5 +1,5 @@
-import {Church, Family, Mass, Messdiener} from "../../shared/general";
-import {getAllChurches, getAllFamilies, getAllMasses, getAllMessdiener} from "../application/state";
+import {Absence, Church, Family, Mass, Messdiener} from "../../shared/general";
+import {getAllAbsences, getAllChurches, getAllFamilies, getAllMasses, getAllMessdiener} from "../application/state";
 import WebContents = Electron.WebContents;
 
 export interface PingDestination {
@@ -7,6 +7,7 @@ export interface PingDestination {
     onFamiliesUpdate: (data: Family[]) => void,
     onChurchesUpdate: (data: Church[]) => void,
     onMassesUpdate: (data: Mass[]) => void,
+    onAbsenceUpdate: (data: Absence[]) => void,
 }
 
 export const createPingDestination = (windowWebContents: WebContents): PingDestination => {
@@ -22,6 +23,9 @@ export const createPingDestination = (windowWebContents: WebContents): PingDesti
         },
         onMassesUpdate(data: Mass[]): void {
             windowWebContents.send('update-mass', data);
+        },
+        onAbsenceUpdate(data: Absence[]): void {
+            windowWebContents.send('update-absence', data);
         },
     }
 }
@@ -49,6 +53,9 @@ class PingManager implements PingDestination {
     onMassesUpdate(data: Mass[]) {
         this.destinations.forEach(dest => dest.onMassesUpdate(data));
     }
+    onAbsenceUpdate(data: Absence[]) {
+        this.destinations.forEach(dest => dest.onAbsenceUpdate(data));
+    }
 }
 
 export const pingManager = new PingManager();
@@ -67,4 +74,8 @@ export const pingChurchesUpdate = () => {
 
 export const pingMassesUpdate = () => {
     getAllMasses().then(masses => pingManager.onMassesUpdate(masses));
+}
+
+export const pingAbsencesUpdate = () => {
+    getAllAbsences().then(absences => pingManager.onAbsenceUpdate(absences));
 }

@@ -1,4 +1,5 @@
 import {
+    Absence,
     Church,
     ExportSettings,
     Family,
@@ -7,7 +8,7 @@ import {
     MessdienerChurchActivityStatus,
     MessdienerMassAllocation
 } from "../shared/general";
-import {IpcRenderer} from "electron";
+import {ipcRenderer, IpcRenderer} from "electron";
 
 declare global {
     interface Window {
@@ -16,6 +17,7 @@ declare global {
             getAllFamilies: () => Promise<Family[]>;
             getAllChurches: () => Promise<Church[]>;
             getAllMasses: () => Promise<Mass[]>;
+            getAllAbsences: () => Promise<Absence[]>;
             getRecentExportSettings: () => Promise<ExportSettings | undefined>,
 
             createMessdiener: (name: string, family: Family | number, churchActivity?: number[]) => void;
@@ -30,11 +32,15 @@ declare global {
             editMass: (mass: Mass) => void;
             changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]) => void;
             exportPlan: (settings: ExportSettings) => void;
+            createAbsence: (start: number, end: number) => void;
+            editAbsence: (absence: Absence) => void;
+            changeAbsenceAffection: (absenceID: number, addedMessdiener: number[], removedMessdiener: number[]) => void;
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer;
             onFamiliesUpdate: (callback: (data: Family[]) => void) => IpcRenderer;
             onChurchesUpdate: (callback: (data: Church[]) => void) => IpcRenderer;
             onMassesUpdate: (callback: (data: Mass[]) => void) => IpcRenderer;
+            onAbsencesUpdate: (callback: (data: Absence[]) => void) => IpcRenderer;
         }
     }
 }

@@ -511,4 +511,14 @@ export class SQLiteConnection implements DatabaseConnection {
         `, [messdienerID, absenceID]);
     }
 
+    changeAbsenceStartDate(id: number, date: number): Promise<void> {
+        return this.runQuery(`
+            UPDATE absence SET start_date = ? WHERE id = ?;
+        `, [date, id]);
+    }
+    changeAbsenceEndDate(id: number, date: number): Promise<void> {
+        return this.runQuery(`
+            UPDATE absence SET end_date = ? WHERE id = ?;
+        `, [date, id]);
+    }
 }
