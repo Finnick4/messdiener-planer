@@ -61,67 +61,71 @@ export class SQLiteConnection implements DatabaseConnection {
 
 
     async initialiseDatabase(): Promise<void> {
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS church
-            (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                name          TEXT NOT NULL,
-                location      TEXT
-            )
-        `);
 
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS mass
-            (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                date          INTEGER NOT NULL,
-                church_id     INTEGER NOT NULL,
-                note          TEXT,
-                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE
-            )
-        `);
+        await Promise.all([
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS church
+                (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name          TEXT NOT NULL,
+                    location      TEXT
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS family
+                (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    internal_name TEXT,
+                    display_name  TEXT NOT NULL,
+                    shorthand     TEXT
+                )
+            `),
+        ])
 
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS family
-            (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                internal_name TEXT,
-                display_name  TEXT NOT NULL,
-                shorthand     TEXT
-            )
-        `);
+        await Promise.all([
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS mass
+                (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    date          INTEGER NOT NULL,
+                    church_id     INTEGER NOT NULL,
+                    note          TEXT,
+                    FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS messdiener
+                (
+                    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name               TEXT    NOT NULL,
+                    family_association INTEGER NOT NULL,
+                    FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
+                )
+            `)
+        ]);
 
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS messdiener
-            (
-                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-                name               TEXT    NOT NULL,
-                family_association INTEGER NOT NULL,
-                FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
-            )
-        `);
-
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS church_activity
-            (
-                messdiener_id   INTEGER NOT NULL,
-                church_id       INTEGER NOT NULL,
-                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
-                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE,
-                PRIMARY KEY (messdiener_id, church_id)
-            )
-        `);
-
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS mass_messdiener_allocation
-            (
-                messdiener_id   INTEGER NOT NULL,
-                mass_id       INTEGER NOT NULL,
-                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
-                FOREIGN KEY (mass_id) REFERENCES mass (id) ON DELETE CASCADE,
-                PRIMARY KEY (messdiener_id, mass_id)
-            )
-        `);
+        await Promise.all([
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS church_activity
+                (
+                    messdiener_id   INTEGER NOT NULL,
+                    church_id       INTEGER NOT NULL,
+                    FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                    FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE,
+                    PRIMARY KEY (messdiener_id, church_id)
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS mass_messdiener_allocation
+                (
+                    messdiener_id   INTEGER NOT NULL,
+                    mass_id       INTEGER NOT NULL,
+                    FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                    FOREIGN KEY (mass_id) REFERENCES mass (id) ON DELETE CASCADE,
+                    PRIMARY KEY (messdiener_id, mass_id)
+                )
+            `)
+        ]);
     }
 
     async getAllMessdiener(): Promise<Messdiener[]> {
