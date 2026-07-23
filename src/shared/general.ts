@@ -7,6 +7,7 @@ export type Messdiener = {
     familyID: number
     identifier: number
     churchActivity: Set<number>
+    absences: EmbeddedAbsence[]
 }
 
 export type Family = {
@@ -51,4 +52,17 @@ export type ExportSettings = {
     mainChurchID: number
     otherChurchComment: boolean
     otherChurchCommentUseLocation: boolean
+}
+
+export type EmbeddedAbsence = {
+    id: number
+    startDate: number
+    endDate: number
+}
+
+export type Absence = {
+    id: number
+    startDate: number
+    endDate: number
+    affectedMessdiener: Set<number>
 }

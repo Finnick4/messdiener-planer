@@ -74,7 +74,8 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
                     lastNameInternal: familyID == 0 ? inputFamIntern.value : "",
                     lastNameShorthand: familyID == 0 ? inputFamShort.value : "",
                     familyID: familyID == messdiener.familyID ? 0 : familyID,
-                    churchActivity: new Set<number>()
+                    churchActivity: new Set<number>(),
+                    absences: []
                 });
             }
             const setDivergences: MessdienerChurchActivityStatus[] = [];
