@@ -2,6 +2,7 @@ import {buildMessdienerOverviewPage} from "./builder/messdiener-overview";
 import {buildChurchesOverviewPage} from "./builder/churches-overview";
 import {buildMassesOverviewPage} from "./builder/masses-overview";
 import {buildPlanCreatorPage} from "./builder/plan-creator";
+import {buildAbsencesOverviewPage} from "./builder/absences-overview";
 
 export enum Pages {
     Main,
@@ -28,6 +29,9 @@ export const routeToPage = (destination: Pages) => {
             break;
         case Pages.MassesOverview:
             buildMassesOverviewPage();
+            break;
+        case Pages.AbsencesOverview:
+            buildAbsencesOverviewPage();
             break;
         default:
             console.warn("Did not find page to route to!");
