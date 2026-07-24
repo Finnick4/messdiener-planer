@@ -1,11 +1,12 @@
-import {Church, Family, Mass, Messdiener} from "../../shared/general";
+import {Absence, Church, Family, Mass, Messdiener} from "../../shared/general";
 import {addSubscription, getData, ListenerEndpoints} from "./state-manager";
 
 let messdienerMap: Map<number, Messdiener> | undefined = undefined;
 let familyMap: Map<number, Family> | undefined = undefined;
 let churchMap: Map<number, Church> |undefined = undefined;
-let massMap: Map<number, Mass> | undefined= undefined;
+let massMap: Map<number, Mass> | undefined = undefined;
 let familyMemberships: Map<number, Set<Messdiener>> | undefined = undefined;
+let absencesMap: Map<number, Absence> | undefined = undefined;
 
 addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
     messdienerMap = new Map(data.map((m) => [m.identifier, m]));
@@ -111,3 +112,20 @@ export const getFamilyMembershipsMap = (): Promise<Map<number, Set<Messdiener>>>
         resolve(structuredClone(familyMemberships));
     });
 };
+
+export const getAbsence = (id: number): Promise<Absence | undefined> =>  {
+    return getAbsencesMap().then(map => map.get(id));
+};
+export const getAbsencesMap = (): Promise<Map<number, Absence>> =>  {
+    return new Promise<Map<number, Absence>>((resolve) => {
+        if (absencesMap == undefined) {
+            getData(ListenerEndpoints.AllAbsences).then((data: Absence[]) => {
+                absencesMap = new Map(data.map((a) => [a.id, a]));
+                resolve(structuredClone(absencesMap));
+            });
+            return;
+        }
+        resolve(structuredClone(absencesMap));
+    });
+};
+

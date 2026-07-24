@@ -57,17 +57,23 @@ for (const elem of customElementsList) {
 routeToPage(Pages.Main);
 
 
-
+// TODO Remove these listeners!
 addSubscription(ListenerEndpoints.AllMessdiener, data => {
     console.log(data)
-})
+});
+
 addSubscription(ListenerEndpoints.AllFamilies, data => {
     console.log(data)
-})
+});
+
 addSubscription(ListenerEndpoints.AllChurches, data => {
     console.log(data)
-})
+});
+
 addSubscription(ListenerEndpoints.AllMasses, data => {
     console.log(data)
-})
+});
 
+addSubscription(ListenerEndpoints.AllAbsences, data => {
+    console.log(data)
+});
