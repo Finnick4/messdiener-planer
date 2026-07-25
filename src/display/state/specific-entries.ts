@@ -21,6 +21,9 @@ addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
 addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
     massMap = new Map(data.map((m) => [m.id, m]));
 });
+addSubscription(ListenerEndpoints.AllAbsences, (data: Absence[]) => {
+    absencesMap = new Map(data.map((a) => [a.id, a]));
+});
 
 export const getMessdiener = (id: number): Promise<Messdiener | undefined> =>  {
     return getMessdienerMap().then(map => map.get(id));

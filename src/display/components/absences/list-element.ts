@@ -1,5 +1,7 @@
 import {Absence} from "../../../shared/general";
 import {getMessdienerMap} from "../../state/specific-entries";
+import {ModalManager} from "../../types";
+import {generateEditAbsenceModal} from "./edit-modal";
 
 export class AbsencesListElement extends HTMLElement {
     private disconnectedHandler = () => {
@@ -9,9 +11,11 @@ export class AbsencesListElement extends HTMLElement {
     connectedCallback() {
         this.classList.add("uninitialised");
     }
+    private manager: ModalManager | undefined;
 
     setAbsence(target: Absence | undefined) {
         this.classList.remove("uninitialised");
+        this.manager?.destroy();
 
         if (!target) {
             this.classList.add("button", "create");
@@ -64,5 +68,15 @@ export class AbsencesListElement extends HTMLElement {
         }
 
         this.replaceChildren(startDate, endDate, affectedMessdiener);
+
+        this.manager = generateEditAbsenceModal(target.id);
+        this.addEventListener("click", () => this.manager?.show());
+
+        this.disconnectedHandler = this.manager?.destroy
+    }
+
+    disconnectedCallback() {
+        this.disconnectedHandler();
+        return
     }
 }

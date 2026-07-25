@@ -25,10 +25,10 @@ export class AbsencesList extends HTMLElement {
                     elem.setAbsence(undefined);
                     this.createButton = elem;
                     return elem;
-                })())
+                })());
             }
             this.replaceChildren(...listElems);
-        })
+        });
 
         this.disconnectedHandler = cancel;
     }

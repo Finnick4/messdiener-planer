@@ -298,6 +298,8 @@ mass-list,absences-list {
         display: flex;
         align-items: center;
         justify-content: center;
+        user-select: none;
+        cursor: pointer;
     }
 
     .create.button:hover {
@@ -322,7 +324,9 @@ absences-list-element {
     padding: var(--padding-element);
     border-radius: calc(var(--border-radius) - .25rem);
     font-size: 1rem;
-    transition: background-color .1s ease;
+    transition: translate .1s ease, background-color .1s ease;
+    cursor: pointer;
+    user-select: none;
 
     .date {
         font-weight: 550;
@@ -340,8 +344,11 @@ absences-list-element {
         margin: auto;
     }
 }
+
+absences-list-element:hover,
 .mass.entry:hover {
     background-color: var(--dropdown-button-pressed);
+    translate: 0 -2px;
 }
 
 mass-list:has(.button.create) + .button.create {
