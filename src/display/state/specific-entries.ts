@@ -7,6 +7,7 @@ let churchMap: Map<number, Church> |undefined = undefined;
 let massMap: Map<number, Mass> | undefined = undefined;
 let familyMemberships: Map<number, Set<Messdiener>> | undefined = undefined;
 let absencesMap: Map<number, Absence> | undefined = undefined;
+let orderedAbsences: Absence[] | undefined = undefined;
 
 addSubscription(ListenerEndpoints.AllMessdiener, (data: Messdiener[]) => {
     messdienerMap = new Map(data.map((m) => [m.identifier, m]));
@@ -23,6 +24,7 @@ addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
 });
 addSubscription(ListenerEndpoints.AllAbsences, (data: Absence[]) => {
     absencesMap = new Map(data.map((a) => [a.id, a]));
+    orderedAbsences = data.sort((a, b) => a.startDate - b.startDate);
 });
 
 export const getMessdiener = (id: number): Promise<Messdiener | undefined> =>  {
@@ -132,3 +134,35 @@ export const getAbsencesMap = (): Promise<Map<number, Absence>> =>  {
     });
 };
 
+export const getAbsencesAffectingDate = (date: number): Promise<Absence[]> => {
+    const filter = (absences: Absence[]): Absence[] => {
+        const matching: Absence[] = [];
+
+        for (const absence of absences) {
+            if (absence.startDate > date) {
+                break;
+            }
+            if (absence.startDate <= date && date <= absence.endDate) {
+                matching.push(absence);
+            }
+        }
+
+        return structuredClone(matching);
+    }
+
+    return new Promise<Absence[]>((resolve) => {
+        if (date <= 0) {
+            resolve([]);
+            return;
+        }
+
+        if (orderedAbsences == undefined) {
+            getData(ListenerEndpoints.AllAbsences).then((data: Absence[]) => {
+                orderedAbsences = data.sort((a, b) => a.startDate - b.startDate);
+                resolve(filter(orderedAbsences));
+            });
+            return;
+        }
+        resolve(filter(orderedAbsences));
+    });
+}

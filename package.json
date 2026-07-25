@@ -1,7 +1,7 @@
 {
   "name": "messdiener-planer",
   "productName": "messdiener-planer",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Ein Werkzeug zur Erstellung von Messdienerplänen.",
   "main": ".vite/build/main.js",
   "private": true,

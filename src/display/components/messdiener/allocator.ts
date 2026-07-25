@@ -1,7 +1,7 @@
 import {MessdienerPreparedList} from "./prepared-list";
-import FamilyAdder from "../family/family-adder";
-import {Messdiener} from "../../../shared/general";
-import {getMessdienerMap} from "../../state/specific-entries";
+import {FamilyAdder} from "../family/family-adder";
+import {Absence, Messdiener} from "../../../shared/general";
+import {getAbsencesAffectingDate, getMessdienerMap} from "../../state/specific-entries";
 
 export class MessdienerAllocator extends HTMLElement {
     constructor() {
@@ -10,6 +10,7 @@ export class MessdienerAllocator extends HTMLElement {
     }
     private allocatedIDs: Set<number>;
     private referenceChurchID: number | undefined;
+    private referenceDateNumber = 0;
 
     connectedCallback() {
         const messdienerList = document.createElement("messdiener-prepared-list") as MessdienerPreparedList;
@@ -27,11 +28,15 @@ export class MessdienerAllocator extends HTMLElement {
 
     setAllocatedMessdiener(ids: Set<number>) {
         this.allocatedIDs = ids;
-        this.updateContent()
+        this.updateContent();
     }
     setReferenceChurchID(id: number) {
         this.referenceChurchID = id;
-        this.updateContent()
+        this.updateContent();
+    }
+    setReferenceDateNumber(date: number) {
+        this.referenceDateNumber = date;
+        this.updateContent();
     }
     updateContent() {
         const messdienerList = this.querySelector<MessdienerPreparedList>("messdiener-prepared-list");
@@ -41,7 +46,21 @@ export class MessdienerAllocator extends HTMLElement {
             return;
         }
 
-        getMessdienerMap().then(mapped => {
+        let absencesPromise: Promise<Absence[]>;
+
+        if (this.referenceDateNumber <= 0) {
+            absencesPromise = new Promise<Absence[]>(resolve => resolve([]))
+        } else {
+            absencesPromise = getAbsencesAffectingDate(this.referenceDateNumber);
+        }
+
+        Promise.all([
+            getMessdienerMap(),
+            absencesPromise
+        ]).then(responses => {
+            const mapped = responses[0];
+            const relevantAbsences = responses[1];
+
             messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));
             if (this.referenceChurchID) {
                 familyAdder.setReferenceChurchID(this.referenceChurchID);
@@ -57,7 +76,17 @@ export class MessdienerAllocator extends HTMLElement {
                     if (messdiener) {
                         allocatedFamilies.add(messdiener.familyID);
                     }
-                })
+                });
+
+                relevantAbsences.forEach(absence => {
+                    absence.affectedMessdiener.forEach(messdienerID => {
+                        const messdiener = mapped.get(messdienerID);
+                        if (messdiener) {
+                            allocatedFamilies.add(messdiener.familyID);
+                        }
+                    });
+                });
+
                 familyAdder.setSelectedFamilies(new Set<number>(allocatedFamilies));
             };
 

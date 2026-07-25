@@ -62,6 +62,7 @@ export const generateEditMassModal = (id: number): ModalManager => {
 
             messdienerAllocator.setAllocatedMessdiener(new Set<number>(mass.allocatedMessdiener));
             messdienerAllocator.setReferenceChurchID(mass.churchID);
+            messdienerAllocator.setReferenceDateNumber(mass.date);
             inputDate.valueAsDate = setDate;
             inputNote.value = setNote;
             churchSelector.initialiseWithStartID(mass.churchID);
