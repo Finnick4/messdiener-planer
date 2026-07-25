@@ -287,3 +287,9 @@ export const removeMessdienerFromAbsence = (absenceID: number, messdiener: numbe
             }
         });
 }
+
+export const deleteAbsence = (id: number): Promise<void> => {
+    return getDBConnection().then(db => db.deleteAbsence(id)).then(() => {
+        allAbsences = allAbsences.filter(a => a.id != id);
+    })
+}

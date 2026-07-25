@@ -35,4 +35,5 @@ export interface DatabaseConnection {
     removeMessdienerFromAbsence: (absenceID: number, messdienerID: number) => Promise<void>;
     changeAbsenceStartDate: (id: number, date: number) => Promise<void>;
     changeAbsenceEndDate: (id: number, date: number) => Promise<void>;
+    deleteAbsence: (id: number) => Promise<void>;
 }

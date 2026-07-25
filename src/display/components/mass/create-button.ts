@@ -67,7 +67,7 @@ export class MassCreateButton extends HTMLElement {
         this.onclick = () => {
             modal.showModal();
         }
-        modal.querySelector<HTMLButtonElement>("button.cancel")?.addEventListener("click", () => modal.close());
+        cancelBtn.addEventListener("click", () => modal.close());
 
         this.disconnectedHandler = () => {
             modal.remove()

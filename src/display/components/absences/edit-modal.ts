@@ -23,14 +23,17 @@ export const generateEditAbsenceModal = (id: number): ModalManager => {
         const controlsField = document.createElement("div");
         const cancelBtn = document.createElement("button");
         const saveBtn = document.createElement("button");
+        const delBtn = document.createElement("button");
+        delBtn.innerText = "Löschen";
         cancelBtn.innerText = "Abbrechen";
         saveBtn.innerText = "Speichern";
         controlsField.classList.add("field", "controls");
         cancelBtn.classList.add("cancel");
         saveBtn.classList.add("save");
+        delBtn.classList.add("delete");
 
 
-        controlsField.append(cancelBtn, saveBtn);
+        controlsField.append(cancelBtn, saveBtn, delBtn);
 
         modal.append(headerElem, ...(formElements.nodes), controlsField);
 
@@ -92,7 +95,17 @@ export const generateEditAbsenceModal = (id: number): ModalManager => {
             })
         })
 
-        modal.querySelector<HTMLButtonElement>("button.cancel")?.addEventListener("click", () => modal.close());
+        cancelBtn.addEventListener("click", () => modal.close());
+
+        // @TODO implement confirmation
+        const attainConfirmation = () => new Promise<void>((resolve) => resolve())
+
+        delBtn.onclick = () => {
+            attainConfirmation().then(() => {
+                modal.close();
+                window.electronAPI.deleteAbsence(id);
+            })
+        }
 
         hasBeenInitialised = true;
     }

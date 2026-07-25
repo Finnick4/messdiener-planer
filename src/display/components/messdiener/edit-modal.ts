@@ -112,7 +112,7 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
             })
         })
 
-        modal.querySelector<HTMLButtonElement>("button.cancel")?.addEventListener("click", () => modal.close());
+        cancelBtn.addEventListener("click", () => modal.close());
 
         // @TODO implement confirmation
         const attainConfirmation = () => new Promise<void>((resolve) => resolve())

@@ -2,10 +2,10 @@ import {Absence} from "../../shared/general";
 import {
     addMessdienerToAbsence,
     areValidMessdienerIDs, changeAbsenceEndDate, changeAbsenceStartDate,
-    createAbsence,
-    getAllAbsences, removeMessdienerFromAbsence,
+    createAbsence, deleteAbsence,
+    getAllAbsences, removeChurch, removeMessdienerFromAbsence,
 } from "../application/state";
-import {pingAbsencesUpdate} from "./ping-manager";
+import {pingAbsencesUpdate, pingChurchesUpdate} from "./ping-manager";
 import IpcMainEvent = Electron.IpcMainEvent;
 
 export const getAllAbsencesHandler = (): Promise<Absence[]> => {
@@ -65,4 +65,18 @@ export const editAbsenceAffectionsHandler = (_event: IpcMainEvent, absenceID: nu
             pingAbsencesUpdate();
         });
     });
+}
+
+export const deleteAbsenceHandler = (_event: IpcMainEvent, id: number): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+        if (id <= 0) {
+            console.log("[HANDLER] (deleteAbsenceHandler) Parameter issue: id is <= 0>!");
+            reject();
+            return;
+        }
+        deleteAbsence(id).then(() => {
+            pingAbsencesUpdate();
+            resolve();
+        });
+    })
 }

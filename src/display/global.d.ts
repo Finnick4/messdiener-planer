@@ -32,9 +32,10 @@ declare global {
             editMass: (mass: Mass) => void;
             changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]) => void;
             exportPlan: (settings: ExportSettings) => void;
-            createAbsence: (start: number, end: number) => void;
+            createAbsence: (start: number, end: number, affectedMessdiener: number[]) => void;
             editAbsence: (absence: Absence) => void;
             changeAbsenceAffection: (absenceID: number, addedMessdiener: number[], removedMessdiener: number[]) => void;
+            deleteAbsence: (id: number) => void;
 
             onMessdienerUpdate: (callback: (data: Messdiener[]) => void) => IpcRenderer;
             onFamiliesUpdate: (callback: (data: Family[]) => void) => IpcRenderer;

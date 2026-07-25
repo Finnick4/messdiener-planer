@@ -31,9 +31,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     editMass: (mass: Mass): void=> ipcRenderer.send("edit-mass", mass),
     changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]): void=> ipcRenderer.send("change-messdiener-mass-allocation", activities),
     exportPlan: (settings: ExportSettings): void => ipcRenderer.send("export-plan", settings),
-    createAbsence: (start: number, end: number): void => ipcRenderer.send("create-absence", start, end),
+    createAbsence: (start: number, end: number, affectedMessdiener: number[]): void => ipcRenderer.send("create-absence", start, end, affectedMessdiener),
     editAbsence: (absence: Absence): void => ipcRenderer.send("edit-absence", absence),
     changeAbsenceAffection: (absenceID: number, addedMessdiener: number[], removedMessdiener: number[]): void=> ipcRenderer.send("change-absence-messdiener-affection", absenceID, addedMessdiener, removedMessdiener),
+    deleteAbsence: (id: number): void => ipcRenderer.send("delete-absence", id),
 
     onMessdienerUpdate: (callback: (data: Messdiener[]) => void): IpcRenderer => ipcRenderer.on('update-messdiener', (_event, value) => callback(value)),
     onFamiliesUpdate: (callback: (data: Family[]) => void): IpcRenderer => ipcRenderer.on('update-families', (_event, value) => callback(value)),

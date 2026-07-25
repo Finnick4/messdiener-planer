@@ -521,4 +521,11 @@ export class SQLiteConnection implements DatabaseConnection {
             UPDATE absence SET end_date = ? WHERE id = ?;
         `, [date, id]);
     }
+
+    deleteAbsence(id: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM absence WHERE id = ?;
+        `, [id]);
+    }
+
 }

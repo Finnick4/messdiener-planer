@@ -3,6 +3,7 @@
 
     --bg-color-muted: hsl(0, 6%, 96%);
     --bg-color-element: hsl(0, 6%, 98%);
+    --bg-color-highlight: hsl(0, 6%, 100%);
 
     --text: hsl(0, 0%, 5%);
     --text-muted: hsl(0, 0%, 15%);
@@ -74,6 +75,7 @@ button,
 .button {
     padding: var(--padding-button);
     border: var(--border);
+    cursor: pointer;
     transition: background-color .1s ease, translate .1s ease, border .1s ease;
     background-color: var(--secondary);
     border-radius: calc(var(--border-radius) - var(--padding-button));
@@ -108,15 +110,27 @@ main {
         grid-template-columns: subgrid;
         padding: var(--padding-row);
         align-items: center;
+        border-radius: calc(var(--border-radius) - var(--padding-element));
+
         .button {
             border-radius: calc(var(--border-radius) - var(--padding-element));
             background-color: var(--bg-color-muted);
+            cursor: pointer;
         }
         .name {
             align-self: center  ;
         }
     }
+
+    .row:hover {
+        background-color: var(--bg-color-highlight);
+    }
 }
+
+.list:has(.row:hover) {
+    background-color: var(--bg-color-muted);
+}
+
 messdiener-list,
 church-list,
 messdiener-prepared-list {

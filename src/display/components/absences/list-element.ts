@@ -2,6 +2,7 @@ import {Absence} from "../../../shared/general";
 import {getMessdienerMap} from "../../state/specific-entries";
 import {ModalManager} from "../../types";
 import {generateEditAbsenceModal} from "./edit-modal";
+import {generateCreateAbsenceModal} from "./create-modal";
 
 export class AbsencesListElement extends HTMLElement {
     private disconnectedHandler = () => {
@@ -24,6 +25,11 @@ export class AbsencesListElement extends HTMLElement {
             label.innerText = "Abwesenheit erstellen";
             label.classList.add("label");
             this.replaceChildren(label);
+
+            this.manager = generateCreateAbsenceModal();
+            this.addEventListener("click", () => this.manager?.show());
+
+            this.disconnectedHandler = this.manager?.destroy
             return;
         }
         this.classList.remove("button", "create");

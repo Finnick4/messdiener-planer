@@ -25,11 +25,12 @@ import {
 } from "./main/handlers/masses";
 import {exportPlanHandler, recentExportSettingsHandler} from "./main/handlers/plans";
 import {
-    createAbsenceHandler,
+    createAbsenceHandler, deleteAbsenceHandler,
     editAbsenceAffectionsHandler,
     editAbsencesHandler,
     getAllAbsencesHandler
 } from "./main/handlers/absences";
+import {deleteAbsence} from "./main/application/state";
 
 if (started) {
   app.quit();
@@ -81,6 +82,7 @@ app.on('ready', () => {
     ipcMain.on('create-absence', createAbsenceHandler);
     ipcMain.on('edit-absence', editAbsencesHandler);
     ipcMain.on('change-absence-messdiener-affection', editAbsenceAffectionsHandler);
+    ipcMain.on('delete-absence', deleteAbsenceHandler);
 });
 
 app.on('window-all-closed', () => {
