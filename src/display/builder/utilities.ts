@@ -37,7 +37,7 @@ const updateSidebar = (currentEntry: SidebarEntries) => {
         {id: SidebarEntries.messdiener, text: "Alle Messdiener", onclick: () => routeToPage(Pages.MessdienerOverview)},
         {id: SidebarEntries.masses, text: "Messen ändern", onclick: () => routeToPage(Pages.MassesOverview)},
         {id: SidebarEntries.churches, text: "Kirchen", onclick: () => routeToPage(Pages.ChurchesOverview)},
-        {id: SidebarEntries.absence, text: "Abwesenheitszeiträume", onclick: () => routeToPage(Pages.AbsencesOverview)}
+        {id: SidebarEntries.absence, text: "Abwesenheiten", onclick: () => routeToPage(Pages.AbsencesOverview)}
     ]
     const htmlElements: HTMLButtonElement[] = [];
     for (const element of elements) {

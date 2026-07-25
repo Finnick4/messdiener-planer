@@ -57,7 +57,7 @@ export class FamilyAdder extends HTMLElement {
                 addBtn.innerText = "+";
 
                 sizeTag.classList.add("tag");
-                countElem.classList.add("value");
+                countElem.classList.add("value", "masses-allocation");
 
                 addBtn.addEventListener("click", () => {
                     this.selectedFamilies.add(family.id);

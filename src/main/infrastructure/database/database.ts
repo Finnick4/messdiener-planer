@@ -1,4 +1,4 @@
-import {Church, Family, Mass, Messdiener} from "../../../shared/general";
+import {Absence, Church, Family, Mass, Messdiener} from "../../../shared/general";
 
 export interface DatabaseConnection {
     initialiseDatabase: () => Promise<void>;
@@ -28,4 +28,12 @@ export interface DatabaseConnection {
     changeMassDate: (id: number, date: number) => Promise<void>;
     addMessdienerToMass: (messdienerID: number, massID: number) => Promise<void>;
     removeMessdienerFromMass: (messdienerID: number, massID: number) => Promise<void>;
+
+    createAbsence: (startDate: number, endDate: number, messdienerAffections: number[]) => Promise<number>;
+    getAllAbsences: () => Promise<Absence[]>;
+    addMessdienerToAbsence: (absenceID: number, messdienerID: number) => Promise<void >;
+    removeMessdienerFromAbsence: (absenceID: number, messdienerID: number) => Promise<void>;
+    changeAbsenceStartDate: (id: number, date: number) => Promise<void>;
+    changeAbsenceEndDate: (id: number, date: number) => Promise<void>;
+    deleteAbsence: (id: number) => Promise<void>;
 }

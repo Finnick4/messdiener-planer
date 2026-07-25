@@ -1,4 +1,5 @@
 import {
+    Absence,
     Church,
     Family,
     Mass,
@@ -12,6 +13,7 @@ let allMessdiener: Messdiener[] = [];
 let allFamilies: Family[] = [];
 let allChurches: Church[] = [];
 let allMasses: Mass[] = [];
+let allAbsences: Absence[] = [];
 
 export const getAllMessdiener = async (): Promise<Messdiener[]> => {
     if (allMessdiener.length !== 0) {
@@ -55,6 +57,17 @@ export const getAllMasses = async (): Promise<Mass[]> => {
             return structuredClone(masses);
         })
     )
+}
+
+export const getAllAbsences = async (): Promise<Absence[]> => {
+    if (allAbsences.length !== 0) {
+        return structuredClone(allAbsences);
+    }
+    return getDBConnection().then(db => db.getAllAbsences().then(absences => {
+            allAbsences = absences;
+            return structuredClone(absences);
+        })
+    );
 }
 
 export const createMessdiener = (name: string, family: Family | number): Promise<number> => {
@@ -220,5 +233,63 @@ export const changeMessdienerMassAllocation = async (activities: MessdienerMassA
         }))
     }).then(() => {
         allMasses = [];
+    })
+}
+
+export const createAbsence = (startDate: number, endDate: number, affectedMessdiener: number[]): Promise<number> => {
+    return getDBConnection().then(db => db.createAbsence(startDate, endDate, affectedMessdiener)).then(id => {
+        allAbsences.push({
+            affectedMessdiener: new Set<number>(affectedMessdiener),
+            endDate: endDate,
+            startDate: startDate,
+            id: id
+        });
+        return id;
+    })
+}
+
+export const changeAbsenceStartDate = (id: number, newStart: number): Promise<void> => {
+    return getDBConnection().then(db => db.changeAbsenceStartDate(id, newStart)).then(() => {
+        const index = allAbsences.findIndex(absence => absence.id == id);
+        if (index >= 0) {
+            allAbsences[index].startDate = newStart;
+        }
+    })
+}
+
+export const changeAbsenceEndDate = (id: number, newEnd: number): Promise<void> => {
+    return getDBConnection().then(db => db.changeAbsenceEndDate(id, newEnd)).then(() => {
+        const index = allAbsences.findIndex(absence => absence.id == id);
+        if (index >= 0) {
+            allAbsences[index].endDate = newEnd;
+        }
+    })
+}
+
+export const addMessdienerToAbsence = (absenceID: number, messdiener: number[]): Promise<void> => {
+    return getDBConnection()
+        .then(db => Promise.all(messdiener.map(mID => db.addMessdienerToAbsence(absenceID, mID))))
+        .then(() => {
+            const index = allAbsences.findIndex(absence => absence.id == absenceID);
+            if (index >= 0) {
+                messdiener.forEach(mID => allAbsences[index].affectedMessdiener.add(mID))
+            }
+        });
+}
+
+export const removeMessdienerFromAbsence = (absenceID: number, messdiener: number[]): Promise<void> => {
+    return getDBConnection()
+        .then(db => Promise.all(messdiener.map(mID => db.removeMessdienerFromAbsence(absenceID, mID))))
+        .then(() => {
+            const index = allAbsences.findIndex(absence => absence.id == absenceID);
+            if (index >= 0) {
+                messdiener.forEach(mID => allAbsences[index].affectedMessdiener.delete(mID))
+            }
+        });
+}
+
+export const deleteAbsence = (id: number): Promise<void> => {
+    return getDBConnection().then(db => db.deleteAbsence(id)).then(() => {
+        allAbsences = allAbsences.filter(a => a.id != id);
     })
 }

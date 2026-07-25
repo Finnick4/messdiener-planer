@@ -14,8 +14,10 @@ import {MassCreateButton} from "./display/components/mass/create-button";
 import {MassList} from "./display/components/mass/list";
 import {MessdienerPreparedList} from "./display/components/messdiener/prepared-list";
 import {MessdienerAllocator} from "./display/components/messdiener/allocator";
-import FamilyAdder from "./display/components/family/family-adder";
+import {FamilyAdder} from "./display/components/family/family-adder";
 import {ExpandingTextArea} from "./display/components/expanding-text-area";
+import {AbsencesList} from "./display/components/absences/list";
+import {AbsencesListElement} from "./display/components/absences/list-element";
 
 interface CustomElementDefinition {
     name: string,
@@ -44,6 +46,9 @@ const customElementsList: CustomElementDefinition[] = [
     {name: "family-adder", constructor: FamilyAdder, extends: null},
 
     {name: "expanding-text-area", constructor: ExpandingTextArea, extends: "textarea"},
+
+    {name: "absences-list", constructor: AbsencesList, extends: null},
+    {name: "absences-list-element", constructor: AbsencesListElement, extends: null},
 ]
 
 for (const elem of customElementsList) {
@@ -57,17 +62,23 @@ for (const elem of customElementsList) {
 routeToPage(Pages.Main);
 
 
-
+// TODO Remove these listeners!
 addSubscription(ListenerEndpoints.AllMessdiener, data => {
     console.log(data)
-})
+});
+
 addSubscription(ListenerEndpoints.AllFamilies, data => {
     console.log(data)
-})
+});
+
 addSubscription(ListenerEndpoints.AllChurches, data => {
     console.log(data)
-})
+});
+
 addSubscription(ListenerEndpoints.AllMasses, data => {
     console.log(data)
-})
+});
 
+addSubscription(ListenerEndpoints.AllAbsences, data => {
+    console.log(data)
+});

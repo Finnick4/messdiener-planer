@@ -1,5 +1,5 @@
 import {CallbackFunction} from "../../shared/state-manager";
-import {Church, Family, Mass, Messdiener} from "../../shared/general";
+import {Absence, Church, Family, Mass, Messdiener} from "../../shared/general";
 
 interface SubscriptionListElement<T> {
     fn: CallbackFunction<T>
@@ -60,6 +60,7 @@ const states = {
     AllFamilies: new State<Family[]>(window.electronAPI.getAllFamilies),
     AllChurches: new State<Church[]>(window.electronAPI.getAllChurches),
     AllMasses: new State<Mass[]>(window.electronAPI.getAllMasses),
+    AllAbsences: new State<Absence[]>(window.electronAPI.getAllAbsences),
 }
 
 export enum ListenerEndpoints {
@@ -67,6 +68,7 @@ export enum ListenerEndpoints {
     AllFamilies = "AllFamilies",
     AllChurches = "AllChurches",
     AllMasses = "AllMasses",
+    AllAbsences = "AllAbsences",
 }
 
 export const addSubscription = (listener: ListenerEndpoints, callback: CallbackFunction<any>): () => void => {
@@ -99,5 +101,10 @@ window.electronAPI.onChurchesUpdate((data: Church[]) => {
 
 window.electronAPI.onMassesUpdate((data: Mass[]) => {
     const target = ListenerEndpoints.AllMasses;
+    states[target].pushUpdate(data);
+});
+
+window.electronAPI.onAbsencesUpdate((data: Absence[]) => {
+    const target = ListenerEndpoints.AllAbsences;
     states[target].pushUpdate(data);
 });

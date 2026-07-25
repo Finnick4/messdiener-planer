@@ -1,5 +1,6 @@
 import {contextBridge, ipcRenderer, IpcRenderer} from 'electron';
 import {
+    Absence,
     Church,
     ExportSettings,
     Family,
@@ -15,6 +16,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getAllFamilies: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllFamilies"),
     getAllChurches: (): Promise<Family[]> => ipcRenderer.invoke("dialog:getAllChurches"),
     getAllMasses: (): Promise<Mass[]> => ipcRenderer.invoke("dialog:getAllMasses"),
+    getAllAbsences: (): Promise<Absence[]> => ipcRenderer.invoke("dialog:getAllAbsences"),
     getRecentExportSettings: (): Promise<ExportSettings | undefined> => ipcRenderer.invoke("dialog:getRecentExportSettings"),
 
     createMessdiener: (name: string, family: Family | number, churchActivity?: number[]): void => ipcRenderer.send("create-messdiener", name, family, churchActivity),
@@ -29,9 +31,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
     editMass: (mass: Mass): void=> ipcRenderer.send("edit-mass", mass),
     changeMessdienerMassAllocation: (activities: MessdienerMassAllocation[]): void=> ipcRenderer.send("change-messdiener-mass-allocation", activities),
     exportPlan: (settings: ExportSettings): void => ipcRenderer.send("export-plan", settings),
+    createAbsence: (start: number, end: number, affectedMessdiener: number[]): void => ipcRenderer.send("create-absence", start, end, affectedMessdiener),
+    editAbsence: (absence: Absence): void => ipcRenderer.send("edit-absence", absence),
+    changeAbsenceAffection: (absenceID: number, addedMessdiener: number[], removedMessdiener: number[]): void=> ipcRenderer.send("change-absence-messdiener-affection", absenceID, addedMessdiener, removedMessdiener),
+    deleteAbsence: (id: number): void => ipcRenderer.send("delete-absence", id),
 
     onMessdienerUpdate: (callback: (data: Messdiener[]) => void): IpcRenderer => ipcRenderer.on('update-messdiener', (_event, value) => callback(value)),
     onFamiliesUpdate: (callback: (data: Family[]) => void): IpcRenderer => ipcRenderer.on('update-families', (_event, value) => callback(value)),
     onChurchesUpdate: (callback: (data: Church[]) => void): IpcRenderer => ipcRenderer.on('update-church', (_event, value) => callback(value)),
     onMassesUpdate: (callback: (data: Mass[]) => void): IpcRenderer => ipcRenderer.on('update-mass', (_event, value) => callback(value)),
+    onAbsencesUpdate: (callback: (data: Absence[]) => void): IpcRenderer => ipcRenderer.on('update-absence', (_event, value) => callback(value)),
 })

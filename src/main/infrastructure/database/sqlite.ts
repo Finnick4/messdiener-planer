@@ -1,5 +1,5 @@
 import {Database, verbose} from "sqlite3";
-import {Church, Family, Mass, Messdiener} from "../../../shared/general";
+import {Absence, Church, Family, Mass, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
 
 const sqlite3 = verbose();
@@ -61,67 +61,89 @@ export class SQLiteConnection implements DatabaseConnection {
 
 
     async initialiseDatabase(): Promise<void> {
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS church
-            (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                name          TEXT NOT NULL,
-                location      TEXT
-            )
-        `);
 
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS mass
-            (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                date          INTEGER NOT NULL,
-                church_id     INTEGER NOT NULL,
-                note          TEXT,
-                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE
-            )
-        `);
+        await Promise.all([
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS church
+                (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name          TEXT NOT NULL,
+                    location      TEXT
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS family
+                (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    internal_name TEXT,
+                    display_name  TEXT NOT NULL,
+                    shorthand     TEXT
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS absence
+                (
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    start_date  INTEGER NOT NULL,
+                    end_date    INTEGER NOT NULL
+                )
+            `),
+        ])
 
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS family
-            (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                internal_name TEXT,
-                display_name  TEXT NOT NULL,
-                shorthand     TEXT
-            )
-        `);
+        await Promise.all([
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS mass
+                (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    date          INTEGER NOT NULL,
+                    church_id     INTEGER NOT NULL,
+                    note          TEXT,
+                    FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS messdiener
+                (
+                    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name               TEXT    NOT NULL,
+                    family_association INTEGER NOT NULL,
+                    FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
+                )
+            `)
+        ]);
 
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS messdiener
-            (
-                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-                name               TEXT    NOT NULL,
-                family_association INTEGER NOT NULL,
-                FOREIGN KEY (family_association) REFERENCES family (id) ON DELETE RESTRICT
-            )
-        `);
-
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS church_activity
-            (
-                messdiener_id   INTEGER NOT NULL,
-                church_id       INTEGER NOT NULL,
-                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
-                FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE,
-                PRIMARY KEY (messdiener_id, church_id)
-            )
-        `);
-
-        await this.runQuery(`
-            CREATE TABLE IF NOT EXISTS mass_messdiener_allocation
-            (
-                messdiener_id   INTEGER NOT NULL,
-                mass_id       INTEGER NOT NULL,
-                FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
-                FOREIGN KEY (mass_id) REFERENCES mass (id) ON DELETE CASCADE,
-                PRIMARY KEY (messdiener_id, mass_id)
-            )
-        `);
+        await Promise.all([
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS church_activity
+                (
+                    messdiener_id   INTEGER NOT NULL,
+                    church_id       INTEGER NOT NULL,
+                    FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                    FOREIGN KEY (church_id) REFERENCES church (id) ON DELETE CASCADE,
+                    PRIMARY KEY (messdiener_id, church_id)
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS mass_messdiener_allocation
+                (
+                    messdiener_id   INTEGER NOT NULL,
+                    mass_id       INTEGER NOT NULL,
+                    FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                    FOREIGN KEY (mass_id) REFERENCES mass (id) ON DELETE CASCADE,
+                    PRIMARY KEY (messdiener_id, mass_id)
+                )
+            `),
+            this.runQuery(`
+                CREATE TABLE IF NOT EXISTS absence_affections
+                (
+                    messdiener_id   INTEGER NOT NULL,
+                    absence_id      INTEGER NOT NULL,
+                    FOREIGN KEY (messdiener_id) REFERENCES messdiener (id) ON DELETE CASCADE,
+                    FOREIGN KEY (absence_id) REFERENCES absence (id) ON DELETE CASCADE,
+                    PRIMARY KEY (messdiener_id, absence_id)
+                )
+            `)
+        ]);
     }
 
     async getAllMessdiener(): Promise<Messdiener[]> {
@@ -147,23 +169,54 @@ export class SQLiteConnection implements DatabaseConnection {
                 lastNameDisplay: row.display_name,
                 lastNameShorthand: row.short == "" ? undefined : row.short,
                 familyID: row.fam_id,
-                churchActivity: new Set<number>()
+                churchActivity: new Set<number>(),
+                absences: []
             })
         }
-        rows = await this.getRowsQuery(`
-            SELECT
-                messdiener.id AS messdiener_id,
-                church_activity.church_id AS church_id
-            FROM messdiener
-                     JOIN church_activity ON messdiener.id = church_activity.messdiener_id
-            ORDER BY messdiener.id ASC;
-        `)
-        for (const row of rows) {
-            const index = messdiener.findIndex(m => m.identifier == row.messdiener_id);
-            if (index >= 0) {
-                messdiener[index].churchActivity.add(row.church_id);
-            }
-        }
+
+        await Promise.all([
+            this.getRowsQuery(`
+                SELECT
+                    messdiener.id AS messdiener_id,
+                    church_activity.church_id AS church_id
+                FROM messdiener
+                         JOIN church_activity ON messdiener.id = church_activity.messdiener_id
+                ORDER BY messdiener.id ASC;
+            `).then(rows => {
+                for (const row of rows) {
+                    const index = messdiener.findIndex(m => m.identifier == row.messdiener_id);
+                    if (index >= 0) {
+                        messdiener[index].churchActivity.add(row.church_id);
+                    }
+                }
+            }),
+
+            this.getRowsQuery(`
+                SELECT
+                    messdiener.id AS messdiener_id,
+                    absence.id AS absence_id,
+                    absence.start_date AS start,
+                    absence.end_date AS end
+                FROM messdiener
+                    JOIN absence_affections ON messdiener.id = absence_affections.messdiener_id
+                    JOIN absence ON absence_affections.absence_id = absence.id
+                ORDER BY messdiener.id ASC;
+            `).then(rows => {
+                for (const row of rows) {
+                    const index = messdiener.findIndex(m => m.identifier == row.messdiener_id);
+                    if (index >= 0) {
+                        messdiener[index].absences.push({
+                            id: row.absence_id,
+                            startDate: row.start,
+                            endDate: row.end
+                        });
+                    }
+                }
+            }),
+
+
+        ])
+
         return messdiener;
     }
 
@@ -402,4 +455,77 @@ export class SQLiteConnection implements DatabaseConnection {
             DELETE FROM mass_messdiener_allocation WHERE messdiener_id=? AND mass_id=?;
         `, [messdienerID, massID]);
     }
+
+    /*
+    Absence related queries
+     */
+
+    async createAbsence(startDate: number, endDate: number, messdienerAffections: number[]): Promise<number> {
+        const id: number = (await this.getRowQuery(`
+            INSERT INTO absence (start_date, end_date) VALUES (?, ?) RETURNING id;
+        `, [startDate, endDate])).id;
+
+        return Promise.all(messdienerAffections.map(mID => this.addMessdienerToAbsence(id, mID)))
+            .then(() => id);
+    }
+
+    async getAllAbsences(): Promise<Absence[]> {
+        let rows = await this.getRowsQuery(`
+            SELECT id, start_date, end_date
+            FROM absence
+            ORDER BY id ASC;
+        `);
+        const absences: Absence[] = [];
+
+        for (const row of rows) {
+            absences.push({
+                id: row.id,
+                startDate: row.start_date,
+                endDate: row.end_date,
+                affectedMessdiener: new Set<number>()
+            })
+        }
+        rows = await this.getRowsQuery(`
+            SELECT
+                messdiener_id,
+                absence_id
+            FROM absence_affections
+        `)
+        for (const row of rows) {
+            const index = absences.findIndex(a => a.id == row.absence_id);
+            if (index >= 0) {
+                absences[index].affectedMessdiener.add(row.messdiener_id);
+            }
+        }
+        return absences;
+    }
+
+    addMessdienerToAbsence(absenceID: number, messdienerID: number): Promise<void> {
+        return this.runQuery(`
+            INSERT OR IGNORE INTO absence_affections (messdiener_id, absence_id) VALUES (?, ?);
+        `, [messdienerID, absenceID]);
+    }
+    removeMessdienerFromAbsence(absenceID: number, messdienerID: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM absence_affections WHERE messdiener_id = ? AND absence_id = ?;
+        `, [messdienerID, absenceID]);
+    }
+
+    changeAbsenceStartDate(id: number, date: number): Promise<void> {
+        return this.runQuery(`
+            UPDATE absence SET start_date = ? WHERE id = ?;
+        `, [date, id]);
+    }
+    changeAbsenceEndDate(id: number, date: number): Promise<void> {
+        return this.runQuery(`
+            UPDATE absence SET end_date = ? WHERE id = ?;
+        `, [date, id]);
+    }
+
+    deleteAbsence(id: number): Promise<void> {
+        return this.runQuery(`
+            DELETE FROM absence WHERE id = ?;
+        `, [id]);
+    }
+
 }
