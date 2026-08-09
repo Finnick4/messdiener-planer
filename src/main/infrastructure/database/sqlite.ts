@@ -501,9 +501,22 @@ export class SQLiteConnection implements DatabaseConnection {
     }
 
     addMessdienerToAbsence(absenceID: number, messdienerID: number): Promise<void> {
-        return this.runQuery(`
-            INSERT OR IGNORE INTO absence_affections (messdiener_id, absence_id) VALUES (?, ?);
-        `, [messdienerID, absenceID]);
+        return Promise.all([
+            this.runQuery(`
+                INSERT OR IGNORE INTO absence_affections (messdiener_id, absence_id) VALUES (?, ?);
+            `, [messdienerID, absenceID]),
+            this.runQuery(`
+                DELETE FROM mass_messdiener_allocation
+                    WHERE messdiener_id = ? 
+                        AND EXISTS(
+                            SELECT mass.id AS id_of_mass FROM mass
+                                JOIN absence ON absence.id = ?
+                            WHERE id_of_mass = mass_messdiener_allocation.mass_id
+                                AND mass.date >= absence.start_date
+                                AND mass.date <= absence.end_date
+                        );
+            `, [messdienerID, absenceID]),
+        ]).then();
     }
     removeMessdienerFromAbsence(absenceID: number, messdienerID: number): Promise<void> {
         return this.runQuery(`

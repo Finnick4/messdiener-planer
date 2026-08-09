@@ -244,6 +244,16 @@ export const createAbsence = (startDate: number, endDate: number, affectedMessdi
             startDate: startDate,
             id: id
         });
+
+        for (const mass of allMasses) {
+            if (mass.date < startDate) {
+                continue;
+            }
+            if (mass.date > endDate) {
+                break;
+            }
+            affectedMessdiener.forEach(mID => mass.allocatedMessdiener.delete(mID));
+        }
         return id;
     })
 }
@@ -271,8 +281,23 @@ export const addMessdienerToAbsence = (absenceID: number, messdiener: number[]):
         .then(db => Promise.all(messdiener.map(mID => db.addMessdienerToAbsence(absenceID, mID))))
         .then(() => {
             const index = allAbsences.findIndex(absence => absence.id == absenceID);
-            if (index >= 0) {
-                messdiener.forEach(mID => allAbsences[index].affectedMessdiener.add(mID))
+            if (index < 0) {
+                allAbsences = [];
+                allMasses = [];
+                return;
+            }
+            messdiener.forEach(mID => allAbsences[index].affectedMessdiener.add(mID))
+
+            const absence = allAbsences[index];
+
+            for (const mass of allMasses) {
+                if (mass.date < absence.startDate) {
+                    continue;
+                }
+                if (mass.date > absence.endDate) {
+                    break;
+                }
+                messdiener.forEach(mID => mass.allocatedMessdiener.delete(mID));
             }
         });
 }

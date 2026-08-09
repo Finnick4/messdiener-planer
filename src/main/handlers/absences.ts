@@ -5,7 +5,7 @@ import {
     createAbsence, deleteAbsence,
     getAllAbsences, removeChurch, removeMessdienerFromAbsence,
 } from "../application/state";
-import {pingAbsencesUpdate, pingChurchesUpdate} from "./ping-manager";
+import {pingAbsencesUpdate, pingChurchesUpdate, pingMassesUpdate} from "./ping-manager";
 import IpcMainEvent = Electron.IpcMainEvent;
 
 export const getAllAbsencesHandler = (): Promise<Absence[]> => {
@@ -27,6 +27,7 @@ export const createAbsenceHandler = (_event: IpcMainEvent, startDate: number, en
 
             createAbsence(startDate, endDate, affectedMessdiener).then((id: number) => {
                 pingAbsencesUpdate();
+                pingMassesUpdate();
                 resolve(id);
             });
         });
@@ -63,6 +64,7 @@ export const editAbsenceAffectionsHandler = (_event: IpcMainEvent, absenceID: nu
             removeMessdienerFromAbsence(absenceID, removeMessdiener),
         ]).then(() => {
             pingAbsencesUpdate();
+            pingMassesUpdate();
         });
     });
 }
