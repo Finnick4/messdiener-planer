@@ -1,5 +1,5 @@
 :root {
-    font-size: 16px;
+    font-size: 1rem;
 
     --bg-color-muted: hsl(0, 6%, 96%);
     --bg-color-element: hsl(0, 6%, 98%);
@@ -140,6 +140,14 @@ messdiener-prepared-list {
 family-adder {
     grid-template-columns: auto 1fr auto auto;
 }
+.modal.absence-edit family-adder,
+.modal.absence-create family-adder {
+    grid-template-columns: auto 1fr auto;
+
+    .value.masses-allocation {
+        display: none;
+    }
+}
 
 .tag {
     padding: var(--padding-row);
@@ -150,7 +158,7 @@ family-adder {
 }
 
 .modal:open {
-    width: 70vw;
+    width: min(50rem, 80%);
     display: block;
     z-index: 1;
     background-color: var(--bg-color-muted);
