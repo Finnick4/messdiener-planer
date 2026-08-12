@@ -8,6 +8,7 @@ import {
     MessdienerMassAllocation
 } from "../../shared/general";
 import {getDBConnection} from "./main";
+import {getMass} from "../../display/state/specific-entries";
 
 let allMessdiener: Messdiener[] = [];
 let allFamilies: Family[] = [];
@@ -227,7 +228,12 @@ export const changeMessdienerMassAllocation = async (activities: MessdienerMassA
     return getDBConnection().then(db => {
         return Promise.all(activities.map(activity => {
             if (activity.isActive) {
-                return db.addMessdienerToMass(activity.messdienerID, activity.massID);
+                return checkIfMessdienerCanBeAllocatedToMass(activity.messdienerID, activity.massID).then(canBeAllocated => {
+                    if (!canBeAllocated) {
+                        return
+                    }
+                    db.addMessdienerToMass(activity.messdienerID, activity.massID)
+                })
             }
             return db.removeMessdienerFromMass(activity.messdienerID, activity.massID);
         }))
@@ -317,4 +323,35 @@ export const deleteAbsence = (id: number): Promise<void> => {
     return getDBConnection().then(db => db.deleteAbsence(id)).then(() => {
         allAbsences = allAbsences.filter(a => a.id != id);
     })
+}
+
+const checkIfMessdienerCanBeAllocatedToMass = (messdienerID: number, massID: number): Promise<boolean> => {
+    return getAllMasses().then(masses => {
+        const mass = masses.filter(mass => mass.id == massID)[0];
+
+        if (mass == undefined || mass.allocatedMessdiener.has(messdienerID)) {
+            return false;
+        }
+
+        return checkIfMessdienerIsNotAbsent(messdienerID, mass.date);
+    });
+}
+
+
+
+const checkIfMessdienerIsNotAbsent = (messdienerID: number, date: number): Promise<boolean> => {
+    return getAllAbsences().then(absences => {
+        for (const absence of absences) {
+            if (!absence.affectedMessdiener.has(messdienerID)) {
+                continue;
+            }
+            if (absence.startDate > date) {
+                return true;
+            }
+            if (absence.startDate <= date && date <= absence.endDate) {
+                return false;
+            }
+        }
+        return true;
+    });
 }
