@@ -208,7 +208,7 @@ const makeLaTeXStringFromMass = (mass: Mass, messdienerMap: Map<number, Messdien
     mass.allocatedMessdiener.forEach(messdienerID => {
         const messdiener = messdienerMap.get(messdienerID);
         if (messdiener) {
-            messdienerList += messdiener.firstName + "\\\\";
+            messdienerList += (messdiener.displayShorthand ? `${messdiener.firstName} ${messdiener.lastNameShorthand}` : messdiener.firstName) + "\\\\";
         }
     })
     if (mass.allocatedMessdiener.size < minMessdienerSize && mass.allocatedMessdiener.size > 0) {

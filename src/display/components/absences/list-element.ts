@@ -65,8 +65,8 @@ export class AbsencesListElement extends HTMLElement {
                 affectedMessdiener.textContent = "";
                 target.affectedMessdiener.forEach(mID => {
                     const messdienerPlaque = document.createElement("div");
-                    const name = mapped.get(mID)?.firstName
-                    messdienerPlaque.textContent = name ? name : "Unbekannt";
+                    const thisMessdiener = mapped.get(mID);
+                    messdienerPlaque.textContent = thisMessdiener ? (thisMessdiener.displayShorthand ? `${thisMessdiener.firstName} ${thisMessdiener.lastNameShorthand}` : thisMessdiener.firstName) : "Unbekannt";
                     messdienerPlaque.classList.add("messdiener");
                     affectedMessdiener.appendChild(messdienerPlaque);
                 });

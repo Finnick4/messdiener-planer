@@ -1,6 +1,7 @@
 import {Database, verbose} from "sqlite3";
 import {Absence, Church, Family, Mass, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
+import familyAdder from "../../../display/components/family/family-adder";
 
 const sqlite3 = verbose();
 
@@ -147,7 +148,7 @@ export class SQLiteConnection implements DatabaseConnection {
     }
 
     async getAllMessdiener(): Promise<Messdiener[]> {
-        let rows = await this.getRowsQuery(`
+        const rows = await this.getRowsQuery(`
             SELECT 
                 messdiener.id AS messdiener_id, 
                 name AS first_name, 
@@ -161,17 +162,34 @@ export class SQLiteConnection implements DatabaseConnection {
         `);
         const messdiener: Messdiener[] = [];
 
+        const names = new Set<string>();
+        const duplicateNames = new Set<string>();
+
         for (const row of rows) {
+            const firstName = String(row.first_name);
+            if (names.has(firstName)) {
+                duplicateNames.add(firstName)
+            }
+            names.add(firstName);
             messdiener.push({
                 identifier: row.messdiener_id,
-                firstName: row.first_name,
+                firstName: firstName,
                 lastNameInternal: row.internal_name,
                 lastNameDisplay: row.display_name,
+                displayShorthand: false,
                 lastNameShorthand: row.short == "" ? undefined : row.short,
                 familyID: row.fam_id,
                 churchActivity: new Set<number>(),
                 absences: []
             })
+        }
+
+        if (duplicateNames.size > 0) {
+            messdiener.forEach((m, i) => {
+                if (duplicateNames.has(m.firstName)) {
+                    messdiener[i].displayShorthand = true;
+                }
+            });
         }
 
         await Promise.all([
@@ -501,9 +519,22 @@ export class SQLiteConnection implements DatabaseConnection {
     }
 
     addMessdienerToAbsence(absenceID: number, messdienerID: number): Promise<void> {
-        return this.runQuery(`
-            INSERT OR IGNORE INTO absence_affections (messdiener_id, absence_id) VALUES (?, ?);
-        `, [messdienerID, absenceID]);
+        return Promise.all([
+            this.runQuery(`
+                INSERT OR IGNORE INTO absence_affections (messdiener_id, absence_id) VALUES (?, ?);
+            `, [messdienerID, absenceID]),
+            this.runQuery(`
+                DELETE FROM mass_messdiener_allocation
+                    WHERE messdiener_id = ? 
+                        AND EXISTS(
+                            SELECT mass.id AS id_of_mass FROM mass
+                                JOIN absence ON absence.id = ?
+                            WHERE id_of_mass = mass_messdiener_allocation.mass_id
+                                AND mass.date >= absence.start_date
+                                AND mass.date <= absence.end_date
+                        );
+            `, [messdienerID, absenceID]),
+        ]).then();
     }
     removeMessdienerFromAbsence(absenceID: number, messdienerID: number): Promise<void> {
         return this.runQuery(`

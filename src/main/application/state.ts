@@ -8,6 +8,7 @@ import {
     MessdienerMassAllocation
 } from "../../shared/general";
 import {getDBConnection} from "./main";
+import {getMass} from "../../display/state/specific-entries";
 
 let allMessdiener: Messdiener[] = [];
 let allFamilies: Family[] = [];
@@ -227,7 +228,12 @@ export const changeMessdienerMassAllocation = async (activities: MessdienerMassA
     return getDBConnection().then(db => {
         return Promise.all(activities.map(activity => {
             if (activity.isActive) {
-                return db.addMessdienerToMass(activity.messdienerID, activity.massID);
+                return checkIfMessdienerCanBeAllocatedToMass(activity.messdienerID, activity.massID).then(canBeAllocated => {
+                    if (!canBeAllocated) {
+                        return
+                    }
+                    db.addMessdienerToMass(activity.messdienerID, activity.massID)
+                })
             }
             return db.removeMessdienerFromMass(activity.messdienerID, activity.massID);
         }))
@@ -244,6 +250,16 @@ export const createAbsence = (startDate: number, endDate: number, affectedMessdi
             startDate: startDate,
             id: id
         });
+
+        for (const mass of allMasses) {
+            if (mass.date < startDate) {
+                continue;
+            }
+            if (mass.date > endDate) {
+                break;
+            }
+            affectedMessdiener.forEach(mID => mass.allocatedMessdiener.delete(mID));
+        }
         return id;
     })
 }
@@ -271,8 +287,23 @@ export const addMessdienerToAbsence = (absenceID: number, messdiener: number[]):
         .then(db => Promise.all(messdiener.map(mID => db.addMessdienerToAbsence(absenceID, mID))))
         .then(() => {
             const index = allAbsences.findIndex(absence => absence.id == absenceID);
-            if (index >= 0) {
-                messdiener.forEach(mID => allAbsences[index].affectedMessdiener.add(mID))
+            if (index < 0) {
+                allAbsences = [];
+                allMasses = [];
+                return;
+            }
+            messdiener.forEach(mID => allAbsences[index].affectedMessdiener.add(mID))
+
+            const absence = allAbsences[index];
+
+            for (const mass of allMasses) {
+                if (mass.date < absence.startDate) {
+                    continue;
+                }
+                if (mass.date > absence.endDate) {
+                    break;
+                }
+                messdiener.forEach(mID => mass.allocatedMessdiener.delete(mID));
             }
         });
 }
@@ -292,4 +323,35 @@ export const deleteAbsence = (id: number): Promise<void> => {
     return getDBConnection().then(db => db.deleteAbsence(id)).then(() => {
         allAbsences = allAbsences.filter(a => a.id != id);
     })
+}
+
+const checkIfMessdienerCanBeAllocatedToMass = (messdienerID: number, massID: number): Promise<boolean> => {
+    return getAllMasses().then(masses => {
+        const mass = masses.filter(mass => mass.id == massID)[0];
+
+        if (mass == undefined || mass.allocatedMessdiener.has(messdienerID)) {
+            return false;
+        }
+
+        return checkIfMessdienerIsNotAbsent(messdienerID, mass.date);
+    });
+}
+
+
+
+const checkIfMessdienerIsNotAbsent = (messdienerID: number, date: number): Promise<boolean> => {
+    return getAllAbsences().then(absences => {
+        for (const absence of absences) {
+            if (!absence.affectedMessdiener.has(messdienerID)) {
+                continue;
+            }
+            if (absence.startDate > date) {
+                return true;
+            }
+            if (absence.startDate <= date && date <= absence.endDate) {
+                return false;
+            }
+        }
+        return true;
+    });
 }

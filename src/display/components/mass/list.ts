@@ -55,8 +55,8 @@ export class MassList extends HTMLElement {
                 getMessdienerMap().then((mapped: Map<number, Messdiener>) => {
                     mass.allocatedMessdiener.forEach(allocatedMessdienerID => {
                         const messdienerPlaque = document.createElement("div");
-                        const name = mapped.get(allocatedMessdienerID)?.firstName
-                        messdienerPlaque.textContent = name ? name : "Unbekannt";
+                        const thisMessdiener = mapped.get(allocatedMessdienerID);
+                        messdienerPlaque.textContent = thisMessdiener ? (thisMessdiener.displayShorthand ? `${thisMessdiener.firstName} ${thisMessdiener.lastNameShorthand}` : thisMessdiener.firstName) : "Unbekannt";
                         messdienerPlaque.classList.add("messdiener");
                         messdiener.appendChild(messdienerPlaque);
                     });
