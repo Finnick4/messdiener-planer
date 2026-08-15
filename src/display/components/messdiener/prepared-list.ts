@@ -45,7 +45,7 @@ export class MessdienerPreparedList extends HTMLElement {
                     entry.classList.add("messdiener", "row", "entry");
 
                     const name = document.createElement("div");
-                    name.textContent = messdiener.firstName;
+                    name.textContent = messdiener.displayShorthand ? `${messdiener.firstName} ${messdiener.lastNameShorthand}` : messdiener.firstName;
                     name.classList.add("name");
                     entry.appendChild(name);
 

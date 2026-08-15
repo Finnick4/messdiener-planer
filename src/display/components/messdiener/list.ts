@@ -27,7 +27,7 @@ export class MessdienerList extends HTMLElement {
                 entry.classList.add("entry");
 
                 const name = document.createElement("div");
-                name.textContent = messdiener.firstName;
+                name.textContent = messdiener.displayShorthand ? `${messdiener.firstName} ${messdiener.lastNameShorthand}` : messdiener.firstName;
                 name.classList.add("name");
                 entry.appendChild(name);
 

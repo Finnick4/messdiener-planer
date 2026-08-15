@@ -4,6 +4,7 @@ export type Messdiener = {
     lastNameInternal: string
     lastNameDisplay: string
     lastNameShorthand?: string
+    displayShorthand: boolean
     familyID: number
     identifier: number
     churchActivity: Set<number>
