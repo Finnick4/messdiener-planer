@@ -4,6 +4,7 @@
   "version": "0.5.1",
   "description": "Ein Werkzeug zur Erstellung von Messdienerplänen.",
   "main": ".vite/build/main.js",
+  "license": "UNLICENSED",
   "private": true,
   "scripts": {
     "start": "electron-forge start",
@@ -39,5 +40,36 @@
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
     "sqlite3": "^6.0.1"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "asar": true
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "messdiener-planer"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin",
+            "linux",
+            "win32"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
