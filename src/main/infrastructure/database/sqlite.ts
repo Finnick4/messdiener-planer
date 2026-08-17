@@ -8,8 +8,9 @@ const sqlite3 = verbose();
 export class SQLiteConnection implements DatabaseConnection {
     private db: Database;
 
-    constructor() {
-        this.db = new sqlite3.Database(`data.db`, (err: Error | null) => {
+    constructor(directoryPath: string | undefined) {
+        const path = directoryPath ? `${directoryPath}/data.db` : "data.db"
+        this.db = new sqlite3.Database(path, (err: Error | null) => {
             if (err) {
                 console.error(`Connection error: ${err?.message}`)
                 throw new Error(`Error while establishing connection: ${err?.message}`)
@@ -62,6 +63,7 @@ export class SQLiteConnection implements DatabaseConnection {
 
 
     async initialiseDatabase(): Promise<void> {
+        console.log("Starting to initialise database!");
 
         await Promise.all([
             this.runQuery(`
@@ -89,7 +91,7 @@ export class SQLiteConnection implements DatabaseConnection {
                     end_date    INTEGER NOT NULL
                 )
             `),
-        ])
+        ]);
 
         await Promise.all([
             this.runQuery(`
@@ -145,6 +147,7 @@ export class SQLiteConnection implements DatabaseConnection {
                 )
             `)
         ]);
+        console.log("Database initialised!");
     }
 
     async getAllMessdiener(): Promise<Messdiener[]> {
