@@ -20,9 +20,11 @@ const safeParseJSON = <T>(str: string): T | undefined => {
     }
 }
 
-export const readExportSettings = (): Promise<ExportSettings | undefined> => {
+export const readExportSettings = (directory: string | undefined): Promise<ExportSettings | undefined> => {
     return new Promise<ExportSettings | undefined>((resolve, reject) => {
-        fs.readFile("exportSettings.json", (err, result) => {
+        const path = directory ? `${directory}/exportSettings.json` : "exportSettings.json";
+
+        fs.readFile(path, (err, result) => {
             if (err) {
                 if (err.code == "ENOENT") {
                     console.log("Did not find any saved export settings!");
@@ -53,9 +55,8 @@ export const readExportSettings = (): Promise<ExportSettings | undefined> => {
     })
 }
 
-export const writeExportSettings = (settings: ExportSettings): Promise<void> => {
+export const writeExportSettings = (settings: ExportSettings, directory: string | undefined): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-
         const converted: ExportSettingsStorage = {
             mainChurchID: settings.mainChurchID,
             otherChurchComment: settings.otherChurchComment,
@@ -65,7 +66,9 @@ export const writeExportSettings = (settings: ExportSettings): Promise<void> => 
             hint: settings.hint,
             displayedChurchIDs: Array.from(settings.displayedChurchIDs)
         }
-        fs.writeFile("exportSettings.json", JSON.stringify(converted), err => {
+        const path = directory ? `${directory}/exportSettings.json` : "exportSettings.json";
+
+        fs.writeFile(path, JSON.stringify(converted), err => {
             if (err) {
                 console.error("Error while writing export settings:")
                 console.error(err.message);

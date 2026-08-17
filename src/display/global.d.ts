@@ -8,7 +8,7 @@ import {
     MessdienerChurchActivityStatus,
     MessdienerMassAllocation
 } from "../shared/general";
-import {ipcRenderer, IpcRenderer} from "electron";
+import {IpcRenderer} from "electron";
 
 declare global {
     interface Window {

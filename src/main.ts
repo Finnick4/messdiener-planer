@@ -25,12 +25,12 @@ import {
 } from "./main/handlers/masses";
 import {exportPlanHandler, recentExportSettingsHandler} from "./main/handlers/plans";
 import {
-    createAbsenceHandler, deleteAbsenceHandler,
+    createAbsenceHandler,
+    deleteAbsenceHandler,
     editAbsenceAffectionsHandler,
     editAbsencesHandler,
     getAllAbsencesHandler
 } from "./main/handlers/absences";
-import {deleteAbsence} from "./main/application/state";
 
 if (started) {
   app.quit();

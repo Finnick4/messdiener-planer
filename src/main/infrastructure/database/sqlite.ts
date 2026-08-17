@@ -1,7 +1,6 @@
 import {Database, verbose} from "sqlite3";
 import {Absence, Church, Family, Mass, Messdiener} from "../../../shared/general";
 import {DatabaseConnection} from "./database";
-import familyAdder from "../../../display/components/family/family-adder";
 
 const sqlite3 = verbose();
 
@@ -9,14 +8,14 @@ export class SQLiteConnection implements DatabaseConnection {
     private db: Database;
 
     constructor(directoryPath: string | undefined) {
-        const path = directoryPath ? `${directoryPath}/data.db` : "data.db"
+        const path = directoryPath ? `${directoryPath}/data.db` : "data.db";
         this.db = new sqlite3.Database(path, (err: Error | null) => {
             if (err) {
-                console.error(`Connection error: ${err?.message}`)
-                throw new Error(`Error while establishing connection: ${err?.message}`)
+                console.error(`Connection error: ${err?.message}`);
+                throw new Error(`Error while establishing connection: ${err?.message}`);
             }
-            console.log("Connection to database established!")
-        })
+            console.log("Connection to database established!");
+        });
     }
     private getRowsQuery (sqlStatement: string, params: any[] = []): Promise<any[]> {
         return new Promise((resolve, reject) => {

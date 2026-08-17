@@ -1,11 +1,15 @@
 import {Absence} from "../../shared/general";
 import {
     addMessdienerToAbsence,
-    areValidMessdienerIDs, changeAbsenceEndDate, changeAbsenceStartDate,
-    createAbsence, deleteAbsence,
-    getAllAbsences, removeChurch, removeMessdienerFromAbsence,
+    areValidMessdienerIDs,
+    changeAbsenceEndDate,
+    changeAbsenceStartDate,
+    createAbsence,
+    deleteAbsence,
+    getAllAbsences,
+    removeMessdienerFromAbsence,
 } from "../application/state";
-import {pingAbsencesUpdate, pingChurchesUpdate, pingMassesUpdate} from "./ping-manager";
+import {pingAbsencesUpdate, pingMassesUpdate} from "./ping-manager";
 import IpcMainEvent = Electron.IpcMainEvent;
 
 export const getAllAbsencesHandler = (): Promise<Absence[]> => {
