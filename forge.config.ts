@@ -10,13 +10,20 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    icon: "./assets/icon"
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({}),
-    new MakerZIP({}, ['darwin']),
+    new MakerZIP({}, [
+        "darwin",
+        "linux",
+        "win32"
+    ]),
     new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerDeb({
+      options: {icon: "./assets/icon.png"}
+    }),
   ],
   plugins: [
     new VitePlugin({

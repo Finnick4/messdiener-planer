@@ -41,6 +41,8 @@ export const getWorkingDirectoryPath = (): Promise<string | undefined> => {
             resolve(workingDirectoryPath);
             return;
         }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         waitingForPath.push(resolve);
         isAskingForDirectory = true;
 
