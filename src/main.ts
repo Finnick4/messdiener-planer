@@ -25,12 +25,13 @@ import {
 } from "./main/handlers/masses";
 import {exportPlanHandler, recentExportSettingsHandler} from "./main/handlers/plans";
 import {
-    createAbsenceHandler, deleteAbsenceHandler,
+    createAbsenceHandler,
+    deleteAbsenceHandler,
     editAbsenceAffectionsHandler,
     editAbsencesHandler,
     getAllAbsencesHandler
 } from "./main/handlers/absences";
-import {deleteAbsence} from "./main/application/state";
+import {getWorkingDirectoryPath} from "./main/application/main";
 
 if (started) {
   app.quit();
@@ -43,7 +44,9 @@ const createWindow = () => {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
+        icon: path.join(__dirname, 'assets/icon.png'),
     });
+    mainWindow.setMenuBarVisibility(false);
 
     pingManager.addDestination(createPingDestination(mainWindow.webContents))
 
@@ -55,11 +58,11 @@ const createWindow = () => {
         );
     }
 
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', () => {
-    createWindow()
+    getWorkingDirectoryPath().then(() => createWindow());
     ipcMain.handle('dialog:getAllMessdiener', getAllMessdienerHandler);
     ipcMain.handle('dialog:getAllFamilies', getAllFamiliesHandler);
     ipcMain.handle('dialog:getAllChurches', getAllChurchesHandler);

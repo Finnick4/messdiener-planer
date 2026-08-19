@@ -2,6 +2,7 @@ import {getAllChurches, getAllMasses, getAllMessdiener} from "./state";
 import {Church, ExportSettings, Mass, Messdiener} from "../../shared/general";
 import * as fs from "node:fs";
 import {saveExportSettings} from "./settings-cache";
+import {getWorkingDirectoryPath} from "./main";
 
 export const texExport = (settings: ExportSettings): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
@@ -16,7 +17,7 @@ export const texExport = (settings: ExportSettings): Promise<string> => {
             getAllMessdiener(),
             getAllChurches(),
             saveExportSettings(settings),
-        ]).then(responses => {
+        ]).then(async responses => {
             const allMasses = responses[0].filter(mass => settings.displayedChurchIDs.has(mass.churchID)).sort((a, b) => a.date - b.date);
             const allMessdiener = responses[1];
             const allChurches = responses[2];
@@ -63,7 +64,8 @@ ${allocationOverviewLaTeXString}
 ${settings.hint}  
 \\end{document}`;
 
-            const path = `./messdienerplan.tex`
+            const directory = await getWorkingDirectoryPath();
+            const path = directory ? `${directory}/messdienerplan.tex` : "messdienerplan.tex";
 
             fs.writeFile(path, tex, err => {
                 if (err) {

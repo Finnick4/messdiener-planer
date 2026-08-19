@@ -8,7 +8,6 @@ import {
     MessdienerMassAllocation
 } from "../../shared/general";
 import {getDBConnection} from "./main";
-import {getMass} from "../../display/state/specific-entries";
 
 let allMessdiener: Messdiener[] = [];
 let allFamilies: Family[] = [];

@@ -1,9 +1,10 @@
 {
   "name": "messdiener-planer",
-  "productName": "messdiener-planer",
-  "version": "0.5.1",
+  "productName": "Messdiener Planer",
+  "version": "0.5.2",
   "description": "Ein Werkzeug zur Erstellung von Messdienerplänen.",
   "main": ".vite/build/main.js",
+  "license": "UNLICENSED",
   "private": true,
   "scripts": {
     "start": "electron-forge start",

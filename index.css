@@ -7,6 +7,7 @@
 
     --text: hsl(0, 0%, 5%);
     --text-muted: hsl(0, 0%, 15%);
+    --text-warning: var(--primary-hover);
 
     --primary: hsl(9, 100%, 64%);
     --primary-hover: hsl(9, 100%, 55%);
@@ -446,4 +447,14 @@ details summary {
 
 details {
     margin-bottom: 1rem;
+}
+
+label {
+    transition:
+            color .5s ease;
+}
+
+.field label:has(+ .has-issue) {
+    color: var(--text-warning);
+    font-weight: bolder;
 }
