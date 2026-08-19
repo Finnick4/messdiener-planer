@@ -20,7 +20,9 @@ const config: ForgeConfig = {
         "linux",
         "win32"
     ]),
-    new MakerRpm({}),
+    new MakerRpm({
+      options: {icon: "./assets/icon.png"}
+    }),
     new MakerDeb({
       options: {icon: "./assets/icon.png"}
     }),

@@ -11,15 +11,10 @@ export const buildPlanCreatorPage = () => {
 
     const noticesHeader = document.createElement("h2");
     noticesHeader.innerText = `Hinweis`;
-    const notices = [
-        "Der Export des Plans erstellt eine .tex Datei, welche zu einer .pdf kompiliert werden kann.",
-        "Es werden alle Messen inkludiert. Messen, zu welchen keine spezifischen Messdiener eingetragen sind,",
-        "werden als Messen, zu welchen alle eingeplant sind, interpretiert."
-    ].map(text => {
-        const notice = document.createElement("p");
-        notice.innerText = text;
-        return notice;
-    })
+
+    const notice = document.createElement("p");
+    notice.innerText = "Der Export des Plans erstellt eine .tex Datei, welche zu einer .pdf kompiliert werden kann. Es werden alle Messen inkludiert. Messen, zu welchen keine spezifischen Messdiener eingetragen sind, werden als Messen, zu welchen alle eingeplant sind, interpretiert.";
+    notice.classList.add("notice");
 
     const settingsHeader = document.createElement("h2");
     settingsHeader.innerText = `Exporteinstellungen`;
@@ -66,9 +61,30 @@ export const buildPlanCreatorPage = () => {
     exportBtn.innerText = "Plan exportieren";
     exportBtn.classList.add("export");
     exportBtn.addEventListener("click", () => {
-        if (inputTitle.value == "" || inputVersion.value == "" || churchSelector.getSelectedChurches().size == 0) {
-            console.log("Did not export the plan as one value wasn't set.")
-            return
+        inputTitle.classList.remove("has-issue");
+        inputVersion.classList.remove("has-issue");
+        churchSelector.classList.remove("has-issue");
+        let escape = false;
+
+        if (inputTitle.value == "") {
+            console.log("Could not export the plan as there was no title set.");
+            inputTitle.focus();
+            inputTitle.classList.add("has-issue");
+            escape = true;
+        }
+        if (inputVersion.value == "") {
+            console.log("Could not export the plan as no version was set.");
+            inputVersion.focus();
+            inputVersion.classList.add("has-issue");
+            escape = true;
+        }
+        if (churchSelector.getSelectedChurches().size == 0) {
+            console.log("Could not export the plan as no churches were selected.");
+            churchSelector.classList.add("has-issue");
+            escape = true;
+        }
+        if (escape) {
+            return;
         }
 
         window.electronAPI.exportPlan({
@@ -85,7 +101,7 @@ export const buildPlanCreatorPage = () => {
     setMainAndSidebar([
         header,
         noticesHeader,
-        ...notices,
+        notice,
         settingsHeader,
         formDiv,
         exportBtn,

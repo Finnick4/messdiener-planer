@@ -46,6 +46,7 @@ const createWindow = () => {
         },
         icon: path.join(__dirname, 'assets/icon.png'),
     });
+    mainWindow.setMenuBarVisibility(false);
 
     pingManager.addDestination(createPingDestination(mainWindow.webContents))
 
