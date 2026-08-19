@@ -9,16 +9,20 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
-    icon: "./assets/icon"
+    asar: {
+      unpack: "*.{node,dll}",
+    },
+    ignore: [/node_modules\/(?!(sqlite3|bindings|file-uri-to-path)\/)/],
+    icon: "./assets/icon",
+    executableName: "messdiener-planer"
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, [
-        "darwin",
-        "linux",
-        "win32"
+      "darwin",
+      "linux",
+      "win32"
     ]),
     new MakerRpm({
       options: {icon: "./assets/icon.png"}
