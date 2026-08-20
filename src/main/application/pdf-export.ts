@@ -3,6 +3,7 @@ import {Church, ExportSettings, Mass, Messdiener} from "../../shared/general";
 import * as fs from "node:fs";
 import {saveExportSettings} from "./settings-cache";
 import {getWorkingDirectoryPath} from "./main";
+import {compile} from "node-tectonic";
 
 export const texExport = (settings: ExportSettings): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
@@ -75,6 +76,28 @@ ${settings.hint}
                 }
                 resolve(path)
             })
+
+            try {
+                const result = await compile({
+                    tex: tex,
+                    outputDir: directory ? `${directory}` : "./",
+                    cwd: directory,
+                });
+                if (!result.success || !result.pdfPath) {
+                    throw new Error(`${result.failure?.message}\n${result.stderr}`);
+                }
+
+                fs.rename(result.pdfPath, directory ? `${directory}/messdienerplan.pdf` : "./messdienerplan.pdf", err => {
+                    if (err) {
+                        console.error(err.message);
+                        reject(err);
+                        return;
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to compile pdf!")
+                console.error(e);
+            }
         });
     })
 }
