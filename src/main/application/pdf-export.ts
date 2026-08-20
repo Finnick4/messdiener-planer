@@ -5,131 +5,265 @@ import {saveExportSettings} from "./settings-cache";
 import {getWorkingDirectoryPath} from "./main";
 import {compile} from "node-tectonic";
 
-export const texExport = (settings: ExportSettings): Promise<string> => {
-    return new Promise<string>((resolve, reject) => {
-        const lastUpdate = new Date().toLocaleString("de", {
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        });
+export const MASSES_PER_ROW = 5;
 
-        Promise.all([
-            getAllMasses(),
-            getAllMessdiener(),
-            getAllChurches(),
-            saveExportSettings(settings),
-        ]).then(async responses => {
-            const allMasses = responses[0].filter(mass => settings.displayedChurchIDs.has(mass.churchID)).sort((a, b) => a.date - b.date);
-            const allMessdiener = responses[1];
-            const allChurches = responses[2];
+const combineOriginalAndAdditionalNote = (original: string | undefined, additional: string | undefined): string => {
+    if (original && additional) {
+        return `${original} ${additional}`;
+    }
+    if (original) {
+        return original;
+    }
+    if (additional) {
+        return additional;
+    }
 
-            const mappedMessdiener = new Map<number, Messdiener>(allMessdiener.map((m) => [m.identifier, m]));
-            const mappedChurches = new Map<number, Church>(allChurches.map((c) => [c.id, c]));
-            const massesPerRow = 5;
+    return "";
+}
 
-            let massesLaTeXString = "\\begin{table}[] "
-            const individualMassesStrings = allMasses.map((mass, index) => {
-                if (settings.otherChurchComment && mass.churchID != settings.mainChurchID) {
-                    const additionalNote = settings.otherChurchCommentUseLocation ? mappedChurches.get(mass.churchID)?.location : mappedChurches.get(mass.churchID)?.name;
-                    if (mass.note) {
-                        mass.note = additionalNote ? `${mass.note} (${additionalNote})` : mass.note;
-                    } else {
-                        mass.note = additionalNote ? `(${additionalNote})` : undefined;
-                    }
-                }
-                if (index % massesPerRow == massesPerRow - 1) {
-                    return makeLaTeXStringFromMass(mass, mappedMessdiener) + "\\hfill \\break";
-                }
-                return makeLaTeXStringFromMass(mass, mappedMessdiener)
-            });
-            if (individualMassesStrings.length > 0) {
-                massesLaTeXString += individualMassesStrings.reduce((accumulator, currentValue) => accumulator + currentValue);
-            }
-            massesLaTeXString += "\\end{table}";
-            
-            const allocationCount = getMassAllocationMap(allMasses);
-            const familyOrientedAllocations = makeFamilyAllocationMap(allMessdiener, allocationCount);
+/**
+ * Returns the name to display of the given Messdiener.
+ * This takes the shorthand and whether it should be displayed into account.
+ * If no shorthand is set, the display name of the family is taken.
+ * @param messdiener
+ */
+const getNameOfMessdiener = (messdiener: Messdiener): string => {
+    if (messdiener.displayShorthand) {
+        return `${messdiener.firstName} ${messdiener.lastNameShorthand ? messdiener.lastNameShorthand : messdiener.lastNameDisplay}`;
+    }
+    return messdiener.firstName;
+}
 
-            const allocationOverviewLaTeXString = makeAllocationsOverviewLaTeXString(familyOrientedAllocations, mappedMessdiener);
 
-            const tex = `\\documentclass[]{article} \\title{${settings.title}} \\date{(${settings.version}) \\\\Stand: ${lastUpdate}} \\pagestyle{empty}
+const getTEXForExport = async (settings: ExportSettings): Promise<string> => {
+    const lastUpdate = new Date().toLocaleString("de", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+
+    const [masses, allocations] = await Promise.all([
+        getMassesString(settings),
+        getMessdienerAllocationsString(settings)
+    ])
+
+    return `\\documentclass[]{article} \\title{${settings.title}} \\date{(${settings.version}) \\\\Stand: ${lastUpdate}} \\pagestyle{empty}
 
 \\begin{document}
 \\maketitle
     
-${massesLaTeXString}
+${masses}
     
-${allocationOverviewLaTeXString}
+${allocations}
     
 \\centering
 ${settings.hint}  
 \\end{document}`;
-
-            const directory = await getWorkingDirectoryPath();
-            const path = directory ? `${directory}/messdienerplan.tex` : "messdienerplan.tex";
-
-            fs.writeFile(path, tex, err => {
-                if (err) {
-                    console.error(err.message);
-                    reject(err);
-                    return;
-                }
-                resolve(path)
-            })
-
-            try {
-                const result = await compile({
-                    tex: tex,
-                    outputDir: directory ? `${directory}` : "./",
-                    cwd: directory,
-                });
-                if (!result.success || !result.pdfPath) {
-                    throw new Error(`${result.failure?.message}\n${result.stderr}`);
-                }
-
-                fs.rename(result.pdfPath, directory ? `${directory}/messdienerplan.pdf` : "./messdienerplan.pdf", err => {
-                    if (err) {
-                        console.error(err.message);
-                        reject(err);
-                        return;
-                    }
-                });
-            } catch (e) {
-                console.error("Failed to compile pdf!")
-                console.error(e);
-            }
-        });
-    })
 }
 
-const getMassAllocationMap = (masses: Mass[]): Map<number, number> => {
-    const map = new Map<number, number>();
-    let allAllocated = 0;
+const filterMassesForRelevancyAndSort = (masses: Mass[], relevantChurches: Set<number>) => masses.filter(mass => relevantChurches.has(mass.churchID)).sort((a, b) => a.date - b.date);
+const filterMessdienerForRelevancy = (messdiener: Messdiener[], relevantChurches: Set<number>) => messdiener.filter(m => m.churchActivity.intersection(relevantChurches).size != 0);
+const filterChurchesForRelevancy = (churches: Church[], relevantChurches: Set<number>) => churches.filter(church => relevantChurches.has(church.id));
 
-    for (const mass of masses) {
-        if (mass.allocatedMessdiener.size == 0) {
-            allAllocated++;
-            continue;
+const mapMessdiener = (messdiener: Messdiener[]) => new Map<number, Messdiener>(messdiener.map((m) => [m.identifier, m]));
+const mapChurches = (churches: Church[]) => new Map<number, Church>(churches.map((c) => [c.id, c]));
+
+const getMessdienerAllocationsString = async (settings: ExportSettings): Promise<string> => {
+    const buffers = await Promise.all([
+        getAllMasses(),
+        getAllMessdiener()
+    ]);
+
+    const relevantMassesBuffer = filterMassesForRelevancyAndSort(buffers[0], settings.displayedChurchIDs);
+    const relevantMessdienerBuffer = filterMessdienerForRelevancy(buffers[1], settings.displayedChurchIDs);
+    const mappedRelevantMessdiener = mapMessdiener(relevantMessdienerBuffer);
+
+    const messdienerMassAllocation = ((): Map<number, number> => {
+        const messdienerAllocations = new Map<number, number>();
+        const addAllocations = (id: number, change = 1) => {
+            const currentNumberOfAllocations = messdienerAllocations.get(id)
+            if (currentNumberOfAllocations == undefined) {
+                messdienerAllocations.set(id, change);
+                return;
+            }
+            messdienerAllocations.set(id, currentNumberOfAllocations + change);
         }
+        let allAllocated = 0;
 
-        for (const messdienerID of mass.allocatedMessdiener) {
-            const currentCount = map.get(messdienerID)
-            if (currentCount == undefined) {
-                map.set(messdienerID, 1);
+        for (const mass of relevantMassesBuffer) {
+            if (mass.allocatedMessdiener.size == 0) {
+                allAllocated++;
                 continue;
             }
-            map.set(messdienerID, currentCount + 1);
-        }
-    }
-    if (allAllocated > 0) {
-        map.forEach((value, key) => {
-            map.set(key, value + allAllocated);
-        })
-    }
 
-    return map;
+            for (const messdienerID of mass.allocatedMessdiener) {
+                addAllocations(messdienerID);
+            }
+        }
+        if (allAllocated > 0) {
+            for (const messdiener of relevantMessdienerBuffer) {
+                addAllocations(messdiener.identifier, allAllocated);
+            }
+        }
+
+        return messdienerAllocations;
+    })()
+
+    const familyOrientedAllocations = makeFamilyAllocationMap(relevantMessdienerBuffer, messdienerMassAllocation);
+
+    return makeAllocationsOverviewLaTeXString(familyOrientedAllocations, mappedRelevantMessdiener);
 }
 
+const getMassesString = async (settings: ExportSettings): Promise<string> => {
+    const buffers = await Promise.all([
+        getAllMasses(),
+        getAllMessdiener(),
+        getAllChurches(),
+    ]);
+
+    const relevantMassesBuffer = filterMassesForRelevancyAndSort(buffers[0], settings.displayedChurchIDs);
+    const mappedRelevantMessdiener = mapMessdiener(filterMessdienerForRelevancy(buffers[1], settings.displayedChurchIDs));
+    const mappedRelevantChurches = mapChurches(filterChurchesForRelevancy(buffers[2], settings.displayedChurchIDs));
+
+
+    const minNumberOfLinesPerMass = 6;
+
+    const getAdditionalNoteForMass = (mass: Mass): string | undefined => {
+        if (!settings.otherChurchComment || mass.churchID == settings.mainChurchID) {
+            return undefined;
+        }
+        const actualChurch = mappedRelevantChurches?.get(mass.churchID);
+        if (!actualChurch) {
+            return undefined;
+        }
+
+        if (settings.otherChurchCommentUseLocation) {
+            return actualChurch.location;
+        }
+        return actualChurch.name;
+    }
+
+    const getMessdienerListForMass = (mass: Mass): string => {
+        let messdienerStr = "";
+
+        // if no messdiener are allocated, the mass should say "Alle" (en: "everyone")
+        if (mass.allocatedMessdiener.size == 0) {
+            const lineForTextIndex = Math.floor(minNumberOfLinesPerMass / 2) - 1;
+            for (let i = 0; i <= minNumberOfLinesPerMass; i++) {
+                if ((i == 0 && lineForTextIndex < 0) || i == lineForTextIndex) {
+                    messdienerStr += "Alle \\\\";
+                    continue;
+                }
+                messdienerStr += "\\\\ ";
+            }
+            return messdienerStr.substring(0, messdienerStr.length - 3);
+        }
+
+        mass.allocatedMessdiener.forEach(messdienerID => {
+            const messdiener = mappedRelevantMessdiener?.get(messdienerID);
+            if (messdiener) {
+                messdienerStr += getNameOfMessdiener(messdiener) + "\\\\ ";
+            }
+        });
+
+        // make sure to not have less than the target number of lines
+        if (mass.allocatedMessdiener.size < minNumberOfLinesPerMass) {
+            for (let i = 0; i <= minNumberOfLinesPerMass - mass.allocatedMessdiener.size; i++) {
+                messdienerStr += "\\\\";
+            }
+        }
+
+        return messdienerStr.substring(0, messdienerStr.length - 2);
+    }
+
+
+    const individualMassesStrings = relevantMassesBuffer.map((mass, index) => {
+        const note = combineOriginalAndAdditionalNote(mass.note, getAdditionalNoteForMass(mass));
+        const lastMassInRow = index % MASSES_PER_ROW == MASSES_PER_ROW - 1;
+
+        return `\\begin{tabular}{|l|}
+    \\hline 
+    \\textbf{${makeDateStringFromDateNumber(mass.date)}} \\\\ \\hline
+    ${note} \\\\ \\hline
+    \\begin{tabular}[c]{@{}l@{}} ${getMessdienerListForMass(mass)} \\end{tabular} \\\\ \\hline
+\\end{tabular}\n${lastMassInRow ? "\\hfill \\break" : ""}`;
+    });
+
+
+    if (individualMassesStrings.length > 0) {
+        return `\\begin{table}[] ${individualMassesStrings.reduce((accumulator, currentValue) => accumulator + currentValue)} \\end{table}`;
+    }
+    return "";
+}
+
+export const bakePDF = async (settings: ExportSettings): Promise<string | undefined> => {
+    console.log("Starting to create PDF export!")
+    const [directory, tex] = await Promise.all([
+        getWorkingDirectoryPath(),
+        getTEXForExport(settings),
+        saveExportSettings(settings),
+    ]);
+
+
+    const waitGroup: Promise<void>[] = [];
+
+    const saveTEX = true;
+    if (saveTEX) {
+        const pathTEX = directory ? `${directory}/messdienerplan.tex` : "messdienerplan.tex";
+
+        waitGroup.push(new Promise<void>(resolve => {
+            fs.writeFile(pathTEX, tex, err => {
+                if (err) {
+                    console.error("Failed to save .tex for export:")
+                    console.error(err.message);
+                }
+                resolve();
+            });
+        }));
+    }
+
+
+    try {
+        const result = await compile({
+            tex: tex,
+            outputDir: directory ? `${directory}` : "./",
+            cwd: directory,
+        });
+        if (!result.success) {
+            throw new Error(`${result.failure?.message}\n${result.stderr}`);
+        }
+
+        waitGroup.push(new Promise<void>(resolve => {
+            const pathPDF = directory ? `${directory}/messdienerplan.pdf` : "./messdienerplan.pdf";
+            if (!result.pdfPath) {
+                console.warn("Could not rename exported PDF because no path was provided!")
+                resolve();
+                return;
+            }
+            fs.rename(result.pdfPath, pathPDF, err => {
+                if (err) {
+                    console.error("Failed to rename exported pdf!");
+                    console.error(err.message);
+                    return;
+                }
+                resolve();
+            });
+        }));
+    } catch (e) {
+        console.error("Failed to compile pdf!")
+        console.error(e);
+    }
+
+    await Promise.all(waitGroup);
+    console.log("Finished exporting PDF!")
+    return directory;
+}
+
+/**
+ * Produces a map wrapping each family id around said family members and their respective allocations.
+ * @param allMessdiener All relevant Messdiener.
+ * @param messdienerAllocationCount A map mapping Messdiener ids to the number of allocations in a plan.
+ */
 const makeFamilyAllocationMap = (allMessdiener: Messdiener[], messdienerAllocationCount: Map<number, number>): Map<number, Map<number, number>>  => {
     const familyAllocationMap = new Map<number, Map<number, number>>();
 
@@ -226,40 +360,4 @@ const makeDateStringFromDateNumber = (dateNum: number): string => {
         day: "numeric",
         month: "short"
     });
-}
-
-const makeLaTeXStringFromMass = (mass: Mass, messdienerMap: Map<number, Messdiener>, minMessdienerSize = 6): string => {
-    let messdienerList = "";
-    mass.allocatedMessdiener.forEach(messdienerID => {
-        const messdiener = messdienerMap.get(messdienerID);
-        if (messdiener) {
-            messdienerList += (messdiener.displayShorthand ? `${messdiener.firstName} ${messdiener.lastNameShorthand}` : messdiener.firstName) + "\\\\";
-        }
-    })
-    if (mass.allocatedMessdiener.size < minMessdienerSize && mass.allocatedMessdiener.size > 0) {
-        for (let i = 0; i <= minMessdienerSize - mass.allocatedMessdiener.size; i++) {
-            messdienerList += "\\\\";
-        }
-    }
-    if (messdienerList.length == 0) {
-        const lineForTextIndex = Math.floor(minMessdienerSize / 2) - 1;
-        for (let i = 0; i <= minMessdienerSize; i++) {
-            if ((i == 0 && lineForTextIndex < 0) || i == lineForTextIndex) {
-                messdienerList += "Alle \\\\";
-                continue;
-            }
-            messdienerList += "\\\\";
-        }
-    }
-
-    messdienerList = messdienerList.substring(0, messdienerList.length - 2);
-
-    const texStr = `\\begin{tabular}{|l|}
-    \\hline 
-    \\textbf{${makeDateStringFromDateNumber(mass.date)}} \\\\ \\hline
-    ${mass.note ? mass.note : ""} \\\\ \\hline
-    \\begin{tabular}[c]{@{}l@{}} ${messdienerList} \\end{tabular} \\\\ \\hline
-\\end{tabular}\n`
-
-    return texStr;
 }
