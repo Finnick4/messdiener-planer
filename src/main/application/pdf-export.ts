@@ -196,7 +196,7 @@ const getMassesString = async (settings: ExportSettings): Promise<string> => {
     return "";
 }
 
-export const bakePDF = async (settings: ExportSettings): Promise<string | undefined> => {
+export const bakePDF = async (settings: ExportSettings): Promise<string> => {
     console.log("Starting to create PDF export!")
     const [directory, tex] = await Promise.all([
         getWorkingDirectoryPath(),
@@ -222,6 +222,7 @@ export const bakePDF = async (settings: ExportSettings): Promise<string | undefi
         }));
     }
 
+    const pathPDF = directory ? `${directory}/messdienerplan.pdf` : "./messdienerplan.pdf";
 
     try {
         const result = await compile({
@@ -234,7 +235,6 @@ export const bakePDF = async (settings: ExportSettings): Promise<string | undefi
         }
 
         waitGroup.push(new Promise<void>(resolve => {
-            const pathPDF = directory ? `${directory}/messdienerplan.pdf` : "./messdienerplan.pdf";
             if (!result.pdfPath) {
                 console.warn("Could not rename exported PDF because no path was provided!")
                 resolve();
@@ -256,7 +256,7 @@ export const bakePDF = async (settings: ExportSettings): Promise<string | undefi
 
     await Promise.all(waitGroup);
     console.log("Finished exporting PDF!")
-    return directory;
+    return pathPDF;
 }
 
 /**
