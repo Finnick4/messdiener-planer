@@ -1,6 +1,6 @@
 import {DatabaseConnection} from "../infrastructure/database/database";
 import {SQLiteConnection} from "../infrastructure/database/sqlite";
-import {dialog} from "electron"
+import {app, dialog, Notification} from "electron"
 
 let db: DatabaseConnection | null;
 let isConnectingToDB = false;
@@ -25,42 +25,42 @@ export const getDBConnection = async (): Promise<DatabaseConnection> => {
     return db;
 }
 
-let workingDirectoryPath: string | undefined | null = null;
+let workingDirectoryPath: string | null = null;
 let isAskingForDirectory = false;
-let waitingForPath: ((result: string | undefined) => void)[] = [];
+let waitingForPath: ((result: string) => void)[] = [];
 
-export const getWorkingDirectoryPath = (): Promise<string | undefined> => {
+export const getWorkingDirectoryPath = async (): Promise<string> => {
     if (isAskingForDirectory) {
-        return new Promise<string | undefined>(resolve => {
+        return new Promise<string>(resolve => {
             waitingForPath.push(resolve);
         });
     }
 
-    return new Promise<string>(resolve => {
-        if (workingDirectoryPath != null) {
-            resolve(workingDirectoryPath);
-            return;
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        waitingForPath.push(resolve);
-        isAskingForDirectory = true;
+    if (workingDirectoryPath != null) {
+        return workingDirectoryPath;
+    }
+    isAskingForDirectory = true;
 
-        dialog.showOpenDialog({
-            title: "Bitte wähle einen Order aus, in welchem das Programm arbeiten darf.",
-            properties: ["openDirectory", "createDirectory", ]
-        }).then(result => {
-            if (result.canceled) {
-                workingDirectoryPath = undefined;
-                return undefined;
-            }
-            workingDirectoryPath = result.filePaths[0];
-            return workingDirectoryPath;
-        }).then(path => {
-            workingDirectoryPath = path;
-            waitingForPath.forEach(fn => fn(path));
-            waitingForPath = [];
-            isAskingForDirectory = false;
-        });
+    const result = await dialog.showOpenDialog({
+        title: "Bitte wähle einen Order aus, in welchem das Programm arbeiten darf.",
+        properties: ["openDirectory", "createDirectory", ]
     });
+    if (result.canceled) {
+        console.info("The user refused to select a directory!");
+        new Notification({
+            title: "Kein Order ausgewählt",
+            body: "Da kein Ordner ausgewählt wurde, in welchem der Messdiener Planer arbeiten und somit auch Dateien ablegen darf, wurde dieser geschlossen!",
+            icon: "./assets/icon.png",
+        }).show()
+        app.quit();
+        waitingForPath.forEach(fn => fn(""));
+        return "";
+    }
+    const path = result.filePaths[0];
+    workingDirectoryPath = path;
+
+    waitingForPath.forEach(fn => fn(path));
+    waitingForPath = [];
+    isAskingForDirectory = false;
+    return path;
 }

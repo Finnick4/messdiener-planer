@@ -53,6 +53,7 @@ export type ExportSettings = {
     mainChurchID: number
     otherChurchComment: boolean
     otherChurchCommentUseLocation: boolean
+    saveTeXFile: boolean
 }
 
 export type EmbeddedAbsence = {

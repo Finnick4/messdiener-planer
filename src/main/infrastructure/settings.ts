@@ -9,6 +9,7 @@ type ExportSettingsStorage = {
     mainChurchID: number
     otherChurchComment: boolean
     otherChurchCommentUseLocation: boolean
+    saveTeXFile: boolean
 }
 
 const safeParseJSON = <T>(str: string): T | undefined => {
@@ -45,6 +46,7 @@ export const readExportSettings = (directory: string | undefined): Promise<Expor
                 mainChurchID: settings.mainChurchID,
                 otherChurchComment: settings.otherChurchComment,
                 otherChurchCommentUseLocation: settings.otherChurchCommentUseLocation,
+                saveTeXFile: settings.saveTeXFile,
                 title: settings.title,
                 version: settings.version,
                 hint: settings.hint,
@@ -61,6 +63,7 @@ export const writeExportSettings = (settings: ExportSettings, directory: string 
             mainChurchID: settings.mainChurchID,
             otherChurchComment: settings.otherChurchComment,
             otherChurchCommentUseLocation: settings.otherChurchCommentUseLocation,
+            saveTeXFile: settings.saveTeXFile,
             title: settings.title,
             version: settings.version,
             hint: settings.hint,

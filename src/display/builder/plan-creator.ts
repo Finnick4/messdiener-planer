@@ -29,6 +29,7 @@ export const buildPlanCreatorPage = () => {
         {tagName: "select", labelText: "Hauptkirche", is: "church-selector"},
         {tagName: "input", labelText: "Zweitkirchennotiz", type: "checkbox"},
         {tagName: "input", labelText: "Zweitkirchennotiz als Ortsangabe", type: "checkbox"},
+        {tagName: "input", labelText: ".tex Datei auch speichern", type: "checkbox"},
     ]);
     formDiv.replaceChildren(...formElements.nodes)
 
@@ -39,9 +40,11 @@ export const buildPlanCreatorPage = () => {
     const mainChurch = formElements.elements[4] as ChurchSelector;
     const switchNote = formElements.elements[5] as HTMLInputElement;
     const switchNoteLocation = formElements.elements[6] as HTMLInputElement;
+    const switchTeXFile = formElements.elements[7] as HTMLInputElement;
 
     switchNote.classList.add("switch");
     switchNoteLocation.classList.add("switch")
+    switchTeXFile.classList.add("switch")
 
     window.electronAPI.getRecentExportSettings().then((settings: ExportSettings | undefined)=> {
         if (!settings) {
@@ -55,6 +58,7 @@ export const buildPlanCreatorPage = () => {
         churchSelector.initialiseWithStartIDs(settings.displayedChurchIDs);
         switchNote.checked = settings.otherChurchComment;
         switchNoteLocation.checked = settings.otherChurchCommentUseLocation;
+        switchTeXFile.checked = settings.saveTeXFile;
     })
 
     const exportBtn = document.createElement("button");
@@ -92,10 +96,11 @@ export const buildPlanCreatorPage = () => {
             mainChurchID: mainChurch.getSelectedChurch(),
             otherChurchComment: switchNote.checked,
             otherChurchCommentUseLocation: switchNoteLocation.checked,
+            saveTeXFile: switchTeXFile.checked,
             hint: hintElem.value,
             title: inputTitle.value,
             version: inputVersion.value,
-        })
+        });
     });
 
     setMainAndSidebar([
