@@ -207,13 +207,14 @@ export const bakePDF = async (settings: ExportSettings): Promise<string> => {
         getTEXForExport(settings),
         saveExportSettings(settings),
     ]);
+    console.log("Done generating tex");
 
 
     const waitGroup: Promise<void>[] = [];
+    const fileName = `${settings.title} ${settings.version}`;
 
-    const saveTEX = true;
-    if (saveTEX) {
-        const pathTEX = directory ? `${directory}/messdienerplan.tex` : "messdienerplan.tex";
+    if (settings.saveTeXFile) {
+        const pathTEX = directory ? `${directory}/${fileName}.tex` : `${fileName}.tex`;
 
         waitGroup.push(new Promise<void>(resolve => {
             fs.writeFile(pathTEX, tex, err => {
@@ -226,14 +227,16 @@ export const bakePDF = async (settings: ExportSettings): Promise<string> => {
         }));
     }
 
-    const pathPDF = directory ? `${directory}/messdienerplan.pdf` : "./messdienerplan.pdf";
+    const pathPDF = directory ? `${directory}/${fileName}.pdf` : `./${fileName}.pdf`;
 
     try {
+        console.log("Starting to compile tex to pdf!");
         const result = await compile({
             tex: tex,
             outputDir: directory ? `${directory}` : "./",
             cwd: directory,
         });
+        console.log("Compiling finished!");
         if (!result.success) {
             throw new Error(`${result.failure?.message}\n${result.stderr}`);
         }
