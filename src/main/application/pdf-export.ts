@@ -48,16 +48,20 @@ const getTEXForExport = async (settings: ExportSettings): Promise<string> => {
     ])
 
     return `\\documentclass[]{article} \\title{${settings.title}} \\date{(${settings.version}) \\\\Stand: ${lastUpdate}} \\pagestyle{empty}
+\\usepackage{longtable}
+\\usepackage[a4paper]{geometry}
 
 \\begin{document}
 \\maketitle
-    
+
+${allocations}
+
+\\begin{center}
+${settings.hint}    
+\\end{center}
+\\newpage    
 ${masses}
     
-${allocations}
-    
-\\centering
-${settings.hint}  
 \\end{document}`;
 }
 
@@ -186,12 +190,12 @@ const getMassesString = async (settings: ExportSettings): Promise<string> => {
     \\textbf{${makeDateStringFromDateNumber(mass.date)}} \\\\ \\hline
     ${note} \\\\ \\hline
     \\begin{tabular}[c]{@{}l@{}} ${getMessdienerListForMass(mass)} \\end{tabular} \\\\ \\hline
-\\end{tabular}\n${lastMassInRow ? "\\hfill \\break" : ""}`;
+\\end{tabular}\n${lastMassInRow ? "\\\\ \\break" : ""}`;
     });
 
 
     if (individualMassesStrings.length > 0) {
-        return `\\begin{table}[] ${individualMassesStrings.reduce((accumulator, currentValue) => accumulator + currentValue)} \\end{table}`;
+        return `\\begin{longtable}{ c c c c c } ${individualMassesStrings.reduce((accumulator, currentValue) => accumulator + currentValue)} \\end{longtable}`;
     }
     return "";
 }

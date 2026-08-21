@@ -95,7 +95,7 @@ export const buildPlanCreatorPage = () => {
             hint: hintElem.value,
             title: inputTitle.value,
             version: inputVersion.value,
-        })
+        });
     });
 
     setMainAndSidebar([
