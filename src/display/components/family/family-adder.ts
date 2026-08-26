@@ -66,7 +66,7 @@ export class FamilyAdder extends HTMLElement {
             }));
 
             return familiesStatus;
-        })()
+        })();
 
         const checkIfEmpty = () => {
             if (familyPoolSize == 0) {
@@ -133,7 +133,14 @@ export class FamilyAdder extends HTMLElement {
             return elem;
         }
 
-        this.replaceChildren(...(selectableFamilies.map(makeElement)));
+        this.replaceChildren(...(selectableFamilies.sort((a, b) => {
+            const statusA = selectableFamiliesStatus.get(a.id);
+            const statusB = selectableFamiliesStatus.get(b.id);
+            if (!statusA || !statusB) {
+                return 0;
+            }
+            return statusB.urgency - statusA.urgency;
+        }).map(makeElement)));
         this.querySelectorAll(".no-effective-size").forEach(e => e.remove());
         checkIfEmpty();
     }

@@ -9,8 +9,8 @@ export const getStatusOfMessdienerAt = (messdienerID: number, date: number): Pro
 export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, date: number): Promise<AllocationStatus> => {
     const masses = await getSortedMasses();
     const status: AllocationStatus = {
-        daysSinceLastAllocation: undefined,
-        daysTillNextAllocation: undefined,
+        daysSinceLastExplicitAllocation: undefined,
+        daysTillNextExplicitAllocation: undefined,
         allocationCount: 0,
         date: date,
         isAllocated: false,
@@ -38,8 +38,8 @@ export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, dat
     })();
     const anchorMass = masses[dateFoundAtIndex];
 
-    status.isAllocated = anchorMass.allocatedMessdiener.intersection(messdienerIDs).size > 0;
-    status.daysTillNextAllocation = ((): number | undefined => {
+    status.isAllocated = anchorMass.allocatedMessdiener.size == 0 || anchorMass.allocatedMessdiener.intersection(messdienerIDs).size > 0;
+    status.daysTillNextExplicitAllocation = ((): number | undefined => {
         for (let i = dateFoundAtIndex + 1; i < masses.length; i++) {
             if (masses[i].allocatedMessdiener.intersection(messdienerIDs).size > 0) {
                 return differenceBetweenTwoDateNumbers(date, masses[i].date);
@@ -47,7 +47,7 @@ export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, dat
         }
         return undefined;
     })();
-    status.daysSinceLastAllocation = ((): number | undefined => {
+    status.daysSinceLastExplicitAllocation = ((): number | undefined => {
         for (let i = dateFoundAtIndex - 1; i >= 0; i--) {
             if (masses[i].allocatedMessdiener.intersection(messdienerIDs).size > 0) {
                 return differenceBetweenTwoDateNumbers(date, masses[i].date);
@@ -56,14 +56,14 @@ export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, dat
         return undefined;
     })();
     status.averageDaysTillAllocation = ((): number => {
-        if (status.daysSinceLastAllocation != undefined && status.daysTillNextAllocation != undefined) {
-            return (status.daysTillNextAllocation + status.daysSinceLastAllocation) / 2;
+        if (status.daysSinceLastExplicitAllocation != undefined && status.daysTillNextExplicitAllocation != undefined) {
+            return (status.daysTillNextExplicitAllocation + status.daysSinceLastExplicitAllocation) / 2;
         }
-        if (status.daysTillNextAllocation == undefined && status.daysSinceLastAllocation != undefined) {
-            return status.daysSinceLastAllocation;
+        if (status.daysTillNextExplicitAllocation == undefined && status.daysSinceLastExplicitAllocation != undefined) {
+            return status.daysSinceLastExplicitAllocation;
         }
-        if (status.daysTillNextAllocation != undefined && status.daysSinceLastAllocation == undefined) {
-            return status.daysTillNextAllocation;
+        if (status.daysTillNextExplicitAllocation != undefined && status.daysSinceLastExplicitAllocation == undefined) {
+            return status.daysTillNextExplicitAllocation;
         }
         return Infinity;
     })();

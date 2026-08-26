@@ -1,6 +1,6 @@
 
 export const differenceBetweenTwoDateNumbers = (a: number, b: number): number => {
-    return (makeDateNumberToDate(a).getTime() - makeDateNumberToDate(b).getTime()) / 1440000;
+    return Math.abs(makeDateNumberToDate(a).getTime() - makeDateNumberToDate(b).getTime()) / (1000 * 60 * 60 * 24);
 }
 
 export const makeDateNumberToDate = (date: number): Date => {

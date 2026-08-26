@@ -72,8 +72,8 @@ export type Absence = {
 export type AllocationStatus = {
     date: number
     isAllocated: boolean
-    daysTillNextAllocation: number | undefined
-    daysSinceLastAllocation: number | undefined
+    daysTillNextExplicitAllocation: number | undefined
+    daysSinceLastExplicitAllocation: number | undefined
     averageDaysTillAllocation: number
     allocationCount: number
     urgency: number
