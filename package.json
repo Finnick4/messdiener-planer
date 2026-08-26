@@ -4,8 +4,8 @@
   "version": "0.6.0",
   "description": "Ein Werkzeug zur Erstellung von Messdienerplänen.",
   "main": ".vite/build/main.js",
-  "license": "UNLICENSED",
-  "private": true,
+  "license": "MIT",
+  "private": false,
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",

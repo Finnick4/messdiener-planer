@@ -3,6 +3,7 @@ import {getMessdienerMap} from "../../state/specific-entries";
 import {ModalManager} from "../../types";
 import {generateEditAbsenceModal} from "./edit-modal";
 import {generateCreateAbsenceModal} from "./create-modal";
+import {makeDateNumberToDate} from "../../../shared/dates";
 
 export class AbsencesListElement extends HTMLElement {
     private disconnectedHandler = () => {
@@ -37,9 +38,7 @@ export class AbsencesListElement extends HTMLElement {
         this.dataset.id = String(target.id);
 
         const startDate = document.createElement("div");
-        startDate.textContent = new Date(Number(String(target.startDate).substring(0, 4)),
-            Number(String(target.startDate).substring(4, 6)) - 1,
-            Number(String(target.startDate).substring(6, 8))).toLocaleString("de", {
+        startDate.textContent = makeDateNumberToDate(target.startDate).toLocaleString("de", {
             day: "numeric",
             month: "long",
             year: "numeric"
@@ -47,9 +46,7 @@ export class AbsencesListElement extends HTMLElement {
         startDate.classList.add("date", "section", "start-date");
 
         const endDate = document.createElement("div");
-        endDate.textContent = new Date(Number(String(target.endDate).substring(0, 4)),
-            Number(String(target.endDate).substring(4, 6)) - 1,
-            Number(String(target.endDate).substring(6, 8))).toLocaleString("de", {
+        endDate.textContent = makeDateNumberToDate(target.endDate).toLocaleString("de", {
             day: "numeric",
             month: "long",
             year: "numeric"

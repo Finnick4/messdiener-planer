@@ -5,6 +5,7 @@ let messdienerMap: Map<number, Messdiener> | undefined = undefined;
 let familyMap: Map<number, Family> | undefined = undefined;
 let churchMap: Map<number, Church> |undefined = undefined;
 let massMap: Map<number, Mass> | undefined = undefined;
+let orderedMasses: Mass[] | undefined = undefined;
 let familyMemberships: Map<number, Set<Messdiener>> | undefined = undefined;
 let absencesMap: Map<number, Absence> | undefined = undefined;
 let orderedAbsences: Absence[] | undefined = undefined;
@@ -21,6 +22,7 @@ addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
 });
 addSubscription(ListenerEndpoints.AllMasses, (data: Mass[]) => {
     massMap = new Map(data.map((m) => [m.id, m]));
+    orderedMasses = data.sort((a, b) => a.date - b.date);
 });
 addSubscription(ListenerEndpoints.AllAbsences, (data: Absence[]) => {
     absencesMap = new Map(data.map((a) => [a.id, a]));
@@ -88,6 +90,18 @@ export const getMassMap = (): Promise<Map<number, Mass>> =>  {
             return;
         }
         resolve(structuredClone(massMap));
+    });
+};
+export const getSortedMasses = (): Promise<Mass[]> =>  {
+    return new Promise<Mass[]>((resolve) => {
+        if (orderedMasses == undefined) {
+            getData(ListenerEndpoints.AllMasses).then((data: Mass[]) => {
+                orderedMasses = data.sort((a, b) => a.date - b.date);
+                resolve(structuredClone(orderedMasses));
+            });
+            return;
+        }
+        resolve(structuredClone(orderedMasses));
     });
 };
 

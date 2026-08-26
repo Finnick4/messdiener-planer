@@ -3,6 +3,7 @@ import {Mass, Messdiener} from "../../../shared/general";
 import {MassCreateButton} from "./create-button";
 import {generateEditMassModal} from "./edit-modal";
 import {getMessdienerMap} from "../../state/specific-entries";
+import {makeDateNumberToDate} from "../../../shared/dates";
 
 export class MassList extends HTMLElement {
     private disconnectedHandler = () => {
@@ -33,9 +34,7 @@ export class MassList extends HTMLElement {
                 entry.classList.add("mass", "entry");
 
                 const date = document.createElement("div");
-                date.textContent = new Date(Number(String(mass.date).substring(0, 4)),
-                    Number(String(mass.date).substring(4, 6)) - 1,
-                    Number(String(mass.date).substring(6, 8))).toLocaleString("de", {
+                date.textContent = makeDateNumberToDate(mass.date).toLocaleString("de", {
                         day: "numeric",
                         month: "long",
                         year: "numeric"
