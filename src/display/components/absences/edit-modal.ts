@@ -3,6 +3,7 @@ import {ModalManager} from "../../types";
 import {MessdienerAllocator} from "../messdiener/allocator";
 import {generateHTMLElementsForm} from "../form-creator";
 import {getAbsence} from "../../state/specific-entries";
+import {makeDateNumberToDate} from "../../../shared/dates";
 
 export const generateEditAbsenceModal = (id: number): ModalManager => {
     const modal = document.createElement("dialog");
@@ -50,12 +51,8 @@ export const generateEditAbsenceModal = (id: number): ModalManager => {
                 return;
             }
 
-            const setStartDate = new Date(Number(String(absence.startDate).substring(0, 4)),
-                Number(String(absence.startDate).substring(4, 6)) - 1,
-                Number(String(absence.startDate).substring(6, 8)) + 1);
-            const setEndDate = new Date(Number(String(absence.endDate).substring(0, 4)),
-                Number(String(absence.endDate).substring(4, 6)) - 1,
-                Number(String(absence.endDate).substring(6, 8)) + 1);
+            const setStartDate =  makeDateNumberToDate(absence.startDate);
+            const setEndDate = makeDateNumberToDate(absence.endDate);
 
             messdienerAllocator.setAllocatedMessdiener(new Set<number>(absence.affectedMessdiener));
             inputStartDate.valueAsDate = setStartDate;

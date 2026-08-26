@@ -141,13 +141,12 @@ messdiener-prepared-list {
 family-adder {
     grid-template-columns: auto 1fr auto auto;
 }
-.modal.absence-edit family-adder,
-.modal.absence-create family-adder {
-    grid-template-columns: auto 1fr auto;
+family-adder .value.masses-allocation.hidden {
+    display: none;
+}
 
-    .value.masses-allocation {
-        display: none;
-    }
+family-adder:has(.value.masses-allocation.hidden) {
+    grid-template-columns: auto 1fr auto;
 }
 
 .tag {

@@ -38,7 +38,8 @@ export class MessdienerAllocator extends HTMLElement {
         this.referenceDateNumber = date;
         this.updateContent();
     }
-    updateContent() {
+
+    async updateContent() {
         const messdienerList = this.querySelector<MessdienerPreparedList>("messdiener-prepared-list");
         const familyAdder = this.querySelector<FamilyAdder>("family-adder");
 
@@ -54,79 +55,71 @@ export class MessdienerAllocator extends HTMLElement {
             absencesPromise = getAbsencesAffectingDate(this.referenceDateNumber);
         }
 
-        Promise.all([
+        const responses = await Promise.all([
             getMessdienerMap(),
             absencesPromise
-        ]).then(responses => {
-            const mapped = responses[0];
-            const relevantAbsences = responses[1];
+        ])
+        const mapped = responses[0];
 
-            messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));
-            if (this.referenceChurchID) {
-                familyAdder.setReferenceChurchID(this.referenceChurchID);
+        messdienerList.changePickedMessdiener(new Set<number>(this.allocatedIDs));
+        if (this.referenceChurchID) {
+            familyAdder.setReferenceChurchID(this.referenceChurchID);
+        }
+        if (this.referenceDateNumber) {
+            familyAdder.setReferenceDateNumber(this.referenceDateNumber);
+        }
+
+        const allocatedFamilies = new Set<number>();
+
+        const updateFamilyAdder = () => {
+            allocatedFamilies.clear();
+
+            this.allocatedIDs.forEach(messdienerID => {
+                const messdiener = mapped.get(messdienerID);
+                if (messdiener) {
+                    allocatedFamilies.add(messdiener.familyID);
+                }
+            });
+
+            familyAdder.setSelectedFamilies(new Set<number>(allocatedFamilies));
+        };
+
+        updateFamilyAdder();
+
+        const familyMemberships = new Map<number, Set<Messdiener>>();
+
+        mapped.forEach((messdiener) => {
+            const family = familyMemberships.get(messdiener.familyID);
+            if (family) {
+                family.add(messdiener);
+                familyMemberships.set(messdiener.familyID, family);
+                return;
             }
+            familyMemberships.set(messdiener.familyID, new Set<Messdiener>([messdiener]));
+        })
 
-            const allocatedFamilies = new Set<number>();
-
-            const updateFamilyAdder = () => {
-                allocatedFamilies.clear();
-
-                this.allocatedIDs.forEach(messdienerID => {
-                    const messdiener = mapped.get(messdienerID);
-                    if (messdiener) {
-                        allocatedFamilies.add(messdiener.familyID);
-                    }
-                });
-
-                relevantAbsences.forEach(absence => {
-                    absence.affectedMessdiener.forEach(messdienerID => {
-                        const messdiener = mapped.get(messdienerID);
-                        if (messdiener) {
-                            allocatedFamilies.add(messdiener.familyID);
-                        }
-                    });
-                });
-
-                familyAdder.setSelectedFamilies(new Set<number>(allocatedFamilies));
-            };
-
-            updateFamilyAdder();
-
-            const familyMemberships = new Map<number, Set<Messdiener>>();
-
-            mapped.forEach((messdiener) => {
-                const family = familyMemberships.get(messdiener.familyID);
-                if (family) {
-                    family.add(messdiener);
-                    familyMemberships.set(messdiener.familyID, family);
+        familyAdder.onedit = (selectedFamilies: Set<number>)=>  {
+            let addedFamilyID = 0;
+            selectedFamilies.forEach(family => {
+                if (!allocatedFamilies.has(family)) {
+                    addedFamilyID = family;
+                }
+            })
+            familyMemberships.get(addedFamilyID)?.forEach(messdiener => {
+                if (this.referenceChurchID && !messdiener.churchActivity.has(this.referenceChurchID)) {
                     return;
                 }
-                familyMemberships.set(messdiener.familyID, new Set<Messdiener>([messdiener]));
-            })
-
-            familyAdder.onedit = (selectedFamilies: Set<number>)=>  {
-                let addedFamilyID = 0;
-                selectedFamilies.forEach(family => {
-                    if (!allocatedFamilies.has(family)) {
-                        addedFamilyID = family;
-                    }
-                })
-                familyMemberships.get(addedFamilyID)?.forEach(messdiener => {
-                    if (this.referenceChurchID && !messdiener.churchActivity.has(this.referenceChurchID)) {
-                        return;
-                    }
-                    this.allocatedIDs.add(messdiener.identifier);
-                    this.onedit(this.allocatedIDs);
-                    messdienerList.changePickedMessdiener(this.allocatedIDs);
-                })
-            }
-
-            messdienerList.onedit = (id: number) => {
-                this.allocatedIDs.delete(id);
-                updateFamilyAdder();
+                this.allocatedIDs.add(messdiener.identifier);
                 this.onedit(this.allocatedIDs);
-            }
-        });
+                messdienerList.changePickedMessdiener(this.allocatedIDs);
+            })
+        }
+
+        messdienerList.onedit = (id: number) => {
+            this.allocatedIDs.delete(id);
+            updateFamilyAdder();
+            this.onedit(this.allocatedIDs);
+        }
     }
 
 

@@ -1,7 +1,8 @@
-import {Family, Mass} from "../../../shared/general";
+import {Absence, AllocationStatus, Family, Mass, Messdiener} from "../../../shared/general";
 import {getData, ListenerEndpoints} from "../../state/state-manager";
 import {createInternalFamilyName} from "../../logic/family";
-import {getFamilyMembershipsMap} from "../../state/specific-entries";
+import {getAbsence, getAbsencesAffectingDate, getFamilyMembershipsMap} from "../../state/specific-entries";
+import {getStatusOfMessdienerSetAt} from "../../state/allocation-status";
 
 export class FamilyAdder extends HTMLElement {
     constructor() {
@@ -9,6 +10,7 @@ export class FamilyAdder extends HTMLElement {
     }
     private selectedFamilies = new Set<number>();
     private referenceChurchID: number | undefined;
+    private referenceDateNumber: number | undefined;
 
     connectedCallback() {
         this.setSelectedFamilies(new Set<number>());
@@ -22,100 +24,118 @@ export class FamilyAdder extends HTMLElement {
         this.referenceChurchID = id;
         this.updateContent();
     }
-    updateContent() {
-        Promise.all([
+    setReferenceDateNumber(date: number) {
+        this.referenceDateNumber = date;
+        this.updateContent();
+    }
+
+    async updateContent() {
+        const resps = await Promise.all([
             getFamilyMembershipsMap(),
             getData(ListenerEndpoints.AllFamilies),
-            getData(ListenerEndpoints.AllMasses)
-        ]).then(resps => {
-            const familyMemberships = resps[0];
-            const data: Family[] = resps[1];
-            const masses: Mass[] = resps[2];
+            this.referenceDateNumber ? getAbsencesAffectingDate(this.referenceDateNumber) : new Promise<Absence[]>(resolve => resolve([]))
+        ]);
 
-            const selectableFamilies = data.filter(family => !this.selectedFamilies.has(family.id));
-            let familyPoolSize = selectableFamilies.length;
+        const familyMemberships = resps[0];
+        const data: Family[] = resps[1];
+        const relevantAbsences: Absence[] = resps[2];
 
-            const checkIfEmpty = () => {
-                if (familyPoolSize == 0) {
-                    const placeholder = document.createElement("p");
-                    placeholder.classList.add("placeholder");
-                    placeholder.innerText = "Es bestehen keine Familien, welche der Messe zugewiesen werden können!"
-                    this.replaceChildren(placeholder);
+        const selectableFamilies = data.filter(family => {
+            if (this.selectedFamilies.has(family.id)) {
+                return false;
+            }
+            for (const absence of relevantAbsences) {
+
+                if (makeMessdienerIDSet(familyMemberships.get(family.id)).intersection(absence.affectedMessdiener).size > 0) {
+                    return false;
                 }
             }
+            return true;
+        });
+        let familyPoolSize = selectableFamilies.length;
+        const selectableFamiliesStatus = await (async (): Promise<Map<number, AllocationStatus>> => {
+            const date = this.referenceDateNumber;
+            const familiesStatus = new Map<number, AllocationStatus>();
+            if (date == undefined) {
+                return familiesStatus;
+            }
 
-            const makeElement = (family: Family): HTMLDivElement => {
-                const elem = document.createElement("div");
-                const sizeTag = document.createElement("div");
-                const nameElem = document.createElement("div");
-                const countElem = document.createElement("div");
-                const addBtn = document.createElement("button");
+            await Promise.all(selectableFamilies.map(family => {
+                const memberIDs = makeMessdienerIDSet(familyMemberships.get(family.id));
+                return getStatusOfMessdienerSetAt(memberIDs, date).then(status => familiesStatus.set(family.id, status));
+            }));
 
-                sizeTag.innerText = String(family.memberSize);
-                nameElem.innerText = createInternalFamilyName(family.lastNameInternal, family.lastNameDisplay);
-                countElem.innerText = "0 Messen";
-                addBtn.innerText = "+";
+            return familiesStatus;
+        })()
 
-                sizeTag.classList.add("tag");
-                countElem.classList.add("value", "masses-allocation");
+        const checkIfEmpty = () => {
+            if (familyPoolSize == 0) {
+                const placeholder = document.createElement("p");
+                placeholder.classList.add("placeholder");
+                placeholder.innerText = "Es bestehen keine Familien, welche ausgewählt werden können!"
+                this.replaceChildren(placeholder);
+            }
+        }
 
-                addBtn.addEventListener("click", () => {
-                    this.selectedFamilies.add(family.id);
-                    elem.remove();
-                    familyPoolSize--;
-                    checkIfEmpty();
-                    this.onedit(this.selectedFamilies);
-                })
+        const makeElement = (family: Family): HTMLDivElement => {
+            const elem = document.createElement("div");
+            const sizeTag = document.createElement("div");
+            const nameElem = document.createElement("div");
+            const countElem = document.createElement("div");
+            const addBtn = document.createElement("button");
 
-                elem.classList.add("row", "entry");
-                elem.dataset.familyId = String(family.id);
-                elem.append(sizeTag, nameElem, countElem, addBtn);
+            sizeTag.innerText = String(family.memberSize);
+            nameElem.innerText = createInternalFamilyName(family.lastNameInternal, family.lastNameDisplay);
+            countElem.innerText = "0 Messen";
+            addBtn.innerText = "+";
 
-                const familyMembers = familyMemberships.get(family.id);
+            sizeTag.classList.add("tag");
+            countElem.classList.add("value", "masses-allocation");
 
-                if (!familyMembers) {
-                    return elem;
-                }
+            addBtn.addEventListener("click", () => {
+                this.selectedFamilies.add(family.id);
+                elem.remove();
+                familyPoolSize--;
+                checkIfEmpty();
+                this.onedit(this.selectedFamilies);
+            })
 
-                if (this.referenceChurchID) {
-                    let effectiveSize = 0;
-                    for (const messdiener of familyMembers) {
-                        if (this.referenceChurchID && messdiener.churchActivity.has(this.referenceChurchID)) {
-                            effectiveSize++;
-                        }
-                    }
-                    sizeTag.innerText = String(effectiveSize);
-                    if (effectiveSize == 0) {
-                        elem.classList.add("no-effective-size");
-                    }
-                }
+            elem.classList.add("row", "entry");
+            elem.dataset.familyId = String(family.id);
+            elem.append(sizeTag, nameElem, countElem, addBtn);
 
-                let massCount = 0;
-                for (const mass of masses) {
-                    for (const member of familyMembers) {
-                        if (this.referenceChurchID) {
-                            if (member.churchActivity.has(this.referenceChurchID) && mass.allocatedMessdiener.has(member.identifier)) {
-                                massCount++;
-                                break;
-                            }
-                        } else {
-                            if (mass.allocatedMessdiener.has(member.identifier)) {
-                                massCount++;
-                                break;
-                            }
-                        }
-                    }
-                }
+            const familyMembers = familyMemberships.get(family.id);
 
-                countElem.innerText = `${massCount} Messe${massCount != 1 ? "n" : ""}`;
-
+            if (!familyMembers) {
                 return elem;
             }
 
-            this.replaceChildren(...(selectableFamilies.map(makeElement)));
-            this.querySelectorAll(".no-effective-size").forEach(e => e.remove());
-            checkIfEmpty();
-        })
+            if (this.referenceChurchID) {
+                let effectiveSize = 0;
+                for (const messdiener of familyMembers) {
+                    if (this.referenceChurchID && messdiener.churchActivity.has(this.referenceChurchID)) {
+                        effectiveSize++;
+                    }
+                }
+                sizeTag.innerText = String(effectiveSize);
+                if (effectiveSize == 0) {
+                    elem.classList.add("no-effective-size");
+                }
+            }
+
+            const status = selectableFamiliesStatus.get(family.id);
+            if (!status) {
+                countElem.classList.add("hidden");
+            } else {
+                countElem.innerText = `${status.allocationCount} Messe${status.allocationCount != 1 ? "n" : ""}`;
+            }
+
+            return elem;
+        }
+
+        this.replaceChildren(...(selectableFamilies.map(makeElement)));
+        this.querySelectorAll(".no-effective-size").forEach(e => e.remove());
+        checkIfEmpty();
     }
 
     onedit(ids: Set<number>) {
@@ -125,6 +145,15 @@ export class FamilyAdder extends HTMLElement {
     getSelectedFamilies(): Set<number> {
         return this.selectedFamilies;
     }
+}
+
+const makeMessdienerIDSet = (members: Set<Messdiener> | undefined): Set<number> => {
+    const memberIDs = new Set<number>;
+    if (!members) {
+        return memberIDs;
+    }
+    members.forEach(messdiener => memberIDs.add(messdiener.identifier));
+    return memberIDs;
 }
 
 export default FamilyAdder
