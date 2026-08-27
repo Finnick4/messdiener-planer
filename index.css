@@ -139,14 +139,16 @@ messdiener-prepared-list {
 }
 
 family-adder {
-    grid-template-columns: auto 1fr auto auto;
+    --additional-rows: 0;
+    grid-template-columns: auto 1fr repeat(calc(var(--additional-rows) + 1), auto);
 }
-family-adder .value.masses-allocation.hidden {
-    display: none;
+family-adder.masses-overview {
+    --additional-rows: 3;
+
 }
 
-family-adder:has(.value.masses-allocation.hidden) {
-    grid-template-columns: auto 1fr auto;
+family-adder .value.hidden {
+    display: none;
 }
 
 .tag {

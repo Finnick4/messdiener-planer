@@ -68,6 +68,10 @@ export class FamilyAdder extends HTMLElement {
             return familiesStatus;
         })();
 
+        if (this.referenceDateNumber != undefined) {
+            this.classList.add("masses-overview");
+        }
+
         const checkIfEmpty = () => {
             if (familyPoolSize == 0) {
                 const placeholder = document.createElement("p");
@@ -82,15 +86,21 @@ export class FamilyAdder extends HTMLElement {
             const sizeTag = document.createElement("div");
             const nameElem = document.createElement("div");
             const countElem = document.createElement("div");
+            const lastElem = document.createElement("div");
+            const nextElem = document.createElement("div");
             const addBtn = document.createElement("button");
 
             sizeTag.innerText = String(family.memberSize);
             nameElem.innerText = createInternalFamilyName(family.lastNameInternal, family.lastNameDisplay);
             countElem.innerText = "0 Messen";
+            lastElem.innerText = "Vor ?d";
+            nextElem.innerText = "In ?d";
             addBtn.innerText = "+";
 
             sizeTag.classList.add("tag");
             countElem.classList.add("value", "masses-allocation");
+            lastElem.classList.add("value", "last-allocation");
+            nextElem.classList.add("value", "next-allocation");
 
             addBtn.addEventListener("click", () => {
                 this.selectedFamilies.add(family.id);
@@ -102,7 +112,7 @@ export class FamilyAdder extends HTMLElement {
 
             elem.classList.add("row", "entry");
             elem.dataset.familyId = String(family.id);
-            elem.append(sizeTag, nameElem, countElem, addBtn);
+            elem.append(sizeTag, nameElem, lastElem, nextElem, countElem, addBtn);
 
             const familyMembers = familyMemberships.get(family.id);
 
@@ -124,10 +134,16 @@ export class FamilyAdder extends HTMLElement {
             }
 
             const status = selectableFamiliesStatus.get(family.id);
-            if (!status) {
-                countElem.classList.add("hidden");
-            } else {
+            if (status) {
                 countElem.innerText = `${status.allocationCount} Messe${status.allocationCount != 1 ? "n" : ""}`;
+
+                lastElem.innerText = status.daysSinceLastExplicitAllocation != undefined ? `${status.daysSinceLastExplicitAllocation}d` : `-`;
+                nextElem.innerText = status.daysTillNextExplicitAllocation != undefined ? `${status.daysTillNextExplicitAllocation}d` : `-`;
+
+            } else {
+                countElem.classList.add("hidden");
+                nextElem.classList.add("hidden");
+                lastElem.classList.add("hidden");
             }
 
             return elem;
