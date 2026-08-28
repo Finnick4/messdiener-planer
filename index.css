@@ -141,14 +141,12 @@ messdiener-prepared-list {
 family-adder {
     --additional-rows: 0;
     grid-template-columns: auto 1fr repeat(calc(var(--additional-rows) + 1), auto);
+    .value {
+        text-align: center;
+    }
 }
 family-adder.masses-overview {
     --additional-rows: 3;
-
-}
-
-family-adder .value.hidden {
-    display: none;
 }
 
 .tag {
