@@ -76,7 +76,7 @@ export class FamilyAdder extends HTMLElement {
             if (familyPoolSize == 0) {
                 const placeholder = document.createElement("p");
                 placeholder.classList.add("placeholder");
-                placeholder.innerText = "Es bestehen keine Familien, welche ausgewählt werden können!"
+                placeholder.innerText = "Es bestehen keine Familien, welche ausgewählt werden können!";
                 this.replaceChildren(placeholder);
             }
         }

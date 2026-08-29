@@ -16,11 +16,13 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
 
     connectedCallback() {
         this.multiple = true;
+        console.log("connected!");
         this.initialiseWithStartIDs(this.selectedChurchesIDs);
-        this.classList.add("select", "multiple")
+        this.classList.add("select", "multiple");
     }
     initialiseWithStartIDs(ids: Set<number>) {
         this.closeSubscription();
+        console.log("initialising!");
         this.selectedChurchesIDs = structuredClone(ids);
         this.onedit(structuredClone(ids));
         this.closeSubscription = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
@@ -42,7 +44,13 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
                 return option;
             }
 
-            if (data == undefined) {
+
+            if (data.length == 0) {
+                const placeholder = document.createElement("option");
+                placeholder.classList.add("placeholder");
+                placeholder.innerText = "Es wurden noch keine Kirchen erstellt.";
+                placeholder.disabled = true;
+                this.replaceChildren(placeholder);
                 return
             }
 
@@ -50,7 +58,7 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
             const options: HTMLOptionElement[] = data.map(church => makeOptionElement(createInternalChurchName(church.name, church.location), church.id));
 
             this.replaceChildren(...options);
-        })
+        });
     }
 
     disconnectedCallback() {

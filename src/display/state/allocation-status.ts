@@ -37,10 +37,12 @@ export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, dat
         return bestIndex;
     })();
     const anchorMass = masses[dateFoundAtIndex];
+    const anchorMassIsBefore = anchorMass.date < date;
+    const anchorMassIsAfter = anchorMass.date > date;
 
     status.isAllocated = anchorMass.allocatedMessdiener.size == 0 || anchorMass.allocatedMessdiener.intersection(messdienerIDs).size > 0;
     status.daysTillNextExplicitAllocation = ((): number | undefined => {
-        for (let i = dateFoundAtIndex + 1; i < masses.length; i++) {
+        for (let i = dateFoundAtIndex + (!anchorMassIsAfter ? 1 : 0); i < masses.length; i++) {
             if (masses[i].allocatedMessdiener.intersection(messdienerIDs).size > 0) {
                 return differenceBetweenTwoDateNumbers(date, masses[i].date);
             }
@@ -48,14 +50,14 @@ export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, dat
         return undefined;
     })();
     status.daysSinceLastExplicitAllocation = ((): number | undefined => {
-        for (let i = dateFoundAtIndex - 1; i >= 0; i--) {
+        for (let i = dateFoundAtIndex - (!anchorMassIsBefore ? 1 : 0); i >= 0; i--) {
             if (masses[i].allocatedMessdiener.intersection(messdienerIDs).size > 0) {
                 return differenceBetweenTwoDateNumbers(date, masses[i].date);
             }
         }
         return undefined;
     })();
-    status.averageDaysTillAllocation = ((): number => {
+    status.averageDaysTillAllocation = Math.round(((): number => {
         if (status.daysSinceLastExplicitAllocation != undefined && status.daysTillNextExplicitAllocation != undefined) {
             return (status.daysTillNextExplicitAllocation + status.daysSinceLastExplicitAllocation) / 2;
         }
@@ -66,7 +68,7 @@ export const getStatusOfMessdienerSetAt = async (messdienerIDs: Set<number>, dat
             return status.daysTillNextExplicitAllocation;
         }
         return Infinity;
-    })();
+    })());
     if (status.allocationCount != 0) {
         status.urgency = status.averageDaysTillAllocation / status.allocationCount;
     }
