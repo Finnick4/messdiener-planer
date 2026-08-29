@@ -14,6 +14,7 @@ export class FamilySelector extends HTMLSelectElement {
     connectedCallback() {
         this.initialiseWithStartID(0);
         this.classList.add("select");
+        this.addEventListener("change", this.updateSelectedElement);
     }
     initialiseWithStartID(id: number) {
         this.closeSubscription();
@@ -25,10 +26,6 @@ export class FamilySelector extends HTMLSelectElement {
                 option.innerText = text;
                 option.dataset.familyId = String(id);
                 option.value = String(id);
-                option.addEventListener("mouseup", () => {
-                    this.selectedFamilyID = id;
-                    this.onedit(id);
-                })
                 option.selected = this.selectedFamilyID == id;
 
                 return option;
@@ -48,6 +45,14 @@ export class FamilySelector extends HTMLSelectElement {
     }
     onedit(newID: number) {
         return;
+    }
+    private updateSelectedElement() {
+        this.querySelectorAll<HTMLOptionElement>("option").forEach(option => {
+            if (option.selected && !isNaN(Number(option.dataset.familyId))) {
+                this.selectedFamilyID = Number(option.dataset.familyId);
+            }
+        });
+        this.onedit(this.selectedFamilyID);
     }
 
     getSelectedFamily(): number {

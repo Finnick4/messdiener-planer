@@ -19,6 +19,7 @@ export class ChurchSelector extends HTMLSelectElement {
     connectedCallback() {
         this.initialiseWithStartID(0);
         this.classList.add("select");
+        this.addEventListener("change", this.updateSelectedElement);
     }
     initialiseWithStartID(id: number) {
         this.closeSubscription();
@@ -46,6 +47,14 @@ export class ChurchSelector extends HTMLSelectElement {
 
             this.replaceChildren(...options);
         })
+    }
+    private updateSelectedElement() {
+        this.querySelectorAll<HTMLOptionElement>("option").forEach(option => {
+            if (option.selected && !isNaN(Number(option.dataset.churchId))) {
+                this.selectedChurchID = Number(option.dataset.churchId);
+            }
+        });
+        this.onedit(this.selectedChurchID);
     }
 
     disconnectedCallback() {

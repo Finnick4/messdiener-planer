@@ -1,7 +1,7 @@
-import {Absence, AllocationStatus, Family, Mass, Messdiener} from "../../../shared/general";
+import {Absence, AllocationStatus, Family, Messdiener} from "../../../shared/general";
 import {getData, ListenerEndpoints} from "../../state/state-manager";
 import {createInternalFamilyName} from "../../logic/family";
-import {getAbsence, getAbsencesAffectingDate, getFamilyMembershipsMap} from "../../state/specific-entries";
+import {getAbsencesAffectingDate, getFamilyMembershipsMap} from "../../state/specific-entries";
 import {getStatusOfMessdienerSetAt} from "../../state/allocation-status";
 
 export class FamilyAdder extends HTMLElement {

@@ -16,13 +16,12 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
 
     connectedCallback() {
         this.multiple = true;
-        console.log("connected!");
         this.initialiseWithStartIDs(this.selectedChurchesIDs);
         this.classList.add("select", "multiple");
+        this.addEventListener("change", this.recalculateSelectedChurches);
     }
     initialiseWithStartIDs(ids: Set<number>) {
         this.closeSubscription();
-        console.log("initialising!");
         this.selectedChurchesIDs = structuredClone(ids);
         this.onedit(structuredClone(ids));
         this.closeSubscription = addSubscription(ListenerEndpoints.AllChurches, (data: Church[]) => {
@@ -31,14 +30,6 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
                 option.innerText = text;
                 option.dataset.churchId = String(id);
                 option.value = String(id);
-                option.addEventListener("mouseup", () => {
-                    if (this.selectedChurchesIDs.has(id)) {
-                        this.selectedChurchesIDs.delete(id);
-                    } else {
-                        this.selectedChurchesIDs.add(id);
-                    }
-                    this.onedit(structuredClone(this.selectedChurchesIDs));
-                })
                 option.selected = this.selectedChurchesIDs.has(id);
 
                 return option;
@@ -67,6 +58,15 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
     }
     onedit(currentIDs: Set<number>) {
         return;
+    }
+    private recalculateSelectedChurches() {
+        this.selectedChurchesIDs = new Set<number>();
+        this.querySelectorAll<HTMLOptionElement>("option").forEach(option => {
+            if (option.selected && !isNaN(Number(option.dataset.churchId))) {
+                this.selectedChurchesIDs.add(Number(option.dataset.churchId));
+            }
+        });
+        this.onedit(this.selectedChurchesIDs);
     }
 
     getSelectedChurches(): Set<number> {
