@@ -52,9 +52,23 @@ export const generateCreateAbsenceModal = (): ModalManager => {
         }
 
         saveBtn.addEventListener("click", () => {
-            if (inputStartDate.value == "" || inputEndDate.value == "") {
-                console.log("Cannot create absence without a start and end dates!")
-                return
+            [inputStartDate, inputEndDate].forEach(e => e.classList.remove("has-issue"));
+            let escape = false;
+            if (inputStartDate.value == "") {
+                console.info("Cannot create absence without a start date!");
+                inputStartDate.classList.add("has-issue");
+                if (!escape) inputStartDate.focus();
+                escape = true;
+            }
+            if (inputEndDate.value == "") {
+                console.info("Cannot create absence without an end date!");
+                inputEndDate.classList.add("has-issue");
+                if (!escape) inputEndDate.focus();
+                escape = true;
+            }
+
+            if (escape) {
+                return;
             }
 
             const numericStartDate = Number(inputStartDate.value.split("-").reduce((acc, currentValue) => acc + currentValue));

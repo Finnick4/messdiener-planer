@@ -68,3 +68,14 @@ export type Absence = {
     endDate: number
     affectedMessdiener: Set<number>
 }
+
+export type AllocationStatus = {
+    date: number
+    isAllocated: boolean
+    daysTillNextExplicitAllocation: number | undefined
+    daysSinceLastExplicitAllocation: number | undefined
+    averageDaysTillAllocation: number
+    allocationCount: number
+    urgency: number
+}
+

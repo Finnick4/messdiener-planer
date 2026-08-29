@@ -65,20 +65,18 @@ export const buildPlanCreatorPage = () => {
     exportBtn.innerText = "Plan exportieren";
     exportBtn.classList.add("export");
     exportBtn.addEventListener("click", () => {
-        inputTitle.classList.remove("has-issue");
-        inputVersion.classList.remove("has-issue");
-        churchSelector.classList.remove("has-issue");
+        [inputTitle, inputVersion, churchSelector].forEach(e => e.classList.remove("has-issue"));
         let escape = false;
 
         if (inputTitle.value == "") {
             console.log("Could not export the plan as there was no title set.");
-            inputTitle.focus();
+            if (!escape) inputTitle.focus();
             inputTitle.classList.add("has-issue");
             escape = true;
         }
         if (inputVersion.value == "") {
             console.log("Could not export the plan as no version was set.");
-            inputVersion.focus();
+            if (!escape) inputVersion.focus();
             inputVersion.classList.add("has-issue");
             escape = true;
         }

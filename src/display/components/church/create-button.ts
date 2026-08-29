@@ -45,9 +45,12 @@ export class ChurchCreateButton extends HTMLElement {
 
         saveBtn.addEventListener("click", () => {
             if (inputName.value == "") {
-                console.log("Cannot create church with empty name!")
-                return
+                console.info("Cannot create church with empty name!")
+                inputName.focus();
+                inputName.classList.add("has-issue");
+                return;
             }
+            inputName.classList.remove("has-issue");
 
             window.electronAPI.createChurch(inputName.value, inputLocation.value == "" ? undefined : inputLocation.value);
             modal.close();

@@ -69,9 +69,9 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
             saveBtn.addEventListener("click", () => {
                 const familyID = familySelector.getSelectedFamily();
+                modal.close();
 
                 if (inputName.value != messdiener.firstName || familyID != messdiener.familyID) {
-                    modal.close();
                     window.electronAPI.editMessdiener({
                         identifier: messdiener.identifier,
                         firstName: inputName.value,

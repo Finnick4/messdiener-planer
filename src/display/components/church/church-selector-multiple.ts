@@ -17,7 +17,8 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
     connectedCallback() {
         this.multiple = true;
         this.initialiseWithStartIDs(this.selectedChurchesIDs);
-        this.classList.add("select", "multiple")
+        this.classList.add("select", "multiple");
+        this.addEventListener("change", this.recalculateSelectedChurches);
     }
     initialiseWithStartIDs(ids: Set<number>) {
         this.closeSubscription();
@@ -29,20 +30,18 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
                 option.innerText = text;
                 option.dataset.churchId = String(id);
                 option.value = String(id);
-                option.addEventListener("mouseup", () => {
-                    if (this.selectedChurchesIDs.has(id)) {
-                        this.selectedChurchesIDs.delete(id);
-                    } else {
-                        this.selectedChurchesIDs.add(id);
-                    }
-                    this.onedit(structuredClone(this.selectedChurchesIDs));
-                })
                 option.selected = this.selectedChurchesIDs.has(id);
 
                 return option;
             }
 
-            if (data == undefined) {
+
+            if (data.length == 0) {
+                const placeholder = document.createElement("option");
+                placeholder.classList.add("placeholder");
+                placeholder.innerText = "Es wurden noch keine Kirchen erstellt.";
+                placeholder.disabled = true;
+                this.replaceChildren(placeholder);
                 return
             }
 
@@ -50,7 +49,7 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
             const options: HTMLOptionElement[] = data.map(church => makeOptionElement(createInternalChurchName(church.name, church.location), church.id));
 
             this.replaceChildren(...options);
-        })
+        });
     }
 
     disconnectedCallback() {
@@ -59,6 +58,15 @@ export class ChurchSelectorMultiple extends HTMLSelectElement {
     }
     onedit(currentIDs: Set<number>) {
         return;
+    }
+    private recalculateSelectedChurches() {
+        this.selectedChurchesIDs = new Set<number>();
+        this.querySelectorAll<HTMLOptionElement>("option").forEach(option => {
+            if (option.selected && !isNaN(Number(option.dataset.churchId))) {
+                this.selectedChurchesIDs.add(Number(option.dataset.churchId));
+            }
+        });
+        this.onedit(this.selectedChurchesIDs);
     }
 
     getSelectedChurches(): Set<number> {
