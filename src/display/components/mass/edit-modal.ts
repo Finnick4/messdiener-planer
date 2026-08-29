@@ -68,8 +68,9 @@ export const generateEditMassModal = (id: number): ModalManager => {
             churchSelector.initialiseWithStartID(mass.churchID);
 
             saveBtn.addEventListener("click", () => {
+                modal.close();
+
                 if (inputDate.valueAsDate != setDate || inputNote.value != setNote) {
-                    modal.close();
                     const numericDate = Number(inputDate.value.split("-").reduce((acc, currentValue) => acc + currentValue));
                     window.electronAPI.editMass({
                         id: mass.id,

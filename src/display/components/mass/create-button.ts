@@ -46,15 +46,26 @@ export class MassCreateButton extends HTMLElement {
         document.body.appendChild(modal);
 
         saveBtn.addEventListener("click", () => {
+            [inputDate, churchSelector].forEach(e => e.classList.remove("has-issue"));
+            let escape = false;
+
             if (inputDate.value == "") {
-                console.log("Cannot create mass without a date!")
-                return
+                console.info("Cannot create mass without a date!");
+                if (!escape) inputDate.focus();
+                escape = true;
+                inputDate.classList.add("has-issue");
             }
 
             if (churchSelector.getSelectedChurch() == 0) {
-                console.log("Cannot create mass without a church!")
-                return
+                console.info("Cannot create mass without a church!");
+                escape = true;
+                churchSelector.classList.add("has-issue");
             }
+
+            if (escape) {
+                return;
+            }
+
             const numericDate = Number(inputDate.value.split("-").reduce((acc, currentValue) => acc + currentValue));
 
             window.electronAPI.createMass(numericDate, churchSelector.getSelectedChurch(), inputNote.value == "" ? undefined : inputNote.value);

@@ -58,11 +58,27 @@ export class MessdienerCreateButton extends HTMLElement {
         }
 
         saveBtn.addEventListener("click", () => {
+            [inputName, inputFamDispl].forEach(e => e.classList.remove("has-issue"));
+            let escape = false;
+
             if (inputName.value == "") {
-                console.log("Cannot create Messsdiener with empty name!")
-                return
+                console.info("Cannot create Messdiener with empty name!")
+                if (!escape) inputName.focus();
+                escape = true;
+                inputName.classList.add("has-issue");
             }
             const familyID = familySelector.getSelectedFamily();
+
+            if (familyID == 0 && inputFamDispl.value == "") {
+                console.info("Cannot create Family with empty name!")
+                if (!escape) inputFamDispl.focus();
+                escape = true;
+                inputFamDispl.classList.add("has-issue");
+            }
+            if (escape) {
+                return;
+            }
+
             const newFamily: Family = {
                 lastNameInternal: inputFamIntern.value,
                 lastNameDisplay: inputFamDispl.value,

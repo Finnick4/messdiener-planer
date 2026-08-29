@@ -59,8 +59,8 @@ export const generateEditAbsenceModal = (id: number): ModalManager => {
             inputEndDate.valueAsDate = setEndDate;
 
             saveBtn.addEventListener("click", () => {
+                modal.close();
                 if (inputStartDate.valueAsDate?.getTime() != setStartDate.getTime() || inputEndDate.valueAsDate?.getTime() != setEndDate.getTime()) {
-                    modal.close();
                     const numericStartDate = Number(inputStartDate.value.split("-").reduce((acc, currentValue) => acc + currentValue));
                     const numericEndDate = Number(inputEndDate.value.split("-").reduce((acc, currentValue) => acc + currentValue));
 

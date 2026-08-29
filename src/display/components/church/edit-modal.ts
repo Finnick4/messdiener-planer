@@ -53,9 +53,9 @@ export const generateEditChurchModal = (id: number): ModalManager => {
             inputLocation.value = church.location != undefined ? church.location : "";
 
             saveBtn.addEventListener("click", () => {
+                modal.close();
 
                 if (inputName.value != church.name || inputLocation.value != church.location) {
-                    modal.close();
                     window.electronAPI.editChurch({
                         id: church.id,
                         name: inputName.value,
