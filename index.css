@@ -16,6 +16,7 @@
     --secondary: hsl(9, 100%, 87%);
     --secondary-hover: hsl(9, 100%, 80%);
     --secondary-pressed: hsl(9, 100%, 84%);
+    --secondary-muted: hsl(9, 100%, 90%);
 
     --accent: hsl(205, 77%, 56%);
 
@@ -90,6 +91,15 @@ button:active,
 .button:active{
     translate: 0 1px;
     background-color: var(--secondary-pressed);
+}
+
+button.export.exporting,
+button.export.exporting:hover,
+button.export.exporting:active {
+    translate: 0 0;
+    cursor: not-allowed;
+    background-color: var(--secondary-muted);
+
 }
 
 main {

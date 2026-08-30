@@ -4,10 +4,11 @@ import {ExportSettings} from "../../shared/general";
 import {getExportSettings} from "../application/settings-cache";
 import {shell} from "electron";
 
-export const exportPlanHandler = (_event: IpcMainEvent, settings: ExportSettings): Promise<void> => {
+export const exportPlanHandler = (event: IpcMainEvent, settings: ExportSettings): Promise<void> => {
     return new Promise<void>(resolve => {
         bakePDF(settings).then(path => {
             shell.showItemInFolder(path);
+            event.sender.send("pdf-compiled");
             resolve()
         });
     })

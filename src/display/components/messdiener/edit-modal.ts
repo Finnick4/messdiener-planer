@@ -4,6 +4,7 @@ import {FamilySelector} from "../family/family-selector";
 import {ChurchSelectorMultiple} from "../church/church-selector-multiple";
 import {generateHTMLElementsForm} from "../form-creator";
 import {getMessdiener} from "../../state/specific-entries";
+import {makeConfirmButton} from "../../logic/confirm-button";
 
 export const generateEditMessdienerModal = (id: number): ModalManager => {
     const modal = document.createElement("dialog");
@@ -30,7 +31,6 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
         const delBtn = document.createElement("button");
         cancelBtn.innerText = "Abbrechen";
         saveBtn.innerText = "Speichern";
-        delBtn.innerText = "Löschen";
         controlsField.classList.add("field", "controls");
         cancelBtn.classList.add("cancel");
         saveBtn.classList.add("save");
@@ -115,15 +115,10 @@ export const generateEditMessdienerModal = (id: number): ModalManager => {
 
         cancelBtn.addEventListener("click", () => modal.close());
 
-        // @TODO implement confirmation
-        const attainConfirmation = () => new Promise<void>((resolve) => resolve())
-
-        delBtn.onclick = () => {
-            attainConfirmation().then(() => {
-                modal.close();
-                window.electronAPI.deleteMessdiener(id);
-            })
-        }
+        makeConfirmButton("Löschen", delBtn, () => {
+            modal.close();
+            window.electronAPI.deleteMessdiener(id);
+        });
 
         hasBeenInitialised = true;
     }

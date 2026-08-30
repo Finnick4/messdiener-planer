@@ -41,4 +41,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onChurchesUpdate: (callback: (data: Church[]) => void): IpcRenderer => ipcRenderer.on('update-church', (_event, value) => callback(value)),
     onMassesUpdate: (callback: (data: Mass[]) => void): IpcRenderer => ipcRenderer.on('update-mass', (_event, value) => callback(value)),
     onAbsencesUpdate: (callback: (data: Absence[]) => void): IpcRenderer => ipcRenderer.on('update-absence', (_event, value) => callback(value)),
-})
+    onPDFCompileFinished: (callback: () => void): IpcRenderer => ipcRenderer.on('pdf-compiled', () => callback()),
+});

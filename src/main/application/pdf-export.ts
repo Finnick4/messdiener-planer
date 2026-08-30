@@ -130,7 +130,18 @@ const getMassesString = async (settings: ExportSettings): Promise<string> => {
     const mappedRelevantChurches = mapChurches(filterChurchesForRelevancy(buffers[2], settings.displayedChurchIDs));
 
 
-    const minNumberOfLinesPerMass = 6;
+    const minNumberOfLinesPerMass = (() => {
+        let sum = 0;
+        let masses = 0;
+        relevantMassesBuffer.forEach(mass => {
+            const allocations = mass.allocatedMessdiener.size;
+            if (allocations != 0) {
+                masses++;
+            }
+            sum += allocations;
+        });
+        return Math.round(sum / masses);
+    })();
 
     const getAdditionalNoteForMass = (mass: Mass): string | undefined => {
         if (!settings.otherChurchComment || mass.churchID == settings.mainChurchID) {

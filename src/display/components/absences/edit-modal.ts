@@ -4,6 +4,7 @@ import {MessdienerAllocator} from "../messdiener/allocator";
 import {generateHTMLElementsForm} from "../form-creator";
 import {getAbsence} from "../../state/specific-entries";
 import {makeDateNumberToDate} from "../../../shared/dates";
+import {makeConfirmButton} from "../../logic/confirm-button";
 
 export const generateEditAbsenceModal = (id: number): ModalManager => {
     const modal = document.createElement("dialog");
@@ -25,7 +26,6 @@ export const generateEditAbsenceModal = (id: number): ModalManager => {
         const cancelBtn = document.createElement("button");
         const saveBtn = document.createElement("button");
         const delBtn = document.createElement("button");
-        delBtn.innerText = "Löschen";
         cancelBtn.innerText = "Abbrechen";
         saveBtn.innerText = "Speichern";
         controlsField.classList.add("field", "controls");
@@ -94,15 +94,10 @@ export const generateEditAbsenceModal = (id: number): ModalManager => {
 
         cancelBtn.addEventListener("click", () => modal.close());
 
-        // @TODO implement confirmation
-        const attainConfirmation = () => new Promise<void>((resolve) => resolve())
-
-        delBtn.onclick = () => {
-            attainConfirmation().then(() => {
-                modal.close();
-                window.electronAPI.deleteAbsence(id);
-            })
-        }
+        makeConfirmButton("Löschen", delBtn, () => {
+            modal.close();
+            window.electronAPI.deleteAbsence(id);
+        });
 
         hasBeenInitialised = true;
     }

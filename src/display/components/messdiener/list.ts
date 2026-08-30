@@ -35,6 +35,8 @@ export class MessdienerList extends HTMLElement {
                 editBtn.setMessdiener(messdiener.identifier);
                 entry.appendChild(editBtn);
 
+                entry.addEventListener("dblclick", () => editBtn.click());
+
                 return entry;
             })
 

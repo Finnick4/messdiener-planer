@@ -1,18 +1,23 @@
 # Messdiener Planer
 
 Ein Werkzeug zur einfachen Erstellung von Messdienerplänen. Ob für eine Kirche oder gleich mehrere mit überlappenden Messdienern, kann hiermit einfach ein Plan erstellt und als PDF exportiert werden.
+![Messen ändern Seite](./example/masses-overview.png)
 ## Warum?
-Dieses Projekt ist aus der Notwendigkeit entstanden, dass meine Gemeinde einen neuen Plan brauchte, was letztlich auf meinem Schreibtisch landet. Da ich nicht wieder den Plan per Hand erstellen wollte, ist dieses Projekt entstanden. Es besitzt also alle Features, welche meine Gemeinde benötigt. Durch dieses Tool hat das Erstellen des letzten Plans (Stand: initiales Verfassen dieses READMEs) mehrere Stunden weniger gebraucht. 
+Dieses Projekt ist aus der Notwendigkeit entstanden, dass meine Gemeinde einen neuen Plan brauchte, was letztlich auf meinem Schreibtisch landet. Da ich nicht wieder den Plan per Hand erstellen wollte, ist dieses Projekt entstanden. Es besitzt also alle Features, welche meine Gemeinde benötigt. Durch dieses Tool hat das Erstellen des letzten Plans (Stand: initiales Verfassen dieses READMEs) mehrere Stunden weniger gebraucht.
 ## Features
 - **100% lokal:** Alle Daten bleiben auf dem Gerät, mit welchem der Plan erstellt wird.
 - **Klicken statt schreiben:** Statt dass man jede Messe und die Namen selbst schreiben muss, weißt man einfach über die Maus Messdiener einer Messe zu. Sollte später doch noch eine weitere Messe eingefügt werden, muss das Dokument nicht händisch neu formatiert werden.
 - **Mehrere Kirchen:** Sofern man mehrere Kirchen erstellt, lassen sich Messdiener den jeweiligen Kirchen zuweisen, in welchen diese dienen wollen. Wenn nun Messdiener einer Messe zugewiesen werden sollen, werden nur jene, die auch in dieser Kirche dienen wollen, angezeigt.
 - **Familien:** Es ist üblich, dass aus einer Familie gleich mehrere Geschwister Messdiener sind. Wenn also mehrere Messdiener einer Familie angehörig sind, werden diese automatisch gemeinsam zu einer Messe zugewiesen (sofern alle auch in der jeweiligen Kirche dienen möchten). 
-- **Individualisierter Export:** Speziell wenn für mehrere Kirchen geplant wird, kann man einstellen, ob die Messen in einer gewissen Kirche inkludiert werden sollen. Möchte man für alle Messdiener einen Plan erstellen, so inkludiere man alle Messen. Ist ein Plan zum Drucken und aushängen in einer gewissen Kirche benötigt, so wähle man nur diese aus.
+- **Individualisierter Export:** Speziell, wenn für mehrere Kirchen geplant wird, kann man einstellen, ob die Messen in einer gewissen Kirche inkludiert werden sollen. Möchte man für alle Messdiener einen Plan erstellen, so inkludiere man alle Messen. Ist ein Plan zum Drucken und aushängen in einer gewissen Kirche benötigt, so wähle man nur diese aus.
 - **Erkennung von anderen Kirchen:** Damit man erkennt, wo eine Messe stattfindet, lässt sich automatisch eine Notiz hinzufügen. Gibt es beispielsweise eine "Hauptkirche" und eine Kapelle, so kann man diese Notiz für diese Hauptkirche deaktivieren. Auch lässt sich für die Notiz einstellen, ob der offizielle Name oder der Ort der Kirche gewählt werden soll. Im Beispiel könnte damit "Kapelle" stehen. 
 - **Abwesenheiten:** Sofern man weiß, wann wer z.B. im Urlaub ist, lässt sich dies auch eingeben. In diesem Fall wird verhindert, dass die jeweilige Person in diesem Zeitraum eingeplant wird. Dies funktioniert auch mit nur einzelnen Personen einer Familie, auch wenn standardmäßig eine ganze Familie einer Abwesenheit zugeteilt wird. In solch einem Fall kann die Familie dennoch einer Messe zugewiesen werden, jedoch ohne das fehlende Mitglied.
 - **Kürzel bei uneindeutige Vornamen:** Sofern man mehrere Messdiener mit gleichem Vornamen hat, wird der (zuvor definierte Kürzel) der Familie verwendet. Dadurch werden Unsicherheiten, wer denn gemeint sei, vorgebeugt. Ist kein Kürzel gesetzt, so wird der Familienname verwendet.
+- **Zuteilungsempfehlungen:** Die Messdiener sind automatisch nach wie "dringlich" sie wieder dienen sollten sortiert. So kann einfach eine relativ gleichmäßige Verteilung erstellt werden.
+![Messe bearbeiten Modal](./example/mass-edit-modal.png)
 ## FAQ
+### Gibt es ein Beispiel für einen hiermit erstellten Plan?
+Ja. Ein Beispiel findet sich im Ordner "example". [Hier](./example/Messdienerplan%202026.5.pdf) findet sich auch ein PDF Export. Die in dem Beispielordner befindliche Datenbank wurde zur Erstellung dieses Plans genutzt.
 ### Wie starte ich und erstelle einen Plan?
 0. Das Program installieren und öffnen.
 1. Einen Ordner auswählen, in welchem das Program arbeiten darf. 
@@ -39,7 +44,7 @@ Dieses Projekt ist aus der Notwendigkeit entstanden, dass meine Gemeinde einen n
 	- Soll diese Notiz die Ortsangabe verwenden, wähle man "Zweitkirchennotiz als Ortsangabe".
 	- Wenn keine Hauptkirche ausgewählt wird, werden alle Kirchen als Zweitkirche gewertet.
 	- Möchte man die .tex Datei, welche als Zwischenschritt intern erstellt wird, speichern, so kann man dies per ".tex Datei auch speichern".
-
+![Plan erstellen Seite](./example/create-plan.png)
 
 ### Worum handelt es sich bei "Abweichender interner Name"?
 Es kommt schon mal vor, dass es zwei Familien mit dem gleichen Nachnamen gibt. Hierbei ist es hilfreich einen internen Namen zur Unterscheidung zu setzen. Sollte es diesen geben, so wird dieser beim Editieren von Messen in Klammern hinter dem Familiennamen angezeigt. Im PDF findet sich dieser Name nirgens. 
@@ -49,6 +54,15 @@ Hierbei handelt es sich um die Zahl an Messdienern, welche zugewiesen werden.
 Ja. Ein Messdiener darf genau so überlappende Abwesenheitszeiträume haben wie es auch parallele Abwesenheiten geben kann. Empfehlenswert ist es, pro Familie eine Abwesenheit zu erstellen, jedoch für Fahrten und des gleichen eine Abwesenheit mit allen jeweils betroffenen zu erstellen.
 ### Was ist eine "Hauptkirche" bzw. "Zweitkirche"?
 Siehe unter "Wie starte ich und erstelle einen Plan?" den Punkt zum Planexport.
+### Wie wird die "Dringlichkeit" entschieden?
+Hierbei handelt es sich um folgendes: 
+```
+d: Durchschnittliche Anzahl an Tagen bis zur nächsten expliziten Zuteilung 
+n: Anzahl der Zuteilungen dieses Messdieners
+
+Dringlichkeit = d/n
+```
+Je höher dieser Wert, desto "dringlicher" ist eine Zuteilung.
 ### Darf meine Gemeinde das Werkzeug auch verwenden?
 Gerne. Dies ist ein kostenloses Werkzeug.
 ### Ich habe weitere Fragen bzw. Wünsche und Anregungen
