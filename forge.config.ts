@@ -12,7 +12,7 @@ const config: ForgeConfig = {
     asar: {
       unpack: "*.{node,dll}",
     },
-    ignore: [/node_modules\/(?!(sqlite3|node-tectonic|bindings|file-uri-to-path)\/)/],
+    ignore: [/node_modules\/(?!(sqlite3|node-tectonic|bindings|file-uri-to-path)\/)/, "example/"],
     icon: "./assets/icon",
     executableName: "messdiener-planer"
   },
