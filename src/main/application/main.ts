@@ -1,6 +1,8 @@
 import {DatabaseConnection} from "../infrastructure/database/database";
 import {SQLiteConnection} from "../infrastructure/database/sqlite";
 import {app, dialog, Notification} from "electron"
+import * as fs from "node:fs";
+import * as constants from "node:constants";
 
 let db: DatabaseConnection | null;
 let isConnectingToDB = false;
@@ -57,10 +59,35 @@ export const getWorkingDirectoryPath = async (): Promise<string> => {
         return "";
     }
     const path = result.filePaths[0];
+    if (!testDirectoryForPermissions(path)) {
+        console.info("The user provided an invalid directory!");
+        new Notification({
+            title: "Ordner nicht nutzbar",
+            body: "Der ausgewählte Ordner darf und kann vom Messdiener Planer nicht benutzt werden! Möglicherweise gibt es diesen noch nicht.",
+            icon: "./assets/icon.png",
+        }).show()
+        app.quit();
+        waitingForPath.forEach(fn => fn(""));
+        return "";
+    }
     workingDirectoryPath = path;
 
     waitingForPath.forEach(fn => fn(path));
     waitingForPath = [];
     isAskingForDirectory = false;
     return path;
+}
+
+
+const testDirectoryForPermissions = (directory: string): boolean => {
+    try {
+        fs.accessSync(directory, constants.R_OK);
+        fs.accessSync(directory, constants.W_OK);
+        console.log("Provided directory is okay to use!");
+        return true;
+    } catch (e) {
+        console.log("Could not access directory " + directory);
+        console.log(e);
+        return false;
+    }
 }

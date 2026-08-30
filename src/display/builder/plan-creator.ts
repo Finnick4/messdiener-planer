@@ -13,7 +13,7 @@ export const buildPlanCreatorPage = () => {
     noticesHeader.innerText = `Hinweis`;
 
     const notice = document.createElement("p");
-    notice.innerText = "Der Export des Plans erstellt eine .tex Datei, welche zu einer .pdf kompiliert werden kann. Es werden alle Messen inkludiert. Messen, zu welchen keine spezifischen Messdiener eingetragen sind, werden als Messen, zu welchen alle eingeplant sind, interpretiert.";
+    notice.innerText = "Der Export des Plans erstellt eine .pdf Datei im ausgewählten Ordner. Nachdem dies erfolgt ist, wird der Ordner geöffnet. Es werden alle Messen inkludiert, welche in einer der unten ausgewählten Kirchengemeinden sind. Messen, zu welchen keine spezifischen Messdiener eingetragen sind, werden als Messen, zu welchen alle eingeplant sind, interpretiert.";
     notice.classList.add("notice");
 
     const settingsHeader = document.createElement("h2");
