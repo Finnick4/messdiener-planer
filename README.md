@@ -44,6 +44,7 @@ Ja. Ein Beispiel findet sich im Ordner "example". [Hier](./example/Messdienerpla
 	- Soll diese Notiz die Ortsangabe verwenden, wähle man "Zweitkirchennotiz als Ortsangabe".
 	- Wenn keine Hauptkirche ausgewählt wird, werden alle Kirchen als Zweitkirche gewertet.
 	- Möchte man die .tex Datei, welche als Zwischenschritt intern erstellt wird, speichern, so kann man dies per ".tex Datei auch speichern".
+
 ![Plan erstellen Seite](./example/create-plan.png)
 
 ### Worum handelt es sich bei "Abweichender interner Name"?
