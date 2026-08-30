@@ -34,6 +34,8 @@ export class ChurchList extends HTMLElement {
                 editBtn.setChurch(church.id);
                 entry.appendChild(editBtn);
 
+                entry.addEventListener("dblclick", () => editBtn.click());
+
                 return entry;
             })
 

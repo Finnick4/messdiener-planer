@@ -143,6 +143,8 @@ export class FamilyAdder extends HTMLElement {
                 lastElem.remove();
             }
 
+            elem.addEventListener("dblclick", () => addBtn.click());
+
             return elem;
         }
 

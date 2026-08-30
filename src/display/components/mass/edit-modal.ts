@@ -4,6 +4,7 @@ import {ChurchSelector} from "../church/church-selector";
 import {MessdienerAllocator} from "../messdiener/allocator";
 import {generateHTMLElementsForm} from "../form-creator";
 import {getMass} from "../../state/specific-entries";
+import {makeConfirmButton} from "../../logic/confirm-button";
 
 export const generateEditMassModal = (id: number): ModalManager => {
     const modal = document.createElement("dialog");
@@ -26,7 +27,6 @@ export const generateEditMassModal = (id: number): ModalManager => {
         const cancelBtn = document.createElement("button");
         const saveBtn = document.createElement("button");
         const delBtn = document.createElement("button");
-        delBtn.innerText = "Löschen";
         cancelBtn.innerText = "Abbrechen";
         saveBtn.innerText = "Speichern";
         controlsField.classList.add("field", "controls");
@@ -110,15 +110,11 @@ export const generateEditMassModal = (id: number): ModalManager => {
 
         cancelBtn.addEventListener("click", () => modal.close());
 
-        // @TODO implement confirmation
-        const attainConfirmation = () => new Promise<void>((resolve) => resolve())
+        makeConfirmButton("Löschen", delBtn, () => {
+            modal.close();
+            window.electronAPI.deleteMass(id);
+        });
 
-        delBtn.onclick = () => {
-            attainConfirmation().then(() => {
-                modal.close();
-                window.electronAPI.deleteMass(id);
-            })
-        }
         hasBeenInitialised = true;
     }
 

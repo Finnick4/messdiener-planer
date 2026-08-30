@@ -2,6 +2,7 @@ import {Church} from "../../../shared/general";
 import {ModalManager} from "../../types";
 import {generateHTMLElementsForm} from "../form-creator";
 import {getChurch} from "../../state/specific-entries";
+import {makeConfirmButton} from "../../logic/confirm-button";
 
 
 export const generateEditChurchModal = (id: number): ModalManager => {
@@ -24,7 +25,6 @@ export const generateEditChurchModal = (id: number): ModalManager => {
         const cancelBtn = document.createElement("button");
         const saveBtn = document.createElement("button");
         const delBtn = document.createElement("button");
-        delBtn.innerText = "Löschen";
         cancelBtn.innerText = "Abbrechen";
         saveBtn.innerText = "Speichern";
         controlsField.classList.add("field", "controls");
@@ -67,15 +67,10 @@ export const generateEditChurchModal = (id: number): ModalManager => {
 
         cancelBtn.addEventListener("click", () => modal.close());
 
-        // @TODO implement confirmation
-        const attainConfirmation = () => new Promise<void>((resolve) => resolve())
-
-        delBtn.onclick = () => {
-            attainConfirmation().then(() => {
-                modal.close();
-                window.electronAPI.deleteChurch(id);
-            })
-        }
+        makeConfirmButton("Löschen", delBtn, () => {
+            modal.close();
+            window.electronAPI.deleteChurch(id);
+        });
 
         hasBeenInitialised = true;
     }

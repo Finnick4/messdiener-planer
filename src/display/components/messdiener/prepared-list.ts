@@ -63,6 +63,8 @@ export class MessdienerPreparedList extends HTMLElement {
                     })
                     entry.appendChild(removeBtn);
 
+                    entry.addEventListener("dblclick", () => removeBtn.click());
+
                     return entry;
                 })
 

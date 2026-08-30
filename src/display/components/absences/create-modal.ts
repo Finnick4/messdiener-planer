@@ -52,7 +52,7 @@ export const generateCreateAbsenceModal = (): ModalManager => {
         }
 
         saveBtn.addEventListener("click", () => {
-            [inputStartDate, inputEndDate].forEach(e => e.classList.remove("has-issue"));
+            [inputStartDate, inputEndDate, messdienerAllocator].forEach(e => e.classList.remove("has-issue"));
             let escape = false;
             if (inputStartDate.value == "") {
                 console.info("Cannot create absence without a start date!");
@@ -64,6 +64,11 @@ export const generateCreateAbsenceModal = (): ModalManager => {
                 console.info("Cannot create absence without an end date!");
                 inputEndDate.classList.add("has-issue");
                 if (!escape) inputEndDate.focus();
+                escape = true;
+            }
+            if (messdienerAllocator.getAllocatedMessdiener().size == 0) {
+                console.info("Cannot create absence without Messdiener!");
+                messdienerAllocator.classList.add("has-issue");
                 escape = true;
             }
 
