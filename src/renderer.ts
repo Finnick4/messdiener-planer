@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import '../index.css';
 import {Pages, routeToPage} from "./display/routing";
 import {addSubscription, ListenerEndpoints} from "./display/state/state-manager";

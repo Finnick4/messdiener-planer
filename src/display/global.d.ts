@@ -42,6 +42,7 @@ declare global {
             onChurchesUpdate: (callback: (data: Church[]) => void) => IpcRenderer;
             onMassesUpdate: (callback: (data: Mass[]) => void) => IpcRenderer;
             onAbsencesUpdate: (callback: (data: Absence[]) => void) => IpcRenderer;
+            onPDFCompileFinished: (callback: () => void) => IpcRenderer,
         }
     }
 }

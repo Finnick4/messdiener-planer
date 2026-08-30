@@ -5,6 +5,15 @@ import {ChurchSelectorMultiple} from "../components/church/church-selector-multi
 import {ExportSettings} from "../../shared/general";
 import {ExpandingTextArea} from "../components/expanding-text-area";
 
+let currentlyExporting = false;
+let updateExportBtn: () => void = () => {
+    return;
+};
+window.electronAPI.onPDFCompileFinished(() => {
+    currentlyExporting = false;
+    updateExportBtn();
+});
+
 export const buildPlanCreatorPage = () => {
     const header = document.createElement("h1");
     header.innerText = `Plan erstellen`;
@@ -62,9 +71,21 @@ export const buildPlanCreatorPage = () => {
     })
 
     const exportBtn = document.createElement("button");
-    exportBtn.innerText = "Plan exportieren";
+    updateExportBtn = () => {
+        if (currentlyExporting) {
+            exportBtn.innerText = "PDF wird erstellt...";
+            exportBtn.classList.add("exporting");
+        } else {
+            exportBtn.innerText = "PDF erstellen";
+            exportBtn.classList.remove("exporting");
+        }
+    }
+    updateExportBtn();
     exportBtn.classList.add("export");
     exportBtn.addEventListener("click", () => {
+        if (currentlyExporting) {
+            return;
+        }
         [inputTitle, inputVersion, churchSelector].forEach(e => e.classList.remove("has-issue"));
         let escape = false;
 
@@ -99,6 +120,8 @@ export const buildPlanCreatorPage = () => {
             title: inputTitle.value,
             version: inputVersion.value,
         });
+        currentlyExporting = true;
+        updateExportBtn();
     });
 
     setMainAndSidebar([
