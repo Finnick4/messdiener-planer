@@ -31,10 +31,7 @@ jobs:
         run: npm ci
 
       - name: package artifacts
-        run: npm run package
-
-      - name: make artifacts
-        run: npm run make
+        run: DEBUG=* npm run package
 
       - name: Build and publish artifacts
         run: npm run publish
