@@ -34,7 +34,10 @@ jobs:
           python-version: '3.12.3'
 
       - name: Setup dependencies
-        run: npm install --production=false
+        run: npm install
+
+      - name: Rebuild native packages
+        run: npx electron-rebuild
 
       - name: Build and publish artifacts
         run: npm run publish
