@@ -25,10 +25,10 @@ jobs:
       - name: Fix python version
         uses: actions/setup-python@v7
         with:
-          python-version: '3.11.x'
+          python-version: '3.12.3'
 
       - name: Setup dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build and publish artifacts
         run: npm run publish
