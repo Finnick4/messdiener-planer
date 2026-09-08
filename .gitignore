@@ -90,7 +90,6 @@ typings/
 
 # Electron-Forge
 out/
-package-lock.json
 .idea
 *.db
 
