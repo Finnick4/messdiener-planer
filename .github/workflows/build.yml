@@ -16,14 +16,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Get dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential python3
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
           node-version: '24.15.x'
           cache: 'npm'
 
+      - name: Fix python version
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12.3'
+
       - name: Setup dependencies
         run: npm install
+
+      - name: Rebuild native packages
+        run: npx electron-rebuild
 
       - name: Build and publish artifacts
         run: npm run publish
