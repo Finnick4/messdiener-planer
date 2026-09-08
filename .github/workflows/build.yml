@@ -16,6 +16,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Get dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential python3
+
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
@@ -30,10 +36,7 @@ jobs:
       - name: Setup dependencies
         run: npm install --production=false
 
-      - name: package artifacts
-        run: NODE_ENV=development npm run package
-
       - name: Build and publish artifacts
-        run: NODE_ENV=development npm run publish
+        run: npm run publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
