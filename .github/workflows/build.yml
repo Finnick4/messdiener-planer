@@ -28,10 +28,10 @@ jobs:
           python-version: '3.12.3'
 
       - name: Setup dependencies
-        run: npm ci
+        run: npm install --production=false
 
       - name: package artifacts
-        run: DEBUG=* npm run package
+        run: npm run package
 
       - name: Build and publish artifacts
         run: npm run publish
