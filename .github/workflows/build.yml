@@ -30,6 +30,12 @@ jobs:
       - name: Setup dependencies
         run: npm ci
 
+      - name: package artifacts
+        run: npm run package
+
+      - name: make artifacts
+        run: npm run make
+
       - name: Build and publish artifacts
         run: npm run publish
         env:
